@@ -26,7 +26,8 @@ func toDomainUser(user UserRequest) domain.User {
 
 // #########################################################
 func getUserFromContext(ctx context.Context) (domain.User, error) {
-	contextUser := ctx.Value("user")
+	contextUser := ctx.Value(ctxKey("user"))
+	// contextUser := ctx.Value("user")
 	if contextUser == nil {
 		return domain.User{}, domain.ErrNoUserInContext
 	}

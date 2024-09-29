@@ -30,7 +30,7 @@ func (h HttpServer) CheckAdmin() gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"not-admin": ""})
 			return
 		}
-		c.Set("user", user)
+		c.Set(ctxKey("user").String(), user)
 		c.Next()
 	}
 }
@@ -48,7 +48,8 @@ func (h HttpServer) CheckAuthorizedUser() gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"check-auth-invalid-token": ""})
 			return
 		}
-		c.Set("user", user)
+		// c.Set("user", user)
+		c.Set(ctxKey("user").String(), user)
 		c.Next()
 	}
 }

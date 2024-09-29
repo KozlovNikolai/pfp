@@ -9,6 +9,9 @@ import (
 )
 
 func TestGetUserFromContext(t *testing.T) {
+	var userCtxKey = ctxKey("user")
+	var productCtxKey = ctxKey("product")
+
 	type args struct {
 		ctx context.Context
 	}
@@ -23,7 +26,8 @@ func TestGetUserFromContext(t *testing.T) {
 			args: args{
 				ctx: context.WithValue(
 					context.Background(),
-					"user",
+					userCtxKey,
+					// "user",
 					domain.User{}),
 			},
 			want:    domain.User{},
@@ -34,7 +38,8 @@ func TestGetUserFromContext(t *testing.T) {
 			args: args{
 				ctx: context.WithValue(
 					context.Background(),
-					"product",
+					productCtxKey,
+					//"product",
 					domain.User{}),
 			},
 			want:    domain.User{},
@@ -45,7 +50,8 @@ func TestGetUserFromContext(t *testing.T) {
 			args: args{
 				ctx: context.WithValue(
 					context.Background(),
-					"user",
+					userCtxKey,
+					//"user",
 					domain.NewUserData{}),
 			},
 			want:    domain.User{},
