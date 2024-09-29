@@ -1,7 +1,8 @@
 package httpserver
 
 const (
-	loginAdmin   = "cmd@cmd.ru"
-	loginRegular = "cmd@cmd.com"
-	ginContext   = "*gin.Context"
+	loginAdmin        = "cmd@cmd.ru"
+	loginRegular      = "cmd@cmd.com"
+	ginContext        = "*gin.Context"
+	domainUserLiteral = "domain.User"
 )
