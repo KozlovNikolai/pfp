@@ -7,10 +7,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const (
-	loginAdmin = "cmd@cmd.ru"
-)
-
 func TestUserRequestValidate(t *testing.T) {
 	cases := []struct {
 		name          string

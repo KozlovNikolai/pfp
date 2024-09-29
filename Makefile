@@ -44,9 +44,9 @@ mockgen:
 
 .PHONY: mockery
 mockery:
-	mockery --name=IProductService \
-	--dir=./internal/app/transport/httpserver \
-	--output=./internal/app/transport/httpserver/mocks
+	mockery --name=IUserService \
+	--dir=./internal/chat/transport/httpserver \
+	--output=./internal/chat/transport/httpserver/mocks
 
 test20:
 	go test -v -count=20 ./...
