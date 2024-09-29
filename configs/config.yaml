@@ -1,0 +1,8 @@
+storage: "postgres://pguser:pgpass@localhost:5432/mydb?sslmode=disable"
+repo_type: "postgres"
+token_time_duration: 30m
+order_time_duration: 1m
+http_server:
+  address: "0.0.0.0:8443"
+  timeout: 4s
+  idle_timout: 60s
