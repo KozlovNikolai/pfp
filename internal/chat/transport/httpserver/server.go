@@ -13,6 +13,7 @@ import (
 	"github.com/KozlovNikolai/pfp/internal/chat/repository/pgrepo"
 	"github.com/KozlovNikolai/pfp/internal/chat/services"
 	"github.com/KozlovNikolai/pfp/internal/chat/transport/httpserver/middlewares"
+	"github.com/KozlovNikolai/pfp/internal/chat/transport/ws"
 	"github.com/KozlovNikolai/pfp/internal/pkg/config"
 	"github.com/KozlovNikolai/pfp/internal/pkg/pg"
 	"github.com/gin-contrib/cors"
@@ -24,13 +25,13 @@ import (
 )
 
 // Server is ...
-type Server struct {
+type Router struct {
 	router *gin.Engine
 	logger *zap.Logger
 }
 
 // NewServer is ...
-func NewServer() *Server {
+func NewRouter(hub *ws.Hub) *Router {
 	// Инициализация логгера Zap
 	//	logger, err := zap.NewProduction()
 	logger, err := zap.NewDevelopment()
@@ -54,14 +55,18 @@ func NewServer() *Server {
 	// создаем сервисы
 	userService := services.NewUserService(userRepo)
 	tokenService := services.NewTokenService(config.Cfg.TokenTimeDuration)
-	// создаем сервер
+
+	// создаем http сервер
 	httpServer := NewHttpServer(
 		userService,
 		tokenService,
 	)
 
-	// Создание сервера
-	server := &Server{
+	// создаем websocket сервер
+	wsHandler := ws.NewHandler(hub)
+
+	// Создание роутера
+	server := &Router{
 		router: gin.Default(),
 		logger: logger,
 	}
@@ -80,12 +85,18 @@ func NewServer() *Server {
 		MaxAge:           12 * time.Hour,
 	}))
 
-	// add swagger
+	// add swagger /docs/index.html
 	server.router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	open := server.router.Group("/")
 	open.POST("signup", httpServer.SignUp)
 	open.POST("signin", httpServer.SignIn)
+
+	// websocket routes
+	open.POST("/ws/createRoom", wsHandler.CreateRoom)
+	open.GET("/ws/joinRoom/:roomId", wsHandler.JoinRoom)
+	open.GET("/ws/getRooms", wsHandler.GetRooms)
+	open.GET("/ws/getClients/:roomId", wsHandler.GetClients)
 
 	// Закрытые маршруты
 	// доступ только для администратора
@@ -104,7 +115,7 @@ func NewServer() *Server {
 }
 
 // Run is ...
-func (s *Server) Run() {
+func (s *Router) Run() {
 	defer func() {
 		_ = s.logger.Sync() // flushes buffer, if any
 	}()

@@ -3,6 +3,7 @@ package main
 import (
 	_ "github.com/KozlovNikolai/pfp/docs"
 	"github.com/KozlovNikolai/pfp/internal/chat/transport/httpserver"
+	"github.com/KozlovNikolai/pfp/internal/chat/transport/ws"
 	"github.com/KozlovNikolai/pfp/internal/pkg/config"
 )
 
@@ -16,7 +17,10 @@ import (
 // @BasePath /
 func main() {
 	config.MustLoad()
-	server := httpserver.NewServer()
+	hub := ws.NewHub()
+	server := httpserver.NewRouter(hub)
+
+	go hub.Run()
 
 	server.Run()
 }
