@@ -1,3 +1,4 @@
+// Package ws ...
 package ws
 
 import (
@@ -6,6 +7,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+// Client ...
 type Client struct {
 	Conn     *websocket.Conn
 	Message  chan *Message
@@ -14,6 +16,7 @@ type Client struct {
 	Username string `json:"username"`
 }
 
+// Message ...
 type Message struct {
 	Content  string `json:"content"`
 	RoomID   string `json:"room_id"`
@@ -29,7 +32,10 @@ func (c *Client) writeMessage() {
 		if !ok {
 			return
 		}
-		c.Conn.WriteJSON(m)
+		err := c.Conn.WriteJSON(m)
+		if err != nil {
+			log.Printf("error: %v", err)
+		}
 	}
 }
 
@@ -41,7 +47,11 @@ func (c *Client) readMessage(hub *Hub) {
 	for {
 		_, message, err := c.Conn.ReadMessage()
 		if err != nil {
-			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+			if websocket.IsUnexpectedCloseError(
+				err,
+				websocket.CloseGoingAway,
+				websocket.CloseAbnormalClosure,
+			) {
 				log.Printf("error: %v", err)
 			}
 			break

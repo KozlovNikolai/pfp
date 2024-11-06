@@ -1,0 +1,832 @@
+Для создания простого веб-сервера на Go с использованием фреймворка **Gin**, который реализует три страницы с функционалом, описанным вами, потребуется выполнить следующие шаги:
+
+### Основные компоненты:
+
+1. **Страница 1 (Аутентификация и Регистрация)**:
+   - Форма для ввода логина и пароля, кнопки "Войти" и "Зарегистрироваться".
+   - При успешном входе выдается токен, используется для последующих запросов.
+
+2. **Страница 2 (Список комнат)**:
+   - Запрос комнат и отображение их списка с возможностью создания новой комнаты.
+
+3. **Страница 3 (Чат с WebSocket)**:
+   - Подключение к WebSocket для чата в комнате.
+
+### 1. Инициализация проекта:
+
+```bash
+go mod init simple-webserver
+go get github.com/gin-gonic/gin
+go get github.com/dgrijalva/jwt-go
+go get github.com/gorilla/websocket
+```
+
+### 2. Основная структура проекта:
+
+```bash
+- main.go
+- templates/
+    - login.html
+    - rooms.html
+    - chat.html
+```
+
+### 3. Код веб-сервера:
+
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
+	"html/template"
+	"log"
+	"net/http"
+	"time"
+)
+
+// JWT secret key
+var jwtKey = []byte("secret_key")
+
+// User struct
+type User struct {
+	ID       int    `json:"id"`
+	Login    string `json:"login"`
+	Password string `json:"password"`
+	Token    string `json:"token"`
+	Role     string `json:"role"`
+}
+
+// Room struct
+type Room struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
+// In-memory storage
+var users = []User{}
+var rooms = []Room{
+	{ID: "1", Name: "room1"},
+	{ID: "2", Name: "room2"},
+}
+
+// JWT Claims struct
+type Claims struct {
+	Username string `json:"username"`
+	jwt.StandardClaims
+}
+
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
+}
+
+// HTML templates
+var loginTemplate = template.Must(template.ParseFiles("templates/login.html"))
+var roomsTemplate = template.Must(template.ParseFiles("templates/rooms.html"))
+var chatTemplate = template.Must(template.ParseFiles("templates/chat.html"))
+
+func main() {
+	r := gin.Default()
+
+	r.Static("/assets", "./assets")
+
+	// Страница входа и регистрации
+	r.GET("/signin", func(c *gin.Context) {
+		loginTemplate.Execute(c.Writer, nil)
+	})
+
+	r.POST("/signin", handleSignin)
+	r.POST("/signup", handleSignup)
+
+	// Страница 2 - Комнаты
+	auth := r.Group("/auth")
+	auth.Use(authMiddleware)
+	{
+		auth.GET("/ws/getRooms", getRoomsHandler)
+		auth.POST("/ws/createRoom", createRoomHandler)
+		auth.GET("/rooms", func(c *gin.Context) {
+			roomsTemplate.Execute(c.Writer, rooms)
+		})
+
+		// WebSocket
+		auth.GET("/ws/joinRoom/:roomID", joinRoomHandler)
+	}
+
+	r.GET("/signout", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"message": "signed out"})
+	})
+
+	r.RunTLS(":8443", "cert.pem", "key.pem")
+}
+
+// Обработчик для страницы входа
+func handleSignin(c *gin.Context) {
+	var user User
+	if err := c.BindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+		return
+	}
+
+	for _, u := range users {
+		if u.Login == user.Login && u.Password == user.Password {
+			token, err := generateJWT(user.Login)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Error generating token"})
+				return
+			}
+			c.JSON(http.StatusOK, gin.H{"token": token})
+			return
+		}
+	}
+
+	c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+}
+
+// Обработчик для страницы регистрации
+func handleSignup(c *gin.Context) {
+	var user User
+	if err := c.BindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+		return
+	}
+
+	user.ID = len(users) + 1
+	users = append(users, user)
+
+	c.JSON(http.StatusOK, user)
+}
+
+// Генерация JWT
+func generateJWT(username string) (string, error) {
+	expirationTime := time.Now().Add(5 * time.Minute)
+	claims := &Claims{
+		Username: username,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: expirationTime.Unix(),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString(jwtKey)
+}
+
+// Middleware для проверки JWT
+func authMiddleware(c *gin.Context) {
+	authHeader := c.GetHeader("Authorization")
+	if authHeader == "" || len(authHeader) <= 7 || authHeader[:7] != "Bearer " {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header missing or invalid"})
+		c.Abort()
+		return
+	}
+
+	tokenStr := authHeader[7:]
+	claims := &Claims{}
+
+	token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
+		return jwtKey, nil
+	})
+
+	if err != nil || !token.Valid {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+		c.Abort()
+		return
+	}
+
+	c.Set("username", claims.Username)
+	c.Next()
+}
+
+// Обработчик для получения комнат
+func getRoomsHandler(c *gin.Context) {
+	if len(rooms) == 0 {
+		c.JSON(http.StatusOK, gin.H{"message": "Ни одной комнаты не создано"})
+		return
+	}
+	c.JSON(http.StatusOK, rooms)
+}
+
+// Обработчик для создания комнаты
+func createRoomHandler(c *gin.Context) {
+	var room Room
+	if err := c.BindJSON(&room); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+		return
+	}
+
+	rooms = append(rooms, room)
+	c.JSON(http.StatusOK, room)
+}
+
+// WebSocket для комнаты
+func joinRoomHandler(c *gin.Context) {
+	roomID := c.Param("roomID")
+	username, exists := c.Get("username")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
+	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		log.Println("Failed to set WebSocket upgrade: ", err)
+		return
+	}
+	defer conn.Close()
+
+	for {
+		_, msg, err := conn.ReadMessage()
+		if err != nil {
+			log.Println("Read error:", err)
+			break
+		}
+		log.Printf("Message from %s in room %s: %s", username, roomID, msg)
+		if err := conn.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("%s: %s", username, msg))); err != nil {
+			log.Println("Write error:", err)
+			break
+		}
+	}
+}
+```
+
+### Структура:
+
+- **JWT** для авторизации.
+- **Middleware** для проверки токена.
+- **WebSocket** для чата в комнате.
+  
+### Страницы:
+
+1. **/signin**: Страница с полями логина и пароля, регистрацией и авторизацией.
+2. **/auth/rooms**: Список комнат с возможностью создания комнаты.
+3. **WebSocket /auth/ws/joinRoom/:roomID**: Чат в комнате.
+
+### Сертификат:
+
+Создайте самоподписанный сертификат:
+
+```bash
+openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365
+```
+#################################################################################
+Для добавления страницы 4, которая будет отображать список клиентов, полученный по запросу `GET https://localhost:8443/auth/ws/getClients/1`, мы можем расширить текущий код, добавив:
+
+- **Обработчик страницы 4**: для запроса списка клиентов и отображения их.
+- **Кнопку "Назад"**: для возврата на страницу 2.
+- **Кнопку "Войти"**: для подключения к комнате по WebSocket.
+
+### Шаги:
+
+1. **Добавим обработчик для страницы 4**.
+2. **Создадим HTML-шаблон для страницы 4**.
+3. **Обновим логику маршрутов и запросов**.
+
+### 1. Обновленный `main.go`:
+
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
+	"html/template"
+	"log"
+	"net/http"
+	"time"
+)
+
+// JWT secret key
+var jwtKey = []byte("secret_key")
+
+// User struct
+type User struct {
+	ID       int    `json:"id"`
+	Login    string `json:"login"`
+	Password string `json:"password"`
+	Token    string `json:"token"`
+	Role     string `json:"role"`
+}
+
+// Room struct
+type Room struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
+// Client struct for clients in room
+type Client struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
+// In-memory storage
+var users = []User{}
+var rooms = []Room{
+	{ID: "1", Name: "room1"},
+	{ID: "2", Name: "room2"},
+}
+
+var clients = []Client{
+	{ID: "1", Name: "User1"},
+	{ID: "2", Name: "User2"},
+}
+
+// JWT Claims struct
+type Claims struct {
+	Username string `json:"username"`
+	jwt.StandardClaims
+}
+
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
+}
+
+// HTML templates
+var loginTemplate = template.Must(template.ParseFiles("templates/login.html"))
+var roomsTemplate = template.Must(template.ParseFiles("templates/rooms.html"))
+var chatTemplate = template.Must(template.ParseFiles("templates/chat.html"))
+var clientsTemplate = template.Must(template.ParseFiles("templates/clients.html")) // Page 4
+
+func main() {
+	r := gin.Default()
+
+	r.Static("/assets", "./assets")
+
+	// Страница входа и регистрации
+	r.GET("/signin", func(c *gin.Context) {
+		loginTemplate.Execute(c.Writer, nil)
+	})
+
+	r.POST("/signin", handleSignin)
+	r.POST("/signup", handleSignup)
+
+	// Страница 2 - Комнаты
+	auth := r.Group("/auth")
+	auth.Use(authMiddleware)
+	{
+		auth.GET("/ws/getRooms", getRoomsHandler)
+		auth.POST("/ws/createRoom", createRoomHandler)
+		auth.GET("/rooms", func(c *gin.Context) {
+			roomsTemplate.Execute(c.Writer, rooms)
+		})
+
+		// WebSocket
+		auth.GET("/ws/joinRoom/:roomID", joinRoomHandler)
+
+		// Страница 4 - Список клиентов
+		auth.GET("/ws/getClients/:roomID", getClientsHandler)
+		auth.GET("/clients/:roomID", clientsPageHandler) // HTML-страница для списка клиентов
+	}
+
+	r.GET("/signout", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"message": "signed out"})
+	})
+
+	r.RunTLS(":8443", "cert.pem", "key.pem")
+}
+
+// Обработчик для страницы входа
+func handleSignin(c *gin.Context) {
+	var user User
+	if err := c.BindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+		return
+	}
+
+	for _, u := range users {
+		if u.Login == user.Login && u.Password == user.Password {
+			token, err := generateJWT(user.Login)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Error generating token"})
+				return
+			}
+			c.JSON(http.StatusOK, gin.H{"token": token})
+			return
+		}
+	}
+
+	c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+}
+
+// Обработчик для страницы регистрации
+func handleSignup(c *gin.Context) {
+	var user User
+	if err := c.BindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+		return
+	}
+
+	user.ID = len(users) + 1
+	users = append(users, user)
+
+	c.JSON(http.StatusOK, user)
+}
+
+// Генерация JWT
+func generateJWT(username string) (string, error) {
+	expirationTime := time.Now().Add(5 * time.Minute)
+	claims := &Claims{
+		Username: username,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: expirationTime.Unix(),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString(jwtKey)
+}
+
+// Middleware для проверки JWT
+func authMiddleware(c *gin.Context) {
+	authHeader := c.GetHeader("Authorization")
+	if authHeader == "" || len(authHeader) <= 7 || authHeader[:7] != "Bearer " {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header missing or invalid"})
+		c.Abort()
+		return
+	}
+
+	tokenStr := authHeader[7:]
+	claims := &Claims{}
+
+	token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
+		return jwtKey, nil
+	})
+
+	if err != nil || !token.Valid {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+		c.Abort()
+		return
+	}
+
+	c.Set("username", claims.Username)
+	c.Next()
+}
+
+// Обработчик для получения комнат
+func getRoomsHandler(c *gin.Context) {
+	if len(rooms) == 0 {
+		c.JSON(http.StatusOK, gin.H{"message": "Ни одной комнаты не создано"})
+		return
+	}
+	c.JSON(http.StatusOK, rooms)
+}
+
+// Обработчик для создания комнаты
+func createRoomHandler(c *gin.Context) {
+	var room Room
+	if err := c.BindJSON(&room); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+		return
+	}
+
+	rooms = append(rooms, room)
+	c.JSON(http.StatusOK, room)
+}
+
+// WebSocket для комнаты
+func joinRoomHandler(c *gin.Context) {
+	roomID := c.Param("roomID")
+	username, exists := c.Get("username")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
+	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		log.Println("Failed to set WebSocket upgrade: ", err)
+		return
+	}
+	defer conn.Close()
+
+	for {
+		_, msg, err := conn.ReadMessage()
+		if err != nil {
+			log.Println("Read error:", err)
+			break
+		}
+		log.Printf("Message from %s in room %s: %s", username, roomID, msg)
+		if err := conn.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("%s: %s", username, msg))); err != nil {
+			log.Println("Write error:", err)
+			break
+		}
+	}
+}
+
+// Обработчик для получения клиентов в комнате (GET /auth/ws/getClients/:roomID)
+func getClientsHandler(c *gin.Context) {
+	roomID := c.Param("roomID")
+	// Возвращаем фиксированный список клиентов, но вы можете интегрировать логику для каждого roomID
+	c.JSON(http.StatusOK, clients)
+}
+
+// HTML-страница для списка клиентов (страница 4)
+func clientsPageHandler(c *gin.Context) {
+	roomID := c.Param("roomID")
+	data := struct {
+		RoomID  string
+		Clients []Client
+	}{
+		RoomID:  roomID,
+		Clients: clients, // В реальном случае вы бы динамически подгружали клиентов для конкретной комнаты
+	}
+
+	clientsTemplate.Execute(c.Writer, data)
+}
+```
+
+### 2. Шаблон для страницы 4 (clients.html):
+
+Создайте файл `templates/clients.html`:
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clients in Room</title>
+</head>
+<body>
+    <h1>Clients in Room {{.RoomID}}</h1>
+
+    {{if .Clients}}
+    <ul>
+        {{range .Clients}}
+        <li>{{.Name}} (ID: {{.ID}})</li>
+        {{end}}
+    </ul>
+    {{else}}
+    <p>No clients found.</p>
+    {{end}}
+
+    <a href="/auth/rooms">Назад</a>
+    <br>
+    <a href="/auth/ws/joinRoom/{{.RoomID}}">Войти в комнату</a>
+</body>
+</html>
+```
+
+### Объяснение:
+- **Шаблон `clients.html`**: Он выводит список клиентов для конкретной комнаты, а также включает две кнопки:
+  - **Назад**: ведет на страницу 2 (список комнат).
+  - **Войти**: ведет на WebSocket-соединение для комнаты.
+
+### Заключение
+
+:
+Теперь, когда вы переходите на страницу клиентов `/clients/:roomID`, будет выполняться запрос для получения списка клиентов из комнаты с ID `roomID`.
+##########################################################################
+Ниже приведены HTML-шаблоны для первых трех страниц:
+
+### 1. Шаблон для страницы 1: Вход и регистрация (`login.html`)
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+</head>
+<body>
+    <h1>Вход</h1>
+    <form id="signin-form" action="javascript:void(0);">
+        <label for="login">Логин:</label>
+        <input type="text" id="login" name="login" required><br><br>
+
+        <label for="password">Пароль:</label>
+        <input type="password" id="password" name="password" required><br><br>
+
+        <button type="submit">Войти</button>
+    </form>
+
+    <h2>Регистрация</h2>
+    <form id="signup-form" action="javascript:void(0);">
+        <label for="reg-login">Логин:</label>
+        <input type="text" id="reg-login" name="reg-login" required><br><br>
+
+        <label for="reg-password">Пароль:</label>
+        <input type="password" id="reg-password" name="reg-password" required><br><br>
+
+        <button type="submit">Зарегистрироваться</button>
+    </form>
+
+    <p id="response"></p>
+
+    <script>
+        document.getElementById('signin-form').addEventListener('submit', async function () {
+            const login = document.getElementById('login').value;
+            const password = document.getElementById('password').value;
+
+            const response = await fetch('/signin', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ login, password })
+            });
+
+            const data = await response.json();
+            document.getElementById('response').textContent = JSON.stringify(data);
+
+            if (response.ok) {
+                localStorage.setItem('token', data.token); // Сохраняем токен
+                window.location.href = '/auth/rooms'; // Перенаправление на страницу 2
+            }
+        });
+
+        document.getElementById('signup-form').addEventListener('submit', async function () {
+            const login = document.getElementById('reg-login').value;
+            const password = document.getElementById('reg-password').value;
+
+            const response = await fetch('/signup', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ login, password })
+            });
+
+            const data = await response.json();
+            document.getElementById('response').textContent = JSON.stringify(data);
+        });
+    </script>
+</body>
+</html>
+```
+
+### 2. Шаблон для страницы 2: Список комнат (`rooms.html`)
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Rooms</title>
+</head>
+<body>
+    <h1>Список комнат</h1>
+
+    <div id="rooms-list">
+        <!-- Комнаты будут отображены здесь -->
+    </div>
+
+    <h2>Создать комнату</h2>
+    <form id="create-room-form" action="javascript:void(0);">
+        <label for="room-id">Номер комнаты:</label>
+        <input type="text" id="room-id" name="room-id" required><br><br>
+
+        <label for="room-name">Название комнаты:</label>
+        <input type="text" id="room-name" name="room-name" required><br><br>
+
+        <button type="submit">Создать комнату</button>
+    </form>
+
+    <p id="response"></p>
+
+    <script>
+        async function loadRooms() {
+            const token = localStorage.getItem('token');
+            const response = await fetch('/auth/ws/getRooms', {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            });
+
+            const rooms = await response.json();
+            const roomsListDiv = document.getElementById('rooms-list');
+
+            if (rooms.length === 0) {
+                roomsListDiv.innerHTML = '<p>Ни одной комнаты не создано</p>';
+            } else {
+                roomsListDiv.innerHTML = '';
+                rooms.forEach(room => {
+                    roomsListDiv.innerHTML += `
+                        <p>Комната: ${room.name}</p>
+                        <a href="/auth/ws/joinRoom/${room.id}">Войти в комнату</a> |
+                        <a href="/auth/ws/getClients/${room.id}">Участники</a>
+                        <br><br>
+                    `;
+                });
+            }
+        }
+
+        document.getElementById('create-room-form').addEventListener('submit', async function () {
+            const roomId = document.getElementById('room-id').value;
+            const roomName = document.getElementById('room-name').value;
+            const token = localStorage.getItem('token');
+
+            const response = await fetch('/auth/ws/createRoom', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id: roomId, name: roomName })
+            });
+
+            const data = await response.json();
+            document.getElementById('response').textContent = JSON.stringify(data);
+            loadRooms(); // Обновляем список комнат
+        });
+
+        // Загружаем список комнат при загрузке страницы
+        window.onload = loadRooms;
+    </script>
+</body>
+</html>
+```
+
+### 3. Шаблон для страницы 3: Чат (WebSocket) (`chat.html`)
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat Room</title>
+</head>
+<body>
+    <h1>Чат</h1>
+
+    <div id="chat-box" style="border: 1px solid black; width: 500px; height: 300px; overflow-y: scroll;">
+        <!-- Сообщения чата будут отображаться здесь -->
+    </div>
+
+    <br>
+
+    <input type="text" id="message" placeholder="Введите сообщение"><br><br>
+    <button onclick="sendMessage()">Отправить</button><br><br>
+    <a href="/auth/signout">Выйти</a>
+
+    <script>
+        let ws;
+
+        // Подключаемся к WebSocket
+        function connectWebSocket() {
+            const roomId = window.location.pathname.split('/').pop(); // Получаем ID комнаты из URL
+            const token = localStorage.getItem('token');
+            const wsUrl = 'wss://localhost:8443/auth/ws/joinRoom/' + roomId + '?token=' + token;
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = function() {
+                console.log("WebSocket подключен");
+            };
+
+            ws.onmessage = function(event) {
+                const chatBox = document.getElementById('chat-box');
+                chatBox.innerHTML += '<p>' + event.data + '</p>';
+                chatBox.scrollTop = chatBox.scrollHeight; // Прокручиваем вниз
+            };
+
+            ws.onclose = function() {
+                console.log("WebSocket закрыт");
+            };
+
+            ws.onerror = function(error) {
+                console.log("Ошибка WebSocket: " + error.message);
+            };
+        }
+
+        // Отправляем сообщение
+        function sendMessage() {
+            const message = document.getElementById('message').value;
+            ws.send(message);
+            document.getElementById('message').value = ''; // Очищаем поле ввода
+        }
+
+        // Подключаем WebSocket при загрузке страницы
+        window.onload = connectWebSocket;
+    </script>
+</body>
+</html>
+```
+
+### Пояснение:
+
+1. **Страница 1 (Login/Signup)**:
+   - Форма для входа и регистрации.
+   - После успешной регистрации или входа сохраняется токен в `localStorage`, который используется для последующих запросов.
+   - Перенаправление на страницу 2 после успешного входа.
+
+2. **Страница 2 (Rooms)**:
+   - Список всех комнат, сгенерированных запросом на сервер.
+   - Возможность создания новой комнаты с помощью формы.
+   - Ссылки для входа в комнату или просмотра участников комнаты.
+
+3. **Страница 3 (Chat)**:
+   - Подключение к WebSocket-соединению по ID комнаты.
+   - Ввод сообщений и получение их в реальном времени через WebSocket.
+   - Кнопка для выхода.
+
+### Как работает WebSocket:
+- WebSocket-соединение открывается при загрузке страницы чата.
+- Сообщения отправляются и отображаются в реальном времени.
+- WebSocket-соединение закрывается при выходе.
+

@@ -1,9 +1,10 @@
 package httpserver
 
 import (
-	"context"
+	"fmt"
 
 	"github.com/KozlovNikolai/pfp/internal/chat/domain"
+	"github.com/gin-gonic/gin"
 )
 
 // #########################################################
@@ -25,9 +26,14 @@ func toDomainUser(user UserRequest) domain.User {
 }
 
 // #########################################################
-func getUserFromContext(ctx context.Context) (domain.User, error) {
-	contextUser := ctx.Value(ctxKey("user"))
+func getUserFromContext(ctx *gin.Context) (domain.User, error) {
+	contextUser, exists := ctx.Get(ctxKey("user").String())
+	if !exists {
+		return domain.User{}, domain.ErrNoUserInContext
+	}
 	// contextUser := ctx.Value("user")
+
+	fmt.Printf("contextUser %v\n", contextUser)
 	if contextUser == nil {
 		return domain.User{}, domain.ErrNoUserInContext
 	}

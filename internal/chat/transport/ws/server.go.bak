@@ -1,0 +1,44 @@
+package ws
+
+import (
+	"log"
+	"os"
+	"time"
+
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
+)
+
+var r *gin.Engine
+
+func InitRouter(hub *Hub) {
+	r = gin.Default()
+
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*", "http://localhost:3000"},
+		AllowMethods:     []string{"GET", "POST"},
+		AllowHeaders:     []string{"Content-Type"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		AllowOriginFunc: func(origin string) bool {
+			// return origin == "http://localhost:3000"
+			return true
+		},
+		MaxAge: 12 * time.Hour,
+	}))
+
+	// создаем websocket сервер
+	wsHandler := NewHandler(hub)
+	// websocket routes
+	r.POST("/ws/createRoom", wsHandler.CreateRoom)
+	r.GET("/ws/getRooms", wsHandler.GetRooms)
+	r.GET("/ws/getClients/:roomID", wsHandler.GetClients)
+	r.GET("/ws/joinRoom/:roomID", wsHandler.JoinRoom)
+}
+
+func Start(addr string) {
+	err := r.RunTLS(addr, os.Getenv("TLS_CERT"), os.Getenv("TLS_KEY"))
+	if err != nil {
+		log.Fatal(err)
+	}
+}

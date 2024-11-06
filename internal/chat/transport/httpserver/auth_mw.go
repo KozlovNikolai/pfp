@@ -1,29 +1,42 @@
 package httpserver
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
-	"github.com/KozlovNikolai/pfp/internal/pkg/config"
 	"github.com/gin-gonic/gin"
+
+	"github.com/KozlovNikolai/pfp/internal/pkg/config"
 )
 
+// AuthorizationHeader ...
+// BearerPrefix ...
 const (
 	AuthorizationHeader = "Authorization"
 	BearerPrefix        = "Bearer "
 )
 
-func (h HttpServer) CheckAdmin() gin.HandlerFunc {
+// CheckAdmin ...
+func (h HTTPServer) CheckAdmin() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		fmt.Println("CheckAdmin----------------------->>>")
+
 		token := c.GetHeader(AuthorizationHeader)
 		token = strings.TrimPrefix(token, BearerPrefix)
 		user, err := h.tokenService.GetUser(token)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"check-admin-validate-token": err.Error()})
+			c.AbortWithStatusJSON(
+				http.StatusInternalServerError,
+				gin.H{"check-admin-validate-token": err.Error()},
+			)
 			return
 		}
 		if user.Login() == "" {
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"check-admin-invalid-token": ""})
+			c.AbortWithStatusJSON(
+				http.StatusInternalServerError,
+				gin.H{"check-admin-invalid-token": ""},
+			)
 			return
 		}
 		if user.Role() != config.AdminRole {
@@ -31,25 +44,42 @@ func (h HttpServer) CheckAdmin() gin.HandlerFunc {
 			return
 		}
 		c.Set(ctxKey("user").String(), user)
+		// v, e := c.Get(ctxKey("user").String())
+		// if !e {
+		// 	fmt.Println("значение в конетексте не существует")
+		// }
+		// fmt.Printf("user in context = %v\n", v)
 		c.Next()
 	}
 }
 
-func (h HttpServer) CheckAuthorizedUser() gin.HandlerFunc {
+// CheckAuthorizedUser ...
+func (h HTTPServer) CheckAuthorizedUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		fmt.Println("CheckAuthorizedUser---------------------->>>")
+
 		token := c.GetHeader(AuthorizationHeader)
+		fmt.Printf("token = %s\n", token)
 		token = strings.TrimPrefix(token, BearerPrefix)
 		user, err := h.tokenService.GetUser(token)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"check-auth-validate-token": err.Error()})
+			c.AbortWithStatusJSON(
+				http.StatusInternalServerError,
+				gin.H{"check-auth-validate-token": err.Error()},
+			)
 			return
 		}
+		fmt.Printf("user = %v\n", user)
 		if user.Login() == "" {
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"check-auth-invalid-token": ""})
+			c.AbortWithStatusJSON(
+				http.StatusInternalServerError,
+				gin.H{"check-auth-invalid-token": ""},
+			)
 			return
 		}
-		// c.Set("user", user)
+
 		c.Set(ctxKey("user").String(), user)
+
 		c.Next()
 	}
 }

@@ -1,58 +1,57 @@
 package httpserver
 
 import (
-	"context"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/KozlovNikolai/pfp/internal/chat/domain"
+	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestGetUserFromContext(t *testing.T) {
+	gin.SetMode(gin.TestMode)
 	var userCtxKey = ctxKey("user")
 	var productCtxKey = ctxKey("product")
 
-	type args struct {
-		ctx context.Context
-	}
 	tests := []struct {
 		name    string
-		args    args
+		ctx     func() *gin.Context
 		want    domain.User
 		wantErr bool
 	}{
 		{
 			name: "valid",
-			args: args{
-				ctx: context.WithValue(
-					context.Background(),
-					userCtxKey,
-					// "user",
-					domain.User{}),
+			ctx: func() *gin.Context {
+				w := httptest.NewRecorder()
+				c, _ := gin.CreateTestContext(w)
+
+				c.Set(userCtxKey.String(), domain.User{})
+				return c
 			},
 			want:    domain.User{},
 			wantErr: false,
 		},
 		{
 			name: "invalid key",
-			args: args{
-				ctx: context.WithValue(
-					context.Background(),
-					productCtxKey,
-					//"product",
-					domain.User{}),
+			ctx: func() *gin.Context {
+				w := httptest.NewRecorder()
+				c, _ := gin.CreateTestContext(w)
+
+				c.Set(productCtxKey.String(), domain.User{})
+				return c
 			},
 			want:    domain.User{},
 			wantErr: true,
 		},
 		{
 			name: "invalid struct",
-			args: args{
-				ctx: context.WithValue(
-					context.Background(),
-					userCtxKey,
-					//"user",
-					domain.NewUserData{}),
+			ctx: func() *gin.Context {
+				w := httptest.NewRecorder()
+				c, _ := gin.CreateTestContext(w)
+
+				c.Set(userCtxKey.String(), domain.NewUserData{})
+				return c
 			},
 			want:    domain.User{},
 			wantErr: true,
@@ -62,7 +61,8 @@ func TestGetUserFromContext(t *testing.T) {
 	for _, tt := range tests {
 
 		t.Run(tt.name, func(t *testing.T) {
-			user, err := getUserFromContext(tt.args.ctx)
+			c := tt.ctx()
+			user, err := getUserFromContext(c)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {

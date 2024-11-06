@@ -3,6 +3,7 @@ package pgrepo
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/KozlovNikolai/pfp/internal/chat/domain"
 	"github.com/KozlovNikolai/pfp/internal/chat/repository/models"
@@ -13,10 +14,12 @@ const (
 	failedToBeginTransaction = "failed to begin transaction: %w"
 )
 
+// UserRepo ...
 type UserRepo struct {
 	db *pg.DB
 }
 
+// NewUserRepo ...
 func NewUserRepo(db *pg.DB) *UserRepo {
 	return &UserRepo{
 		db: db,
@@ -34,8 +37,12 @@ func (u *UserRepo) CreateUser(ctx context.Context, User domain.User) (domain.Use
 	if err != nil {
 		return domain.User{}, fmt.Errorf(failedToBeginTransaction, err)
 	}
-	defer tx.Rollback(ctx)
-
+	defer func() {
+		err := tx.Rollback(ctx)
+		if err != nil {
+			log.Printf("error:%v", err)
+		}
+	}()
 	// Вставка данных о пользователе и получение ID
 	err = tx.QueryRow(ctx, `
 			INSERT INTO users (login,password,role,token)
@@ -71,7 +78,12 @@ func (u *UserRepo) DeleteUser(ctx context.Context, id int) error {
 	if err != nil {
 		return fmt.Errorf(failedToBeginTransaction, err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() {
+		err := tx.Rollback(ctx)
+		if err != nil {
+			log.Printf("error:%v", err)
+		}
+	}()
 	// Проверяем, что пользователь не связан ни с одним заказом.
 	var count int
 	err = tx.QueryRow(ctx, `
@@ -100,7 +112,6 @@ func (u *UserRepo) DeleteUser(ctx context.Context, id int) error {
 
 // GetUsers implements service.IUserRepository.
 func (u *UserRepo) GetUsers(ctx context.Context, limit, offset int) ([]domain.User, error) {
-
 	query := `
 		SELECT id, login, password, role, token
 		FROM users
@@ -140,7 +151,6 @@ func (u *UserRepo) GetUsers(ctx context.Context, limit, offset int) ([]domain.Us
 
 // GetUserByID implements service.IUserRepository.
 func (u *UserRepo) GetUserByID(ctx context.Context, id int) (domain.User, error) {
-
 	// SQL-запрос на получение данных Пользователя по ID
 	query := `
 		SELECT id, login, password, role, token
@@ -187,13 +197,18 @@ func (u *UserRepo) GetUserByLogin(ctx context.Context, login string) (domain.Use
 // UpdateUser implements service.IUserRepository.
 func (u *UserRepo) UpdateUser(ctx context.Context, user domain.User) (domain.User, error) {
 	dbUser := domainToUser(user)
-	//dbUser.UpdatedAt = time.Now()
+	// dbUser.UpdatedAt = time.Now()
 	// Начинаем транзакцию
 	tx, err := u.db.WR.Begin(ctx)
 	if err != nil {
 		return domain.User{}, fmt.Errorf("failed to begin transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() {
+		err := tx.Rollback(ctx)
+		if err != nil {
+			log.Printf("error:%v", err)
+		}
+	}()
 	// SQL-запрос на обновление данных Поставщика
 	query := `
 		UPDATE users

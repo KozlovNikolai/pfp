@@ -1,11 +1,13 @@
 package ws
 
+// Room ...
 type Room struct {
 	ID      string             `json:"id"`
 	Name    string             `json:"name"`
 	Clients map[string]*Client `json:"client"`
 }
 
+// Hub ...
 type Hub struct {
 	Rooms      map[string]*Room
 	Register   chan *Client
@@ -13,6 +15,7 @@ type Hub struct {
 	Broadcast  chan *Message
 }
 
+// NewHub ...
 func NewHub() *Hub {
 	return &Hub{
 		Rooms:      make(map[string]*Room),
@@ -22,6 +25,7 @@ func NewHub() *Hub {
 	}
 }
 
+// Run ...
 func (h *Hub) Run() {
 	for {
 		select {
@@ -56,16 +60,14 @@ func (h *Hub) Run() {
 				close(client.Message)
 			}
 		case message := <-h.Broadcast:
-			//если комната, указанная в сообщении не существует, то выходим из селекта
+			// если комната, указанная в сообщении не существует, то выходим из селекта
 			if _, ok := h.Rooms[message.RoomID]; !ok {
 				break
 			}
-			//идем по всем клиентам в комнате и отправляем им сообщение:
+			// идем по всем клиентам в комнате и отправляем им сообщение:
 			for _, client := range h.Rooms[message.RoomID].Clients {
 				client.Message <- message
 			}
 		}
-
 	}
-
 }

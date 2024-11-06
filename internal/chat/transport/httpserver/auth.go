@@ -1,3 +1,4 @@
+// Package httpserver ...
 package httpserver
 
 import (
@@ -21,7 +22,7 @@ const (
 // @failure				400 {string} err.Error()
 // @failure				500 {string} string "error-to-create-domain-user"
 // @Router				/signup [post]
-func (h HttpServer) SignUp(c *gin.Context) {
+func (h HTTPServer) SignUp(c *gin.Context) {
 	var userRequest UserRequest
 	var err error
 	if err = c.ShouldBindJSON(&userRequest); err != nil {
@@ -35,11 +36,11 @@ func (h HttpServer) SignUp(c *gin.Context) {
 		return
 	}
 
-	userRequest.Password, err = hashPassword(userRequest.Password)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error-hashing-password": err.Error()})
-		return
-	}
+	// userRequest.Password, err = hashPassword(userRequest.Password)
+	// if err != nil {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"error-hashing-password": err.Error()})
+	// 	return
+	// }
 
 	domainUser := toDomainUser(userRequest)
 
@@ -63,7 +64,7 @@ func (h HttpServer) SignUp(c *gin.Context) {
 // @failure				400 {string} err.Error()
 // @failure				500 {string} err.Error()
 // @Router				/signin [post]
-func (h HttpServer) SignIn(c *gin.Context) {
+func (h HTTPServer) SignIn(c *gin.Context) {
 	var userRequest UserRequest
 	if err := c.ShouldBindJSON(&userRequest); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"invalid-json": err.Error()})
@@ -75,21 +76,15 @@ func (h HttpServer) SignIn(c *gin.Context) {
 		return
 	}
 
-	domainUser, err := h.userService.GetUserByLogin(c, userRequest.Login)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{invaldRequest: err.Error()})
-		return
-	}
-
-	if !checkPasswordHash(userRequest.Password, domainUser.Password()) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid-password"})
-		return
-	}
-
-	token, err := h.tokenService.GenerateToken(domainUser)
+	token, err := h.tokenService.GenerateToken(c, userRequest.Login, userRequest.Password)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error-generated-token": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"token": token})
+}
+
+// SignOut ...
+func (h HTTPServer) SignOut(c *gin.Context) {
+	_ = c
 }

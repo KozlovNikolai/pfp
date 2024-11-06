@@ -1,4 +1,4 @@
-package httpserver
+package utils
 
 import (
 	"testing"
@@ -24,7 +24,7 @@ func TestHashPassword(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
-		hash, err := hashPassword(tc.password)
+		hash, err := HashPassword(tc.password)
 		if tc.wantError {
 			assert.Error(t, err)
 		} else {
@@ -38,7 +38,7 @@ func TestHashPassword(t *testing.T) {
 func TestCheckPasswordHash(t *testing.T) {
 	password := "123456"
 
-	hash, err := hashPassword(password)
+	hash, err := HashPassword(password)
 	assert.NoError(t, err)
 
 	testCases := []struct {
@@ -63,7 +63,7 @@ func TestCheckPasswordHash(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
-			result := checkPasswordHash(tt.password, tt.hash)
+			result := CheckPasswordHash(tt.password, tt.hash)
 			assert.Equal(t, tt.expected, result)
 		})
 	}

@@ -4,10 +4,10 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/gin-gonic/gin"
+
 	"github.com/KozlovNikolai/pfp/internal/chat/domain"
 	"github.com/KozlovNikolai/pfp/internal/pkg/config"
-
-	"github.com/gin-gonic/gin"
 )
 
 const (
@@ -25,7 +25,7 @@ const (
 // @Success			200 {object} UserResponse
 // @failure			404 {string} err.Error()
 // @Router			/user [get]
-func (h HttpServer) GetUser(c *gin.Context) {
+func (h HTTPServer) GetUser(c *gin.Context) {
 	var userRequest UserRequest
 	idQuery := c.Query("id")
 	loginQuery := c.Query("login")
@@ -53,7 +53,10 @@ func (h HttpServer) GetUser(c *gin.Context) {
 		}
 		// auth login
 		if userCtx.Login() != domainUser.Login() && userCtx.Role() != config.AdminRole {
-			c.JSON(http.StatusUnauthorized, gin.H{"invalid user login or role": domain.ErrAccessDenied.Error()})
+			c.JSON(
+				http.StatusUnauthorized,
+				gin.H{"invalid user login or role": domain.ErrAccessDenied.Error()},
+			)
 			return
 		}
 		response := toResponseUser(domainUser)
@@ -74,7 +77,10 @@ func (h HttpServer) GetUser(c *gin.Context) {
 
 		// auth user id
 		if userCtx.ID() != userID && userCtx.Role() != config.AdminRole {
-			c.JSON(http.StatusUnauthorized, gin.H{"invalid user id or role": domain.ErrAccessDenied.Error()})
+			c.JSON(
+				http.StatusUnauthorized,
+				gin.H{"invalid user id or role": domain.ErrAccessDenied.Error()},
+			)
 			return
 		}
 		user, err := h.userService.GetUserByID(c, userID)
@@ -100,7 +106,7 @@ func (h HttpServer) GetUser(c *gin.Context) {
 // @Success			200 {object} []UserResponse
 // @failure			404 {string} err.Error()
 // @Router			/users [get]
-func (h HttpServer) GetUsers(c *gin.Context) {
+func (h HTTPServer) GetUsers(c *gin.Context) {
 	userCtx, err := getUserFromContext(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": domain.ErrNoUserInContext.Error()})
@@ -108,7 +114,10 @@ func (h HttpServer) GetUsers(c *gin.Context) {
 	}
 	// check admin
 	if userCtx.Role() != config.AdminRole {
-		c.JSON(http.StatusUnauthorized, gin.H{"invalid user id or role": domain.ErrAccessDenied.Error()})
+		c.JSON(
+			http.StatusUnauthorized,
+			gin.H{"invalid user id or role": domain.ErrAccessDenied.Error()},
+		)
 		return
 	}
 	limitQuery := c.Query("limit")

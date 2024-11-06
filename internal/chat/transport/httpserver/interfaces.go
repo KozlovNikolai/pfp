@@ -16,8 +16,8 @@ type IUserService interface {
 	DeleteUser(context.Context, int) error
 }
 
-// TokenService is a token service
+// ITokenService is a token service
 type ITokenService interface {
-	GenerateToken(user domain.User) (string, error)
+	GenerateToken(ctx context.Context, login string, password string) (string, error)
 	GetUser(token string) (domain.User, error)
 }

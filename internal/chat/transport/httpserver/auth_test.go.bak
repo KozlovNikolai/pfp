@@ -1,4 +1,4 @@
-package httpserver
+// package httpserver
 
 import (
 	"bytes"
@@ -10,6 +10,7 @@ import (
 
 	"github.com/KozlovNikolai/pfp/internal/chat/domain"
 	"github.com/KozlovNikolai/pfp/internal/chat/transport/httpserver/mocks"
+	"github.com/KozlovNikolai/pfp/internal/pkg/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -34,7 +35,7 @@ func TestSignUp(t *testing.T) {
 		{
 			name:    "Invalid JSON",
 			wantErr: true,
-			mockCreateUser: func() { //empty value
+			mockCreateUser: func() { // empty value
 			},
 			expectedStatusCode:   http.StatusBadRequest,
 			expectedResponseBody: `{"invalid-json":"EOF"}`,
@@ -46,7 +47,7 @@ func TestSignUp(t *testing.T) {
 				Password: "1234567",
 			},
 			wantErr: true,
-			mockCreateUser: func() { //empty value
+			mockCreateUser: func() { // empty value
 			},
 			expectedStatusCode:   http.StatusBadRequest,
 			expectedResponseBody: "validation",
@@ -58,7 +59,7 @@ func TestSignUp(t *testing.T) {
 				Password: "12345",
 			},
 			wantErr: true,
-			mockCreateUser: func() { //empty value
+			mockCreateUser: func() { // empty value
 			},
 			expectedStatusCode:   http.StatusBadRequest,
 			expectedResponseBody: "validation",
@@ -130,14 +131,12 @@ func TestSignUp(t *testing.T) {
 			}
 			mockUserService.AssertExpectations(t)
 		})
-
 	}
 }
 
 func TestSignIn(t *testing.T) {
-
 	password := "123456"
-	hash, err := hashPassword(password)
+	hash, err := utils.HashPassword(password)
 	assert.NoError(t, err)
 
 	gin.SetMode(gin.TestMode)
@@ -160,9 +159,9 @@ func TestSignIn(t *testing.T) {
 		{
 			name:    "Invalid JSON",
 			wantErr: true,
-			mockGetUserByLogin: func() { //empty value
+			mockGetUserByLogin: func() { // empty value
 			},
-			mockGenerateToken: func() { //empty value
+			mockGenerateToken: func() { // empty value
 			},
 			expectedStatusCode:   http.StatusBadRequest,
 			expectedResponseBody: `{"invalid-json":"EOF"}`,
@@ -174,9 +173,9 @@ func TestSignIn(t *testing.T) {
 				Password: "1234567",
 			},
 			wantErr: true,
-			mockGetUserByLogin: func() { //empty value
+			mockGetUserByLogin: func() { // empty value
 			},
-			mockGenerateToken: func() { //empty value
+			mockGenerateToken: func() { // empty value
 			},
 			expectedStatusCode:   http.StatusBadRequest,
 			expectedResponseBody: "validation",
@@ -188,9 +187,9 @@ func TestSignIn(t *testing.T) {
 				Password: "12345",
 			},
 			wantErr: true,
-			mockGetUserByLogin: func() { //empty value
+			mockGetUserByLogin: func() { // empty value
 			},
-			mockGenerateToken: func() { //empty value
+			mockGenerateToken: func() { // empty value
 			},
 			expectedStatusCode:   http.StatusBadRequest,
 			expectedResponseBody: "validation",
@@ -207,7 +206,7 @@ func TestSignIn(t *testing.T) {
 					Return(domain.User{},
 						domain.ErrFailure).Once()
 			},
-			mockGenerateToken: func() { //empty value
+			mockGenerateToken: func() { // empty value
 			},
 			expectedStatusCode:   http.StatusBadRequest,
 			expectedResponseBody: `{"invalid-request":"failure"}`,
@@ -232,7 +231,7 @@ func TestSignIn(t *testing.T) {
 					}),
 						nil).Once()
 			},
-			mockGenerateToken: func() { //empty value
+			mockGenerateToken: func() { // empty value
 			},
 			expectedStatusCode:   http.StatusBadRequest,
 			expectedResponseBody: `{"error":"invalid-password"}`,
@@ -295,6 +294,5 @@ func TestSignIn(t *testing.T) {
 			}
 			mockUserService.AssertExpectations(t)
 		})
-
 	}
 }

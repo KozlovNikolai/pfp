@@ -1,17 +1,17 @@
 package httpserver
 
-// HttpServer is a HTTP server for ports
-type HttpServer struct {
+// HTTPServer is a HTTP server for ports
+type HTTPServer struct {
 	userService  IUserService
 	tokenService ITokenService
 }
 
-// NewHttpServer creates a new HTTP server for ports
-func NewHttpServer(
+// NewHTTPServer creates a new HTTP server for ports
+func NewHTTPServer(
 	userService IUserService,
 	tokenService ITokenService,
-) HttpServer {
-	return HttpServer{
+) HTTPServer {
+	return HTTPServer{
 		userService:  userService,
 		tokenService: tokenService,
 	}

@@ -10,28 +10,28 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	"go.uber.org/zap"
+
 	"github.com/KozlovNikolai/pfp/internal/chat/repository/pgrepo"
 	"github.com/KozlovNikolai/pfp/internal/chat/services"
 	"github.com/KozlovNikolai/pfp/internal/chat/transport/httpserver/middlewares"
 	"github.com/KozlovNikolai/pfp/internal/chat/transport/ws"
 	"github.com/KozlovNikolai/pfp/internal/pkg/config"
 	"github.com/KozlovNikolai/pfp/internal/pkg/pg"
-	"github.com/gin-contrib/cors"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
-
-	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 )
 
-// Server is ...
+// Router is ...
 type Router struct {
 	router *gin.Engine
 	logger *zap.Logger
 }
 
-// NewServer is ...
-func NewRouter(hub *ws.Hub) *Router {
+// NewRouter is ...
+func NewRouter() *Router {
 	// Инициализация логгера Zap
 	//	logger, err := zap.NewProduction()
 	logger, err := zap.NewDevelopment()
@@ -54,17 +54,18 @@ func NewRouter(hub *ws.Hub) *Router {
 	}
 	// создаем сервисы
 	userService := services.NewUserService(userRepo)
-	tokenService := services.NewTokenService(config.Cfg.TokenTimeDuration)
+	tokenService := services.NewTokenService(
+		userRepo,
+		config.Cfg.TokenTimeDuration,
+	)
 
 	// создаем http сервер
-	httpServer := NewHttpServer(
+	httpServer := NewHTTPServer(
 		userService,
 		tokenService,
 	)
-
-	// создаем websocket сервер
-	wsHandler := ws.NewHandler(hub)
-
+	hub := ws.NewHub()              // создаем hub
+	wsHandler := ws.NewHandler(hub) // создаем websocket handler
 	// Создание роутера
 	server := &Router{
 		router: gin.Default(),
@@ -77,8 +78,8 @@ func NewRouter(hub *ws.Hub) *Router {
 
 	// CORS
 	server.router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"https://localhost:8443", "https://127.0.0.1:8443"},
-		AllowMethods:     []string{"GET", "POST", "PATCH", "DELETE"},
+		AllowOrigins:     []string{"*", "https://localhost:8443", "https://127.0.0.1:8443"},
+		AllowMethods:     []string{"GET", "POST"},
 		AllowHeaders:     []string{"Origin", "Content-Type"},
 		ExposeHeaders:    []string{"Content-Length", "X-Request-ID"},
 		AllowCredentials: true,
@@ -91,25 +92,25 @@ func NewRouter(hub *ws.Hub) *Router {
 	open := server.router.Group("/")
 	open.POST("signup", httpServer.SignUp)
 	open.POST("signin", httpServer.SignIn)
-
-	// websocket routes
-	open.POST("/ws/createRoom", wsHandler.CreateRoom)
-	open.GET("/ws/joinRoom/:roomId", wsHandler.JoinRoom)
-	open.GET("/ws/getRooms", wsHandler.GetRooms)
-	open.GET("/ws/getClients/:roomId", wsHandler.GetClients)
-
-	// Закрытые маршруты
-	// доступ только для администратора
-	admin := server.router.Group("/")
+	//open.GET("signout", httpServer.SignOut)
+	// доступ для админов
+	admin := server.router.Group("/admin/")
 	admin.Use(httpServer.CheckAdmin())
-
 	admin.GET("users", httpServer.GetUsers)
 
 	// доступ для любых зарегистрированных пользователей
-	authorized := server.router.Group("/")
+	authorized := server.router.Group("/auth/")
 	authorized.Use(httpServer.CheckAuthorizedUser())
 
 	authorized.GET("user", httpServer.GetUser)
+	authorized.GET("signout", httpServer.SignOut)
+	// создаем websocket сервер
+
+	// websocket routes
+	authorized.POST("/ws/createRoom", wsHandler.CreateRoom)
+	authorized.GET("/ws/getRooms", wsHandler.GetRooms)
+	authorized.GET("/ws/getClients/:roomID", wsHandler.GetClients)
+	authorized.GET("/ws/joinRoom/:roomID", wsHandler.JoinRoom)
 
 	return server
 }
@@ -141,7 +142,8 @@ func (s *Router) Run() {
 		}
 		close(stopped)
 	}()
-	if err := server.ListenAndServeTLS(config.CertFile, config.KeyFile); err != nil && err != http.ErrServerClosed {
+	if err := server.ListenAndServeTLS(config.CertFile, config.KeyFile); err != nil &&
+		err != http.ErrServerClosed {
 		s.logger.Fatal(fmt.Sprintf("Could not listen on %s", config.Cfg.Address), zap.Error(err))
 	}
 	<-stopped

@@ -24,6 +24,7 @@ type NewUserData struct {
 	UpdatedAt time.Time
 }
 
+// NewUser ...
 func NewUser(data NewUserData) User {
 	return User{
 		id:        data.ID,
@@ -36,24 +37,37 @@ func NewUser(data NewUserData) User {
 	}
 }
 
+// ID ...
 func (u User) ID() int {
 	return u.id
 }
+
+// Login ...
 func (u User) Login() string {
 	return u.login
 }
+
+// Password ...
 func (u User) Password() string {
 	return u.password
 }
+
+// Role ...
 func (u User) Role() string {
 	return u.role
 }
+
+// Token ...
 func (u User) Token() string {
 	return u.token
 }
+
+// CreratedAt ...
 func (u User) CreratedAt() time.Time {
 	return u.createdAt
 }
+
+// UpdatedAt ...
 func (u User) UpdatedAt() time.Time {
 	return u.updatedAt
 }
