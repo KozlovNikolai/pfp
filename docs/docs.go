@@ -15,6 +15,106 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/admin/users": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Return users list.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Получить список всех пользователей.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "10",
+                        "example": "10",
+                        "description": "limit records on page",
+                        "name": "limit",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "default": "0",
+                        "example": "0",
+                        "description": "start of record output",
+                        "name": "offset",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/httpserver.UserResponse"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/user": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Получить пользователя по его id ли логину.",
+                "tags": [
+                    "User"
+                ],
+                "summary": "Посмотреть пользователя по его id или логину.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "1",
+                        "example": "1",
+                        "description": "id of the user",
+                        "name": "id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "default": "cmd@cmd.ru",
+                        "example": "cmd@cmd.ru",
+                        "description": "login of the user",
+                        "name": "login",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/httpserver.UserResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/signin": {
             "post": {
                 "description": "Sign in as an existing user.",
@@ -94,106 +194,6 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "error-to-create-domain-user",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/user": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Получить пользователя по его id ли логину.",
-                "tags": [
-                    "User"
-                ],
-                "summary": "Посмотреть пользователя по его id или логину.",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "default": "1",
-                        "example": "1",
-                        "description": "id of the user",
-                        "name": "id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "default": "cmd@cmd.ru",
-                        "example": "cmd@cmd.ru",
-                        "description": "login of the user",
-                        "name": "login",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/httpserver.UserResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/users": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Return users list.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "User"
-                ],
-                "summary": "Получить список всех пользователей.",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "default": "10",
-                        "example": "10",
-                        "description": "limit records on page",
-                        "name": "limit",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "default": "0",
-                        "example": "0",
-                        "description": "start of record output",
-                        "name": "offset",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/httpserver.UserResponse"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
                         "schema": {
                             "type": "string"
                         }

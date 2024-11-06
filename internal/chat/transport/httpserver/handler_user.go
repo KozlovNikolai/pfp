@@ -18,13 +18,13 @@ const (
 // GetUserTags 		godoc
 // @Summary			Посмотреть пользователя по его id или логину.
 // @Description		Получить пользователя по его id ли логину.
-// @Param        id  query   string  false  "id of the user" example(1) default(1)
-// @Param        login  query   string  false  "login of the user" example(cmd@cmd.ru) default(cmd@cmd.ru)
+// @Param        	id  query   string  false  "id of the user" example(1) default(1)
+// @Param        	login  query   string  false  "login of the user" example(cmd@cmd.ru) default(cmd@cmd.ru)
 // @Tags			User
-// @Security			BearerAuth
+// @Security		BearerAuth
 // @Success			200 {object} UserResponse
 // @failure			404 {string} err.Error()
-// @Router			/user [get]
+// @Router			/auth/user [get]
 func (h HTTPServer) GetUser(c *gin.Context) {
 	var userRequest UserRequest
 	idQuery := c.Query("id")
@@ -100,12 +100,12 @@ func (h HTTPServer) GetUser(c *gin.Context) {
 // @Description		Return users list.
 // @Tags			User
 // @Security		BearerAuth
-// @Param        limit  query   string  true  "limit records on page" example(10) default(10)
-// @Param        offset  query   string  true  "start of record output" example(0) default(0)
-// @Produce      json
+// @Param        	limit  query   string  true  "limit records on page" example(10) default(10)
+// @Param       	offset  query   string  true  "start of record output" example(0) default(0)
+// @Produce      	json
 // @Success			200 {object} []UserResponse
 // @failure			404 {string} err.Error()
-// @Router			/users [get]
+// @Router			/admin/users [get]
 func (h HTTPServer) GetUsers(c *gin.Context) {
 	userCtx, err := getUserFromContext(c)
 	if err != nil {
