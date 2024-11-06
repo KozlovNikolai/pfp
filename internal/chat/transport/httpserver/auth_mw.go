@@ -69,7 +69,7 @@ func (h HTTPServer) CheckAuthorizedUser() gin.HandlerFunc {
 			)
 			return
 		}
-		fmt.Printf("user = %v\n", user)
+		fmt.Printf("user = %+v\n", user)
 		if user.Login() == "" {
 			c.AbortWithStatusJSON(
 				http.StatusInternalServerError,

@@ -26,6 +26,29 @@ definitions:
       token:
         type: string
     type: object
+  ws.ClientRes:
+    properties:
+      id:
+        type: string
+      username:
+        type: string
+    type: object
+  ws.CreateRoomReq:
+    properties:
+      id:
+        example: "1"
+        type: string
+      name:
+        example: Room1
+        type: string
+    type: object
+  ws.RoomRes:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+    type: object
 info:
   contact: {}
   description: An Shop service API in Go using Gin framework
@@ -98,6 +121,86 @@ paths:
       summary: Посмотреть пользователя по его id или логину.
       tags:
       - User
+  /auth/ws/createRoom:
+    post:
+      description: Create new room in the system.
+      parameters:
+      - description: Create room.
+        in: body
+        name: CreateRoomReq
+        required: true
+        schema:
+          $ref: '#/definitions/ws.CreateRoomReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/ws.CreateRoomReq'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: error-to-create-room
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Создать комнату.
+      tags:
+      - Room
+  /auth/ws/getClients/{roomID}:
+    get:
+      description: Return room clients list.
+      parameters:
+      - default: 1
+        description: Room ID
+        example: 1
+        in: path
+        name: roomID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/ws.ClientRes'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Получить список всех участников группы.
+      tags:
+      - Room
+  /auth/ws/getRooms:
+    get:
+      description: Return rooms list.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/ws.RoomRes'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Получить список всех комнат.
+      tags:
+      - Room
   /signin:
     post:
       description: Sign in as an existing user.

@@ -1,5 +1,7 @@
 package ws
 
+import "fmt"
+
 // Room ...
 type Room struct {
 	ID      string             `json:"id"`
@@ -32,21 +34,25 @@ func (h *Hub) Run() {
 		case client := <-h.Register:
 			// если комната, указанная в клиенте не существует, то выходим из селекта
 			if _, ok := h.Rooms[client.RoomID]; !ok {
+				fmt.Printf("..Register..............Room whith id: %s not exists\n", client.RoomID)
 				break
 			}
 			// если комната существует, то работаем с ней:
 			room := h.Rooms[client.RoomID]
 			// если в комнате этот клиент не зарегистрировано, то регистрируем его:
 			if _, ok := room.Clients[client.ID]; !ok {
+				fmt.Printf("..Register..............Registering client %s in room %s\n", client.ID, client.RoomID)
 				room.Clients[client.ID] = client
 			}
 		case client := <-h.Unregister:
 			// если комната, указанная в клиенте не существует, то выходим из селекта
 			if _, ok := h.Rooms[client.RoomID]; !ok {
+				fmt.Printf("..Unregister..............Room whith id: %s not exists\n", client.RoomID)
 				break
 			}
 			// если в комнате, указанной в клиенте не зарегистрирован этот клиент, то выходим из селекта
 			if _, ok := h.Rooms[client.RoomID].Clients[client.ID]; !ok {
+				fmt.Printf("..Unregister..............Client %s in room %s not registering\n", client.ID, client.RoomID)
 				break
 			}
 			// если в комнате, указанной в клиенте кто то еще остался, то отправляем им сообщение:

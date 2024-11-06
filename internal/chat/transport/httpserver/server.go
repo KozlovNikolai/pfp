@@ -64,7 +64,8 @@ func NewRouter() *Router {
 		userService,
 		tokenService,
 	)
-	hub := ws.NewHub()              // создаем hub
+	hub := ws.NewHub() // создаем hub
+	go hub.Run()
 	wsHandler := ws.NewHandler(hub) // создаем websocket handler
 	// Создание роутера
 	server := &Router{

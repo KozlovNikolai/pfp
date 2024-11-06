@@ -7,9 +7,9 @@ import (
 	"github.com/KozlovNikolai/pfp/internal/pkg/config"
 )
 
-// @title 	Shop Service API
+// @title 	Chat Service API
 // @version	1.0
-// @description An Shop service API in Go using Gin framework
+// @description Chat service API in Go using Gin framework
 // @securityDefinitions.apikey BearerAuth
 // @in header
 // @name Authorization

@@ -22,11 +22,22 @@ func NewHandler(hub *Hub) *Handler {
 
 // CreateRoomReq ...
 type CreateRoomReq struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID   string `json:"id" example:"1"`
+	Name string `json:"name" example:"Room1"`
 }
 
-// CreateRoom ...
+// CreateRoom is ...
+// CreateRoomTags		godoc
+// @Summary				Создать комнату.
+// @Description			Create new room in the system.
+// @Param				CreateRoomReq body CreateRoomReq true "Create room."
+// @Produce				application/json
+// @Tags				Room
+// @Security			BearerAuth
+// @Success				201 {object} CreateRoomReq
+// @failure				400 {string} err.Error()
+// @failure				500 {string} string "error-to-create-room"
+// @Router				/auth/ws/createRoom [post]
 func (h *Handler) CreateRoom(c *gin.Context) {
 	var req CreateRoomReq
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -60,7 +71,7 @@ func (h *Handler) JoinRoom(c *gin.Context) {
 	roomID := c.Param("roomID")
 	clientID := c.Query("userID")
 	username := c.Query("username")
-	fmt.Printf("roomID: %s, clientID: %s, username: %s\n", roomID, clientID, username)
+	fmt.Printf("\nroomID: %s, clientID: %s, username: %s\n\n", roomID, clientID, username)
 
 	client := &Client{
 		Conn:     conn,
@@ -89,7 +100,16 @@ type RoomRes struct {
 	Name string `json:"name"`
 }
 
-// GetRooms ...
+// GetRooms is ...
+// GetRoomsTags 		godoc
+// @Summary			Получить список всех комнат.
+// @Description		Return rooms list.
+// @Tags			Room
+// @Security		BearerAuth
+// @Produce      	json
+// @Success			200 {object} []RoomRes
+// @failure			404 {string} err.Error()
+// @Router			/auth/ws/getRooms [get]
 func (h *Handler) GetRooms(c *gin.Context) {
 	rooms := make([]RoomRes, 0)
 	for _, room := range h.hub.Rooms {
@@ -108,7 +128,17 @@ type ClientRes struct {
 	Username string `json:"username"`
 }
 
-// GetClients ...
+// GetClients is ...
+// GetClientsTags 		godoc
+// @Summary			Получить список всех участников группы.
+// @Description		Return room clients list.
+// @Tags			Room
+// @Security		BearerAuth
+// @Param			roomID path int true "Room ID" example(1) default(1)
+// @Produce      	json
+// @Success			200 {object} []ClientRes
+// @failure			404 {string} err.Error()
+// @Router			/auth/ws/getClients/{roomID} [get]
 func (h *Handler) GetClients(c *gin.Context) {
 	clients := make([]ClientRes, 0)
 	roomID := c.Param("roomID")
@@ -117,7 +147,9 @@ func (h *Handler) GetClients(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "room not found"})
 		return
 	}
+
 	for _, client := range h.hub.Rooms[roomID].Clients {
+		fmt.Printf("clients: %+v\n", client)
 		clients = append(clients, ClientRes{
 			ID:       client.ID,
 			Username: client.Username,
