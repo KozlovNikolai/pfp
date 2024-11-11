@@ -1,0 +1,91 @@
+@startuml chat
+
+actor Client
+
+participant Auth
+participant WebSocket
+participant Http
+participant Message_DB
+participant File_DB
+
+' Логин
+' autonumber
+Client -> Auth: Логин
+note left: Авторизация.
+activate Client
+activate Auth
+Client <-- Auth: A.Token,R.Token
+deactivate Auth
+deactivate Client
+
+' подключение
+' autonumber 
+Client -> WebSocket: подключение с A.Token
+note left: Подключение.
+activate Client
+activate WebSocket
+    WebSocket -> Auth: A.Token
+    activate Auth
+    WebSocket <-- Auth: Valid/Invalid
+    deactivate Auth
+Client <-- WebSocket: http ссылка для стейта аккаунта
+deactivate WebSocket
+Client -> Http: запрос стейта аккаунта
+activate Http
+    Http -> Auth: A.Token
+    activate Auth
+    Http <-- Auth: Valid/Invalid
+    deactivate Auth
+Client <-- Http: Стейт аккаунта (группы, каналы, непрочитанные сообщения)
+deactivate Http
+deactivate Client
+
+' отправка сообщения
+' autonumber
+Client -> Http: Отправить новое сообщение
+note left: Отправка сообщения.
+activate Client
+activate Http
+    Http -> Auth: A.Token
+    activate Auth
+    Http <-- Auth: Valid/Invalid
+    deactivate Auth
+Http -> Message_DB: сохранение сообщения
+activate Message_DB
+Http <-- Message_DB: подтверждение сохранения
+deactivate Message_DB
+Client <-- Http: возврат ссылки на сообщение
+deactivate Http
+Client -> WebSocket: отправка ссылки на сообщение адресату
+activate WebSocket
+Client <-- WebSocket: подтверждение отправки
+deactivate Client
+Client <-- WebSocket: распостранение по адресатам
+deactivate WebSocket
+
+' получение сообщения
+Client <- WebSocket: уведомление о новом сообщении
+note left: Получение сообщения.
+activate Client
+activate WebSocket
+Client --> WebSocket: подтверждение получения уведомления
+deactivate WebSocket
+Client -> Http: Запрос данных сообщения
+activate Http
+    Http -> Auth: A.Token
+    activate Auth
+    Http <-- Auth: Valid/Invalid
+    deactivate Auth
+Http -> Message_DB: извлечение сообщения
+activate Message_DB
+Http <-- Message_DB: сообщение
+deactivate Message_DB
+Http -> File_DB: извлечение ссылок на файлы
+activate File_DB
+Http <-- File_DB: ссылки на файлы
+deactivate File_DB
+Client <-- Http: возврат сообщения и ссылок на файлы
+deactivate Http
+deactivate Client
+
+@enduml

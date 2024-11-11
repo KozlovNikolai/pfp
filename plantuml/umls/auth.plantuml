@@ -1,0 +1,37 @@
+@startuml chat
+
+actor Client
+
+participant Http
+participant Auth
+
+' Авторизация
+' autonumber
+'== Авторизация ==
+Client -> Auth: Логин, Пароль
+note left: Авторизация.
+activate Client
+activate Auth
+Client <-- Auth: Auth Token, Refresh Token
+deactivate Auth
+deactivate Client
+
+' Запрос
+' autonumber 
+|||
+'== Запрос ==
+' activate Http
+Client -> Http: запрос
+note left: Запрос.
+activate Client
+ activate Http
+     Http -> Http: Auth Token
+    activate Http
+    Http -> Auth: Если Invalid, отправляем Refresh Token
+    activate Auth
+    Http <-- Auth: Новый Auth Token
+    deactivate Auth
+     return
+Client <-- Http: Ответ
+
+@enduml
