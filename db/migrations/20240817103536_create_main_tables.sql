@@ -1,6 +1,6 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE TABLE IF NOT EXISTS "users"(
+CREATE TABLE IF NOT EXISTS "myusers"(
     "id"  serial NOT NULL PRIMARY KEY,
     "login" TEXT NOT NULL,
     "password" TEXT NOT NULL,
@@ -8,10 +8,10 @@ CREATE TABLE IF NOT EXISTS "users"(
     "token" TEXT NOT NULL
 );
 
-ALTER TABLE users ADD CONSTRAINT unique_login UNIQUE (login);
+ALTER TABLE myusers ADD CONSTRAINT unique_login UNIQUE (login);
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
-drop table "users";
+drop table "myusers";
 -- +goose StatementEnd
