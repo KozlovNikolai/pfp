@@ -45,7 +45,7 @@ func (u *UserRepo) CreateUser(ctx context.Context, User domain.User) (domain.Use
 	}()
 	// Вставка данных о пользователе и получение ID
 	err = tx.QueryRow(ctx, `
-			INSERT INTO users (login,password,role,token)
+			INSERT INTO myusers (login,password,role,token)
 			VALUES ($1, $2, $3, $4)
 			RETURNING id,login,password,role,token`,
 		dbUser.Login, dbUser.Password, dbUser.Role, dbUser.Token).
@@ -89,7 +89,7 @@ func (u *UserRepo) DeleteUser(ctx context.Context, id int) error {
 	err = tx.QueryRow(ctx, `
 		SELECT COUNT(*)
 		FROM orders
-		WHERE user_id = (SELECT id FROM users WHERE id = $1)`, id).Scan(&count)
+		WHERE user_id = (SELECT id FROM myusers WHERE id = $1)`, id).Scan(&count)
 	if err != nil {
 		return fmt.Errorf("failed to request the orders users: %w", err)
 	}
@@ -98,7 +98,7 @@ func (u *UserRepo) DeleteUser(ctx context.Context, id int) error {
 	}
 	// Удаляем пользователя
 	_, err = tx.Exec(ctx, `
-		DELETE FROM users
+		DELETE FROM myusers
 		WHERE id = $1`, id)
 	if err != nil {
 		return fmt.Errorf("failed to delete User with id %d: %w", id, err)
@@ -114,7 +114,7 @@ func (u *UserRepo) DeleteUser(ctx context.Context, id int) error {
 func (u *UserRepo) GetUsers(ctx context.Context, limit, offset int) ([]domain.User, error) {
 	query := `
 		SELECT id, login, password, role, token
-		FROM users
+		FROM myusers
 		ORDER BY id
 		LIMIT $1 OFFSET $2
 	`
@@ -154,7 +154,7 @@ func (u *UserRepo) GetUserByID(ctx context.Context, id int) (domain.User, error)
 	// SQL-запрос на получение данных Пользователя по ID
 	query := `
 		SELECT id, login, password, role, token
-		FROM users
+		FROM myusers
 		WHERE id = $1
 	`
 	var user models.User
@@ -178,7 +178,7 @@ func (u *UserRepo) GetUserByLogin(ctx context.Context, login string) (domain.Use
 	// SQL-запрос на получение данных Пользователя по логину
 	query := `
 		SELECT id, login, password, role, token
-		FROM users
+		FROM myusers
 		WHERE login = $1
 	`
 	var user models.User
@@ -211,7 +211,7 @@ func (u *UserRepo) UpdateUser(ctx context.Context, user domain.User) (domain.Use
 	}()
 	// SQL-запрос на обновление данных Поставщика
 	query := `
-		UPDATE users
+		UPDATE myusers
 		SET login = $1, password = $2, role = $3, token = $4
 		WHERE id = $5
 		RETURNING id, login, password, role, token

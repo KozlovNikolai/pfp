@@ -5,14 +5,15 @@ import (
 	"testing"
 
 	"github.com/KozlovNikolai/pfp/internal/chat/domain"
+	"github.com/KozlovNikolai/pfp/internal/pkg/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestGetUserFromContext(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	var userCtxKey = ctxKey("user")
-	var productCtxKey = ctxKey("product")
+	var userCtxKey = utils.CtxKey("user")
+	var productCtxKey = utils.CtxKey("product")
 
 	tests := []struct {
 		name    string
@@ -62,7 +63,7 @@ func TestGetUserFromContext(t *testing.T) {
 
 		t.Run(tt.name, func(t *testing.T) {
 			c := tt.ctx()
-			user, err := getUserFromContext(c)
+			user, err := utils.GetUserFromContext(c)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {

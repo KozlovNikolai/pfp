@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/KozlovNikolai/pfp/internal/pkg/config"
+	"github.com/KozlovNikolai/pfp/internal/pkg/utils"
 )
 
 // AuthorizationHeader ...
@@ -43,7 +44,7 @@ func (h HTTPServer) CheckAdmin() gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"not-admin": ""})
 			return
 		}
-		c.Set(ctxKey("user").String(), user)
+		c.Set(utils.CtxKey("user").String(), user)
 		// v, e := c.Get(ctxKey("user").String())
 		// if !e {
 		// 	fmt.Println("значение в конетексте не существует")
@@ -78,7 +79,7 @@ func (h HTTPServer) CheckAuthorizedUser() gin.HandlerFunc {
 			return
 		}
 
-		c.Set(ctxKey("user").String(), user)
+		c.Set(utils.CtxKey("user").String(), user)
 
 		c.Next()
 	}

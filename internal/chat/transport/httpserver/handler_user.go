@@ -8,6 +8,7 @@ import (
 
 	"github.com/KozlovNikolai/pfp/internal/chat/domain"
 	"github.com/KozlovNikolai/pfp/internal/pkg/config"
+	"github.com/KozlovNikolai/pfp/internal/pkg/utils"
 )
 
 const (
@@ -31,7 +32,7 @@ func (h HTTPServer) GetUser(c *gin.Context) {
 	loginQuery := c.Query("login")
 
 	// check auth
-	userCtx, err := getUserFromContext(c)
+	userCtx, err := utils.GetUserFromContext(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": domain.ErrNoUserInContext.Error()})
 		return
@@ -107,7 +108,7 @@ func (h HTTPServer) GetUser(c *gin.Context) {
 // @failure			404 {string} err.Error()
 // @Router			/admin/users [get]
 func (h HTTPServer) GetUsers(c *gin.Context) {
-	userCtx, err := getUserFromContext(c)
+	userCtx, err := utils.GetUserFromContext(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": domain.ErrNoUserInContext.Error()})
 		return

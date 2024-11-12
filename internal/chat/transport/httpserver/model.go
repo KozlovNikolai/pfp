@@ -4,11 +4,11 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-type ctxKey string
+// type ctxKey string
 
-func (c ctxKey) String() string {
-	return string(c)
-}
+// func (c ctxKey) String() string {
+// 	return string(c)
+// }
 
 // UserRequest is ...
 type UserRequest struct {

@@ -58,8 +58,9 @@ func (s TokenService) GenerateToken(ctx context.Context, login, password string)
 		AuthLogin: domainUser.Login(),
 		AuthRole:  domainUser.Role(),
 		StandardClaims: jwt.StandardClaims{
-			IssuedAt:  time.Now().Unix(),
-			ExpiresAt: time.Now().Add(time.Minute * 15).Unix(),
+			IssuedAt: time.Now().Unix(),
+			// ExpiresAt: time.Now().Add(time.Minute * 15).Unix(),
+			ExpiresAt: time.Now().Add(config.Cfg.TokenTimeDuration).Unix(),
 		},
 	}
 
