@@ -4,12 +4,6 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-// type ctxKey string
-
-// func (c ctxKey) String() string {
-// 	return string(c)
-// }
-
 // UserRequest is ...
 type UserRequest struct {
 	Login    string `json:"login"    db:"login"    example:"cmd@cmd.ru" validate:"required,email"`

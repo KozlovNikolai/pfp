@@ -76,8 +76,6 @@ func (h *Handler) JoinRoom(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
 	roomID := c.Param("roomID")
-	// clientID := c.Query("userID")
-	// username := c.Query("username")
 	clientID := strconv.Itoa(user.ID())
 	username := user.Login()
 	fmt.Printf("\nroomID: %s, clientID: %s, username: %s\n\n", roomID, clientID, username)
