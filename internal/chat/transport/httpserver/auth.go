@@ -2,9 +2,12 @@
 package httpserver
 
 import (
+	"fmt"
 	"net/http"
 
+	"github.com/KozlovNikolai/pfp/internal/pkg/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 const (
@@ -82,6 +85,44 @@ func (h HTTPServer) SignIn(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"token": token})
+
+}
+
+// LoginUserByToken is ...
+// LoginUserByTokenTags		godoc
+// @Summary				Авторизоваться по токену.
+// @Description			Logging in as an existing user from remote Auth service.
+// @Produce				application/json
+// @Tags				Auth
+// @Success				200 {string} pubsub_token
+// @failure				400 {string} err.Error()
+// @failure				500 {string} err.Error()
+// @Router				/auth/login [get]
+func (h HTTPServer) LoginUserByToken(c *gin.Context) {
+	rawToken := c.GetHeader(AuthorizationHeader)
+	userIdToken := c.GetHeader(UserIdToken)
+	headerApplication := c.GetHeader(HeaderApplication)
+	fmt.Println("Get headers:")
+	fmt.Printf("rawToken: %s, userIdToken: %s, headerApplication: %s\n",
+		rawToken, userIdToken, headerApplication)
+
+	authHeaders := map[string]string{
+		AuthorizationHeader: rawToken,
+	}
+
+	resp, err := utils.DoRequest[ReceiveUser]("GET", sputnikUrl, nil, authHeaders)
+	//currentUser = resp.convertToCurrentUser()
+	if err != nil {
+		fmt.Println("Error DoRequest")
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err})
+		return
+	}
+	tokenWS := uuid.New()
+	fmt.Println()
+	fmt.Printf("Result: %+v\n", resp)
+	fmt.Println()
+	c.JSON(http.StatusOK, gin.H{"websocket token": tokenWS})
+
 }
 
 // SignOut ...

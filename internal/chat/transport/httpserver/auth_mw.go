@@ -14,8 +14,11 @@ import (
 // AuthorizationHeader ...
 // BearerPrefix ...
 const (
-	AuthorizationHeader = "Authorization"
-	BearerPrefix        = "Bearer "
+	AuthorizationHeader        = "Authorization"
+	BearerPrefix               = "Bearer "
+	UserIdToken                = "user-id"
+	HeaderApplication          = "Application"
+	sputnikUrl          string = "https://api.sputnik-monitor.ru/api/v1/auth/login"
 )
 
 // CheckAdmin ...
