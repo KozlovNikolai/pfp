@@ -1,12 +1,9 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE TABLE IF NOT EXISTS "myusers"(
+CREATE TABLE IF NOT EXISTS "unread_msgs"(
     "id"  serial NOT NULL PRIMARY KEY,
-    "user_id" INTEGER NOT NULL,
-    "login" TEXT NOT NULL UNIQUE,
-    "password" TEXT NOT NULL,
-    "role" TEXT NOT NULL,
-    "token" TEXT NOT NULL
+    "user_id" NUMERIC NOT NULL,
+    "message_id" NUMERIC NOT NULL
 );
 
 -- ALTER TABLE myusers ADD CONSTRAINT unique_login UNIQUE (login);
@@ -14,5 +11,5 @@ CREATE TABLE IF NOT EXISTS "myusers"(
 
 -- +goose Down
 -- +goose StatementBegin
-drop table "myusers";
+drop table if EXISTS "unread_msgs" CASCADE;
 -- +goose StatementEnd

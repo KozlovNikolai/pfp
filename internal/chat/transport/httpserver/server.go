@@ -101,7 +101,8 @@ func NewRouter() *Router {
 
 	// доступ для любых зарегистрированных пользователей
 	authorized := server.router.Group("/auth/")
-	//authorized.Use(httpServer.CheckAuthorizedUser())
+	// authorized.Use(httpServer.CheckAuthorizedUser())
+	authorized.Use(httpServer.CheckAuthorizedUser())
 
 	authorized.GET("user", httpServer.GetUser)
 	authorized.GET("signout", httpServer.SignOut)

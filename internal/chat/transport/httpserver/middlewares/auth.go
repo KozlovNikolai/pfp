@@ -9,13 +9,17 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 
 	"github.com/KozlovNikolai/pfp/internal/pkg/config"
+	"github.com/KozlovNikolai/pfp/internal/pkg/utils"
 )
 
 // AuthorizationHeader ...
 // BearerPrefix ...
 const (
-	AuthorizationHeader = "Authorization"
-	BearerPrefix        = "Bearer "
+	AuthorizationHeader        = "Authorization"
+	BearerPrefix               = "Bearer "
+	UserIdToken                = "user-id"
+	HeaderApplication          = "Application"
+	sputnikUrl          string = "https://api.sputnik-monitor.ru/api/v1/auth/login"
 )
 
 // Claims is ...
@@ -72,3 +76,28 @@ func AuthMiddleware() gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+func AuthSputnikMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context){
+		rawToken := c.GetHeader(AuthorizationHeader)
+		userIdToken := c.GetHeader(UserIdToken)
+		headerApplication := c.GetHeader(HeaderApplication)
+		fmt.Println("Get headers:")
+		fmt.Printf("rawToken: %s, userIdToken: %s, headerApplication: %s\n",
+			rawToken, userIdToken, headerApplication)
+		
+		authHeaders := map[string]string{
+			AuthorizationHeader: rawToken,
+		}
+		
+		resp, err := utils.DoRequest[ReceiveUser]("GET", sputnikUrl, nil, authHeaders)
+		//currentUser = resp.convertToCurrentUser()
+		if err != nil {
+			fmt.Println("Error DoRequest")
+			c.JSON(http.StatusUnauthorized, gin.H{"error": err})
+			return
+		}
+	}
+}
+
+
