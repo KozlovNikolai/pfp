@@ -109,11 +109,12 @@ func (h HTTPServer) LoginUserByToken(c *gin.Context) {
 	}
 
 	tokenWS := uuid.New()
+
 	fmt.Println()
 	fmt.Printf("Result: %+v\n", userSputnik)
 	fmt.Println()
-	c.JSON(http.StatusOK, gin.H{"websocket token": tokenWS})
 
+	c.JSON(http.StatusOK, gin.H{"websocket token": tokenWS})
 }
 
 // SignOut ...
