@@ -25,6 +25,17 @@ type UserResponse struct {
 	Token    string `json:"token"    db:"token"`
 }
 
+type UserChatResponse struct {
+	ID        int    `json:"id" db:"id"`
+	UserExtID int    `json:"user_ext_id" db:"user_ext_id"`
+	Name      string `json:"name" db:"name"`
+	Surname   string `json:"surname" db:"surname"`
+	Email     string `json:"email" db:"email"`
+	UserType  string `json:"type" db:"type"`
+	CreatedAt uint64 `json:"created_at" db:"created_at"`
+	UpdatedAt uint64 `json:"updated_at" db:"updated_at"`
+}
+
 // type ReceiveUser struct {
 // 	Payload Payload `json:"payload"`
 // }

@@ -17,6 +17,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/KozlovNikolai/pfp/internal/chat/repository/pgrepo"
+	"github.com/KozlovNikolai/pfp/internal/chat/repository/staterepo"
 	"github.com/KozlovNikolai/pfp/internal/chat/services"
 	"github.com/KozlovNikolai/pfp/internal/chat/transport/httpserver/middlewares"
 	"github.com/KozlovNikolai/pfp/internal/chat/transport/ws"
@@ -40,6 +41,7 @@ func NewRouter() *Router {
 	}
 
 	var userRepo services.IUserRepository
+
 	// Выбор репозитория
 	switch config.Cfg.RepoType {
 	case "postgres":
@@ -48,11 +50,18 @@ func NewRouter() *Router {
 			logger.Fatal("pg.Dial failed: %w", zap.Error(err))
 		}
 		userRepo = pgrepo.NewUserRepo(pgDB)
-
 	default:
 		logger.Fatal("Invalid repository type")
 	}
+
+	// создаем стейт
+	var stateRepo services.IStateRepository
+	stateDB := staterepo.NewStateDB()
+	stateRepo = staterepo.NewStateRepo(stateDB)
+
 	// создаем сервисы
+	stateService := services.NewStateService(stateRepo)
+	userChatService := services.NewUserChatService(userRepo)
 	userService := services.NewUserService(userRepo)
 	tokenService := services.NewTokenService(
 		userRepo,
@@ -61,8 +70,10 @@ func NewRouter() *Router {
 
 	// создаем http сервер
 	httpServer := NewHTTPServer(
+		userChatService,
 		userService,
 		tokenService,
+		stateService,
 	)
 	hub := ws.NewHub() // создаем hub
 	go hub.Run()

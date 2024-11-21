@@ -110,6 +110,15 @@ func (h HTTPServer) LoginUserByToken(c *gin.Context) {
 
 	tokenWS := uuid.New()
 
+	domainUserChat := toDomainUserChat(userSputnik)
+
+	registeredUserChat, err := h.userChatService.RegisterUser(c, domainUserChat)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error service User": err.Error()})
+		return
+	}
+	response := toResponseUser(createdUser)
+
 	fmt.Println()
 	fmt.Printf("Result: %+v\n", userSputnik)
 	fmt.Println()

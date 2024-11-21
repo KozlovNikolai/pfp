@@ -21,3 +21,15 @@ type ITokenService interface {
 	GenerateToken(ctx context.Context, login string, password string) (string, error)
 	GetUser(token string) (domain.User, error)
 }
+
+type IStateService interface {
+}
+
+type IUserChatService interface {
+	RegisterUser(context.Context, domain.UserChat) (domain.UserChat, error)
+	GetUsers(context.Context, int, int) ([]domain.User, error)
+	GetUserByID(context.Context, int) (domain.User, error)
+	GetUserByLogin(context.Context, string) (domain.User, error)
+	UpdateUser(context.Context, domain.User) (domain.User, error)
+	DeleteUser(context.Context, int) error
+}

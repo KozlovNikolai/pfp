@@ -16,3 +16,7 @@ type IUserRepository interface {
 	UpdateUser(context.Context, domain.User) (domain.User, error)
 	DeleteUser(context.Context, int) error
 }
+
+type IStateRepository interface {
+	GetState(context.Context, domain.UserChat) (domain.State, error)
+}

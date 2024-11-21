@@ -3,7 +3,7 @@ package domain
 // User is a domain User
 type UserChat struct {
 	id        int
-	userExtID string
+	userExtID int
 	name      string
 	surname   string
 	email     string
@@ -15,7 +15,7 @@ type UserChat struct {
 // NewUserData is a domain User
 type NewUserChatData struct {
 	ID        int    `json:"id" db:"id"`
-	UserExtID string `json:"user_ext_id" db:"user_ext_id"`
+	UserExtID int    `json:"user_ext_id" db:"user_ext_id"`
 	Name      string `json:"name" db:"name"`
 	Surname   string `json:"surname" db:"surname"`
 	Email     string `json:"email" db:"email"`
@@ -44,7 +44,7 @@ func (u UserChat) GetID() int {
 }
 
 // Login ...
-func (u UserChat) GetUserExtID() string {
+func (u UserChat) GetUserExtID() int {
 	return u.userExtID
 }
 
@@ -63,8 +63,13 @@ func (u UserChat) GetEmail() string {
 	return u.email
 }
 
+// Token ...
+func (u UserChat) GetUserType() string {
+	return u.userType
+}
+
 // CreratedAt ...
-func (u UserChat) GetCreratedAt() uint64 {
+func (u UserChat) GetCreatedAt() uint64 {
 	return u.createdAt
 }
 
