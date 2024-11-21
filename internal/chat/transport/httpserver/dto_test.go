@@ -63,7 +63,7 @@ func TestGetUserFromContext(t *testing.T) {
 
 		t.Run(tt.name, func(t *testing.T) {
 			c := tt.ctx()
-			user, err := utils.GetUserFromContext(c)
+			user, err := utils.GetDataFromContext[domain.User](c, "user")
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {

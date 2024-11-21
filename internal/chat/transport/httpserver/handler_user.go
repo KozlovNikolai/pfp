@@ -32,7 +32,7 @@ func (h HTTPServer) GetUser(c *gin.Context) {
 	loginQuery := c.Query("login")
 
 	// check auth
-	userCtx, err := utils.GetUserFromContext(c)
+	userCtx, err := utils.GetDataFromContext[domain.User](c, "user")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": domain.ErrNoUserInContext.Error()})
 		return
@@ -108,7 +108,7 @@ func (h HTTPServer) GetUser(c *gin.Context) {
 // @failure			404 {string} err.Error()
 // @Router			/admin/users [get]
 func (h HTTPServer) GetUsers(c *gin.Context) {
-	userCtx, err := utils.GetUserFromContext(c)
+	userCtx, err := utils.GetDataFromContext[domain.User](c, "user")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": domain.ErrNoUserInContext.Error()})
 		return

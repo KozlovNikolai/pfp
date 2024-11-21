@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/KozlovNikolai/pfp/internal/chat/domain"
 	"github.com/KozlovNikolai/pfp/internal/pkg/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -66,7 +67,7 @@ var upgrade = websocket.Upgrader{
 
 // JoinRoom ...
 func (h *Handler) JoinRoom(c *gin.Context) {
-	user, err := utils.GetUserFromContext(c)
+	user, err := utils.GetDataFromContext[domain.User](c, "user")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/KozlovNikolai/pfp/internal/chat/domain"
+	"github.com/KozlovNikolai/pfp/internal/chat/transport/httpserver/middlewares"
 	"github.com/KozlovNikolai/pfp/internal/pkg/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -99,27 +101,16 @@ func (h HTTPServer) SignIn(c *gin.Context) {
 // @failure				500 {string} err.Error()
 // @Router				/auth/login [get]
 func (h HTTPServer) LoginUserByToken(c *gin.Context) {
-	rawToken := c.GetHeader(AuthorizationHeader)
-	userIdToken := c.GetHeader(UserIdToken)
-	headerApplication := c.GetHeader(HeaderApplication)
-	fmt.Println("Get headers:")
-	fmt.Printf("rawToken: %s, userIdToken: %s, headerApplication: %s\n",
-		rawToken, userIdToken, headerApplication)
 
-	authHeaders := map[string]string{
-		AuthorizationHeader: rawToken,
-	}
-
-	resp, err := utils.DoRequest[ReceiveUser]("GET", sputnikUrl, nil, authHeaders)
-	//currentUser = resp.convertToCurrentUser()
+	userSputnik, err := utils.GetDataFromContext[middlewares.ReceiveUserSputnik](c, "user_sputnik")
 	if err != nil {
-		fmt.Println("Error DoRequest")
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err})
+		c.JSON(http.StatusBadRequest, gin.H{"error": domain.ErrNoUserInContext.Error()})
 		return
 	}
+
 	tokenWS := uuid.New()
 	fmt.Println()
-	fmt.Printf("Result: %+v\n", resp)
+	fmt.Printf("Result: %+v\n", userSputnik)
 	fmt.Println()
 	c.JSON(http.StatusOK, gin.H{"websocket token": tokenWS})
 

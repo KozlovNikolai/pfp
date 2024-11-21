@@ -2,9 +2,9 @@
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS "notifications"(
     "id"  serial NOT NULL PRIMARY KEY,
-    "user_id" NUMERIC NOT NULL,
-    "chat_id" NUMERIC NOT NULL,
-    "msg_id" NUMERIC NOT NULL,
+    "user_id" INTEGER NOT NULL,
+    "chat_id" INTEGER NOT NULL,
+    "msg_id" INTEGER NOT NULL,
     "text" TEXT,
     "is_deleted" BOOLEAN,
     "notification_type" TEXT NOT NULL,
@@ -12,7 +12,18 @@ CREATE TABLE IF NOT EXISTS "notifications"(
     "created_at" TIMESTAMP NOT NULL
 );
 
--- ALTER TABLE myusers ADD CONSTRAINT unique_login UNIQUE (login);
+ALTER TABLE "notifications"
+ADD FOREIGN KEY("user_id") REFERENCES "users"("id")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+ALTER TABLE "notifications"
+ADD FOREIGN KEY("chat_id") REFERENCES "chats"("id")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+ALTER TABLE "notifications"
+ADD FOREIGN KEY("msg_id") REFERENCES "messages"("id")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+
 -- +goose StatementEnd
 
 -- +goose Down

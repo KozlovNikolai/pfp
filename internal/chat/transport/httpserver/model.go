@@ -25,26 +25,26 @@ type UserResponse struct {
 	Token    string `json:"token"    db:"token"`
 }
 
-type ReceiveUser struct {
-	Payload Payload `json:"payload"`
-}
+// type ReceiveUser struct {
+// 	Payload Payload `json:"payload"`
+// }
 
-type Payload struct {
-	Email         string        `json:"email" db:"email"`
-	Name          string        `json:"name" db:"name"`
-	Surname       string        `json:"surname" db:"surname"`
-	UserID        int           `json:"id" db:"id"`
-	TokensSputnik TokensSputnik `json:"tokens"`
-	Lang          string        `json:"lang" db:"lang"`
-	AccountId     int           `json:"account_id"`
-}
+// type Payload struct {
+// 	Email         string        `json:"email" db:"email"`
+// 	Name          string        `json:"name" db:"name"`
+// 	Surname       string        `json:"surname" db:"surname"`
+// 	UserID        int           `json:"id" db:"id"`
+// 	TokensSputnik TokensSputnik `json:"tokens"`
+// 	Lang          string        `json:"lang" db:"lang"`
+// 	AccountId     int           `json:"account_id"`
+// }
 
-type TokensSputnik struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
-}
+// type TokensSputnik struct {
+// 	AccessToken  string `json:"access_token"`
+// 	RefreshToken string `json:"refresh_token"`
+// }
 
-func (ru *ReceiveUser) Validate() error {
-	validate := validator.New(validator.WithRequiredStructEnabled())
-	return validate.Struct(ru)
-}
+// func (ru *ReceiveUser) Validate() error {
+// 	validate := validator.New(validator.WithRequiredStructEnabled())
+// 	return validate.Struct(ru)
+// }

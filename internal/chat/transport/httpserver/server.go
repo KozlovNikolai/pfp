@@ -90,24 +90,27 @@ func NewRouter() *Router {
 	// add swagger /docs/index.html
 	server.router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
+	// открытый доступ
 	open := server.router.Group("/")
 	open.POST("signup", httpServer.SignUp)
 	open.POST("signin", httpServer.SignIn)
 	//open.GET("signout", httpServer.SignOut)
+
 	// доступ для админов
 	admin := server.router.Group("/admin/")
 	admin.Use(httpServer.CheckAdmin())
 	admin.GET("users", httpServer.GetUsers)
 
+	// доступ для авторизации по токену спутника
+	authSputnik := server.router.Group("/sputnik/")
+	authSputnik.Use(middlewares.AuthSputnikMiddleware())
+	authSputnik.GET("login", httpServer.LoginUserByToken)
+
 	// доступ для любых зарегистрированных пользователей
 	authorized := server.router.Group("/auth/")
-	// authorized.Use(httpServer.CheckAuthorizedUser())
 	authorized.Use(httpServer.CheckAuthorizedUser())
-
 	authorized.GET("user", httpServer.GetUser)
 	authorized.GET("signout", httpServer.SignOut)
-	authorized.GET("login", httpServer.LoginUserByToken)
-	// создаем websocket сервер
 
 	// websocket routes
 	authorized.POST("/ws/createRoom", wsHandler.CreateRoom)

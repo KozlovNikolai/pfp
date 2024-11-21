@@ -2,8 +2,8 @@
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS "messages"(
     "id"  serial NOT NULL PRIMARY KEY,
-    "sender_id" NUMERIC NOT NULL,
-    "chat_id" NUMERIC NOT NULL,
+    "sender_id" INTEGER NOT NULL,
+    "chat_id" INTEGER NOT NULL,
     "type" TEXT NOT NULL,
     "text" TEXT,
     "is_deleted" BOOLEAN,

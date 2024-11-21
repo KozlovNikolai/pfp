@@ -11,7 +11,6 @@ CREATE TABLE IF NOT EXISTS "users"(
     "updated_at" TIMESTAMP NOT NULL
 );
 
--- ALTER TABLE myusers ADD CONSTRAINT unique_login UNIQUE (login);
 -- +goose StatementEnd
 
 -- +goose Down
