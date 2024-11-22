@@ -10,7 +10,7 @@ type State struct {
 
 type Connect struct {
 	WStoken   uuid.UUID `json:"ws_token" db:"ws_token"`
-	CreatedAt uint64    `json:"created_at" db:"created_at"`
+	CreatedAt int64     `json:"created_at" db:"created_at"`
 }
 
 type Contact struct {

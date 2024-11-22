@@ -43,7 +43,7 @@ func (h HTTPServer) CheckAdmin() gin.HandlerFunc {
 			)
 			return
 		}
-		if user.Role() != config.AdminRole {
+		if user.UserType() != config.AdminRole {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"not-admin": ""})
 			return
 		}

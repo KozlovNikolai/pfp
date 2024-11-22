@@ -32,7 +32,6 @@ func (h HTTPServer) SignUp(c *gin.Context) {
 	var err error
 	if err = c.ShouldBindJSON(&userRequest); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"invalid-json": err.Error()})
-
 		return
 	}
 
@@ -47,14 +46,14 @@ func (h HTTPServer) SignUp(c *gin.Context) {
 	// 	return
 	// }
 
-	domainUser := toDomainUser(userRequest)
+	domainUser := toDomainUserChat(userRequest)
 
-	createdUser, err := h.userService.CreateUser(c, domainUser)
+	createdUser, err := h.userChatService.CreateUser(c, domainUser)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error service User": err.Error()})
 		return
 	}
-	response := toResponseUser(createdUser)
+	response := toResponseUserChat(createdUser)
 	c.JSON(http.StatusCreated, response)
 }
 
@@ -81,7 +80,7 @@ func (h HTTPServer) SignIn(c *gin.Context) {
 		return
 	}
 
-	token, err := h.tokenService.GenerateToken(c, userRequest.Login, userRequest.Password)
+	token, err := h.tokenService.GenerateToken(c, userRequest.Account, userRequest.Login, userRequest.Password)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error-generated-token": err.Error()})
 		return
@@ -110,20 +109,21 @@ func (h HTTPServer) LoginUserByToken(c *gin.Context) {
 
 	tokenWS := uuid.New()
 
-	domainUserChat := toDomainUserChat(userSputnik)
+	domainUserChat := toDomainUserSputnik(userSputnik)
 
-	registeredUserChat, err := h.userChatService.RegisterUser(c, domainUserChat)
+	registeredDomainUserChat, err := h.userChatService.RegisterUser(c, domainUserChat)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error service User": err.Error()})
 		return
 	}
-	response := toResponseUser(createdUser)
+
+	response := toResponseUserChat(registeredDomainUserChat)
 
 	fmt.Println()
 	fmt.Printf("Result: %+v\n", userSputnik)
 	fmt.Println()
 
-	c.JSON(http.StatusOK, gin.H{"websocket token": tokenWS})
+	c.JSON(http.StatusOK, gin.H{"websocket token": tokenWS, "user chat": response})
 }
 
 // SignOut ...

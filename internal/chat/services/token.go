@@ -35,28 +35,28 @@ func NewTokenService(
 
 // UserClaims ...
 type UserClaims struct {
-	AuthID    int    `json:"auth_id"`
-	AuthLogin string `json:"auth_login"`
-	AuthRole  string `json:"auth_role"`
+	AuthID       int    `json:"auth_id"`
+	AuthLogin    string `json:"auth_login"`
+	AuthUserType string `json:"auth_user_type"`
 	jwt.StandardClaims
 }
 
 // GenerateToken generates a token
 // func (s TokenService) GenerateToken(user domain.User) (string, error) {
-func (s TokenService) GenerateToken(ctx context.Context, login, password string) (string, error) {
-	domainUser, err := s.repo.GetUserByLogin(ctx, login)
+func (s TokenService) GenerateToken(ctx context.Context, account, login, password string) (string, error) {
+	domainUserChat, err := s.repo.GetUserByLogin(ctx, account, login)
 	if err != nil {
 		return "", fmt.Errorf("invaldRequest: %v", err.Error())
 	}
 
-	if !utils.CheckPasswordHash(password, domainUser.Password()) {
+	if !utils.CheckPasswordHash(password, domainUserChat.Password()) {
 		return "", fmt.Errorf("error: invalid-password")
 	}
-	fmt.Printf("func GenerateToken: domainUser: %+v\n", domainUser)
+	fmt.Printf("func GenerateToken: domainUser: %+v\n", domainUserChat)
 	payload := UserClaims{
-		AuthID:    domainUser.ID(),
-		AuthLogin: domainUser.Login(),
-		AuthRole:  domainUser.Role(),
+		AuthID:       domainUserChat.ID(),
+		AuthLogin:    domainUserChat.Login(),
+		AuthUserType: domainUserChat.UserType(),
 		StandardClaims: jwt.StandardClaims{
 			IssuedAt: time.Now().Unix(),
 			// ExpiresAt: time.Now().Add(time.Minute * 15).Unix(),
@@ -75,7 +75,7 @@ func (s TokenService) GenerateToken(ctx context.Context, login, password string)
 }
 
 // GetUser ...
-func (s TokenService) GetUser(token string) (domain.User, error) {
+func (s TokenService) GetUser(token string) (domain.UserChat, error) {
 	var userClaims UserClaims
 	t, err := jwt.ParseWithClaims(token, &userClaims, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -84,19 +84,19 @@ func (s TokenService) GetUser(token string) (domain.User, error) {
 		return jwtSecretKey, nil
 	})
 	if err != nil {
-		return domain.User{}, fmt.Errorf("failed to parse a token: %w", err)
+		return domain.UserChat{}, fmt.Errorf("failed to parse a token: %w", err)
 	}
 	if !t.Valid {
-		return domain.User{}, errors.New("invalid token")
+		return domain.UserChat{}, errors.New("invalid token")
 	}
 	user := userClaimsToDomainUser(userClaims)
 	return user, nil
 }
 
-func userClaimsToDomainUser(claims UserClaims) domain.User {
-	return domain.NewUser(domain.NewUserData{
-		ID:    claims.AuthID,
-		Login: claims.AuthLogin,
-		Role:  claims.AuthRole,
+func userClaimsToDomainUser(claims UserClaims) domain.UserChat {
+	return domain.NewUserChat(domain.NewUserChatData{
+		ID:       claims.AuthID,
+		Login:    claims.AuthLogin,
+		UserType: claims.AuthUserType,
 	})
 }

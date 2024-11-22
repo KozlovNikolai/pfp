@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/KozlovNikolai/pfp/internal/chat/domain"
@@ -21,39 +22,62 @@ func NewUserChatService(repo IUserRepository) UserChatService {
 	}
 }
 
-// GetUserByID ...
-func (s UserChatService) GetUserByID(ctx context.Context, id int) (domain.User, error) {
-	return s.repo.GetUserByID(ctx, id)
-}
-
-// GetUserByLogin ...
-func (s UserChatService) GetUserByLogin(ctx context.Context, login string) (domain.User, error) {
-	return s.repo.GetUserByLogin(ctx, login)
-}
-
-// CreateUser ...
-func (s UserChatService) RegisterUser(ctx context.Context, user domain.UserChat) (domain.UserChat, error) {
-	creatingTime := time.Now()
+// // CreateUser ...
+func (s UserChatService) CreateUser(ctx context.Context, user domain.UserChat) (domain.UserChat, error) {
+	creatingTime := time.Now().Unix()
 
 	password, err := utils.HashPassword(user.Password())
 	if err != nil {
-		return domain.User{}, fmt.Errorf("error-hashing-password: %v", err.Error())
+		return domain.UserChat{}, fmt.Errorf("error-hashing-password: %v", err.Error())
 	}
 
-	newUser := domain.NewUserData{
+	newUser := domain.NewUserChatData{
+		UserExtID: user.UserExtID(),
 		Login:     user.Login(),
 		Password:  password,
-		Role:      "regular",
-		Token:     "",
+		Account:   user.Account(),
+		Token:     user.Token(),
+		Name:      user.Name(),
+		Surname:   user.Surname(),
+		Email:     user.Email(),
+		UserType:  user.UserType(),
 		CreatedAt: creatingTime,
 		UpdatedAt: creatingTime,
 	}
-	creatingUser := domain.NewUser(newUser)
-	return s.repo.CreateUser(ctx, creatingUser)
+	creatingUser := domain.NewUserChat(newUser)
+	return s.repo.CreateUserChat(ctx, creatingUser)
+}
+
+// // GetUserByID ...
+func (s UserChatService) GetUserByID(ctx context.Context, id int) (domain.UserChat, error) {
+	return s.repo.GetUserByID(ctx, id)
+}
+
+// GetUserByID ...
+func (s UserChatService) GetUserByExtID(ctx context.Context, account, extId string) (domain.UserChat, error) {
+	return s.repo.GetUserByExtID(ctx, account, extId)
+}
+
+// GetUserByLogin ...
+func (s UserChatService) GetUserByLogin(ctx context.Context, account, login string) (domain.UserChat, error) {
+	return s.repo.GetUserByLogin(ctx, account, login)
+}
+
+// RegisterUser ...
+func (s UserChatService) RegisterUser(ctx context.Context, user domain.UserChat) (domain.UserChat, error) {
+	userChat, err := s.GetUserByExtID(ctx, user.Account(), user.UserExtID())
+
+	if err != nil {
+		if strings.HasSuffix(err.Error(), "no rows in result set") {
+			return s.repo.CreateUserChat(ctx, user)
+		}
+		return domain.UserChat{}, fmt.Errorf("register failure of user with ext id: %s, error: %s", user.UserExtID(), err.Error())
+	}
+	return userChat, nil
 }
 
 // UpdateUser ...
-func (s UserChatService) UpdateUser(ctx context.Context, user domain.User) (domain.User, error) {
+func (s UserChatService) UpdateUser(ctx context.Context, user domain.UserChat) (domain.UserChat, error) {
 	return s.repo.UpdateUser(ctx, user)
 }
 
@@ -63,6 +87,6 @@ func (s UserChatService) DeleteUser(ctx context.Context, id int) error {
 }
 
 // GetUsers ...
-func (s UserChatService) GetUsers(ctx context.Context, limit, offset int) ([]domain.User, error) {
+func (s UserChatService) GetUsers(ctx context.Context, limit, offset int) ([]domain.UserChat, error) {
 	return s.repo.GetUsers(ctx, limit, offset)
 }

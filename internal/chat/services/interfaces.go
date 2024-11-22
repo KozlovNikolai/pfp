@@ -9,11 +9,12 @@ import (
 
 // IUserRepository is ...
 type IUserRepository interface {
-	CreateUser(context.Context, domain.User) (domain.User, error)
-	GetUsers(context.Context, int, int) ([]domain.User, error)
-	GetUserByID(context.Context, int) (domain.User, error)
-	GetUserByLogin(context.Context, string) (domain.User, error)
-	UpdateUser(context.Context, domain.User) (domain.User, error)
+	CreateUserChat(context.Context, domain.UserChat) (domain.UserChat, error)
+	GetUsers(context.Context, int, int) ([]domain.UserChat, error)
+	GetUserByID(context.Context, int) (domain.UserChat, error)
+	GetUserByExtID(context.Context, string, string) (domain.UserChat, error)
+	GetUserByLogin(context.Context, string, string) (domain.UserChat, error)
+	UpdateUser(context.Context, domain.UserChat) (domain.UserChat, error)
 	DeleteUser(context.Context, int) error
 }
 

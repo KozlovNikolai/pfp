@@ -4,14 +4,12 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
+	"github.com/KozlovNikolai/pfp/internal/chat/constants"
 	"github.com/KozlovNikolai/pfp/internal/chat/domain"
 	"github.com/KozlovNikolai/pfp/internal/chat/repository/models"
 	"github.com/KozlovNikolai/pfp/internal/pkg/pg"
-)
-
-const (
-	failedToBeginTransaction = "failed to begin transaction: %w"
 )
 
 // UserRepo ...
@@ -26,16 +24,22 @@ func NewUserRepo(db *pg.DB) *UserRepo {
 	}
 }
 
-// CreateUser implements services.IUserRepository.
-func (u *UserRepo) CreateUser(ctx context.Context, User domain.User) (domain.User, error) {
-	dbUser := domainToUser(User)
+// CreateUserChat implements services.IUserRepository.
+func (u *UserRepo) CreateUserChat(ctx context.Context, user domain.UserChat) (domain.UserChat, error) {
+	dbUser := domainToUserChat(user)
 
-	var insertedUser models.User
+	dbUser.Login = dbUser.Email
+	dbUser.Account = constants.Account_name_magnum
+	dbUser.CreatedAt = time.Now().Unix()
+	dbUser.UpdatedAt = dbUser.CreatedAt
+	dbUser.UserType = constants.User_type
+
+	var insertedUser models.UserChat
 
 	// Начинаем транзакцию
 	tx, err := u.db.WR.Begin(ctx)
 	if err != nil {
-		return domain.User{}, fmt.Errorf(failedToBeginTransaction, err)
+		return domain.UserChat{}, fmt.Errorf(constants.FailedToBeginTransaction, err)
 	}
 	defer func() {
 		err := tx.Rollback(ctx)
@@ -44,29 +48,130 @@ func (u *UserRepo) CreateUser(ctx context.Context, User domain.User) (domain.Use
 		}
 	}()
 	// Вставка данных о пользователе и получение ID
-	err = tx.QueryRow(ctx, `
-			INSERT INTO myusers (login,password,role,token)
-			VALUES ($1, $2, $3, $4)
-			RETURNING id,login,password,role,token`,
-		dbUser.Login, dbUser.Password, dbUser.Role, dbUser.Token).
+	err = tx.QueryRow(
+		ctx,
+		`
+			INSERT INTO users (user_ext_id, login, password, account, token, name, surname, email, user_type, created_at, updated_at)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+			RETURNING id,user_ext_id, login, password, account, token, name, surname, email, user_type, created_at, updated_at`,
+		dbUser.UserExtID,
+		dbUser.Login,
+		dbUser.Password,
+		dbUser.Account,
+		dbUser.Token,
+		dbUser.Name,
+		dbUser.Surname,
+		dbUser.Email,
+		dbUser.UserType,
+		dbUser.CreatedAt,
+		dbUser.UpdatedAt,
+	).
 		Scan(
 			&insertedUser.ID,
+			&insertedUser.UserExtID,
 			&insertedUser.Login,
 			&insertedUser.Password,
-			&insertedUser.Role,
-			&insertedUser.Token)
+			&insertedUser.Account,
+			&insertedUser.Token,
+			&insertedUser.Name,
+			&insertedUser.Surname,
+			&insertedUser.Email,
+			&insertedUser.UserType,
+			&insertedUser.CreatedAt,
+			&insertedUser.UpdatedAt)
 	if err != nil {
-		return domain.User{}, fmt.Errorf("failed to insert User: %w", err)
+		return domain.UserChat{}, fmt.Errorf("failed to insert UserChat: %w", err)
 	}
 	// Фиксация транзакции
 	if err := tx.Commit(ctx); err != nil {
-		return domain.User{}, fmt.Errorf(failedToBeginTransaction, err)
+		return domain.UserChat{}, fmt.Errorf(constants.FailedToBeginTransaction, err)
+	}
+	fmt.Printf("insertedUser: %v\n", insertedUser)
+	domainUserChat := userChatToDomain(insertedUser)
+	fmt.Printf("domainUserChat: %v\n", domainUserChat)
+	return domainUserChat, nil
+}
+
+// GetUserByExtID implements services.IUserRepository.
+func (u *UserRepo) GetUserByExtID(ctx context.Context, account, extID string) (domain.UserChat, error) {
+	if extID == "" {
+		return domain.UserChat{}, fmt.Errorf("%w: ext ID", domain.ErrRequired)
+	}
+	if account == "" {
+		return domain.UserChat{}, fmt.Errorf("%w: account", domain.ErrRequired)
+	}
+	// SQL-запрос на получение данных Пользователя по extID
+	query := `
+		SELECT *
+		FROM users
+		WHERE (account=$1 AND user_ext_id=$2)
+	`
+	var userChat models.UserChat
+	// Выполняем запрос и сканируем результат в структуру User
+	err := u.db.RO.QueryRow(ctx, query, account, extID).Scan(
+		&userChat.ID,
+		&userChat.UserExtID,
+		&userChat.Login,
+		&userChat.Password,
+		&userChat.Account,
+		&userChat.Token,
+		&userChat.Name,
+		&userChat.Surname,
+		&userChat.Email,
+		&userChat.UserType,
+		&userChat.CreatedAt,
+		&userChat.UpdatedAt,
+	)
+	if err != nil {
+		return domain.UserChat{}, fmt.Errorf("failed to get UserChat by extId: %s: %w", extID, err)
 	}
 
-	domainUser := userToDomain(insertedUser)
+	domainUserChat := userChatToDomain(userChat)
 
-	return domainUser, nil
+	return domainUserChat, nil
 }
+
+// // CreateUser implements services.IUserRepository.
+// func (u *UserRepo) CreateUser(ctx context.Context, user domain.UserChat) (domain.UserChat, error) {
+// 	dbUser := domainToUserChat(user)
+
+// 	var insertedUser models.UserChat
+
+// 	// Начинаем транзакцию
+// 	tx, err := u.db.WR.Begin(ctx)
+// 	if err != nil {
+// 		return domain.UserChat{}, fmt.Errorf(failedToBeginTransaction, err)
+// 	}
+// 	defer func() {
+// 		err := tx.Rollback(ctx)
+// 		if err != nil {
+// 			log.Printf("error:%v", err)
+// 		}
+// 	}()
+// 	// Вставка данных о пользователе и получение ID
+// 	err = tx.QueryRow(ctx, `
+// 			INSERT INTO users (login,password,role,token)
+// 			VALUES ($1, $2, $3, $4)
+// 			RETURNING id,login,password,role,token`,
+// 		dbUser.Login, dbUser.Password, dbUser.Role, dbUser.Token).
+// 		Scan(
+// 			&insertedUser.ID,
+// 			&insertedUser.Login,
+// 			&insertedUser.Password,
+// 			&insertedUser.Role,
+// 			&insertedUser.Token)
+// 	if err != nil {
+// 		return domain.User{}, fmt.Errorf("failed to insert User: %w", err)
+// 	}
+// 	// Фиксация транзакции
+// 	if err := tx.Commit(ctx); err != nil {
+// 		return domain.User{}, fmt.Errorf(failedToBeginTransaction, err)
+// 	}
+
+// 	domainUser := userToDomain(insertedUser)
+
+// 	return domainUser, nil
+// }
 
 // DeleteUser implements service.IUserRepository.
 func (u *UserRepo) DeleteUser(ctx context.Context, id int) error {
@@ -76,7 +181,7 @@ func (u *UserRepo) DeleteUser(ctx context.Context, id int) error {
 	// Начинаем транзакцию
 	tx, err := u.db.WR.Begin(ctx)
 	if err != nil {
-		return fmt.Errorf(failedToBeginTransaction, err)
+		return fmt.Errorf(constants.FailedToBeginTransaction, err)
 	}
 	defer func() {
 		err := tx.Rollback(ctx)
@@ -98,7 +203,7 @@ func (u *UserRepo) DeleteUser(ctx context.Context, id int) error {
 	}
 	// Удаляем пользователя
 	_, err = tx.Exec(ctx, `
-		DELETE FROM myusers
+		DELETE FROM users
 		WHERE id = $1`, id)
 	if err != nil {
 		return fmt.Errorf("failed to delete User with id %d: %w", id, err)
@@ -111,10 +216,10 @@ func (u *UserRepo) DeleteUser(ctx context.Context, id int) error {
 }
 
 // GetUsers implements service.IUserRepository.
-func (u *UserRepo) GetUsers(ctx context.Context, limit, offset int) ([]domain.User, error) {
+func (u *UserRepo) GetUsers(ctx context.Context, limit, offset int) ([]domain.UserChat, error) {
 	query := `
 		SELECT id, login, password, role, token
-		FROM myusers
+		FROM users
 		ORDER BY id
 		LIMIT $1 OFFSET $2
 	`
@@ -125,11 +230,11 @@ func (u *UserRepo) GetUsers(ctx context.Context, limit, offset int) ([]domain.Us
 	}
 	defer rows.Close()
 	// Заполняем массив пользователей
-	var users []models.User
+	var users []models.UserChat
 	for rows.Next() {
-		var user models.User
+		var user models.UserChat
 		err := rows.Scan(
-			&user.ID, &user.Login, &user.Password, &user.Role, &user.Token)
+			&user.ID, &user.Login, &user.Password, &user.UserType, &user.Token)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan row: %w", err)
 		}
@@ -141,67 +246,91 @@ func (u *UserRepo) GetUsers(ctx context.Context, limit, offset int) ([]domain.Us
 		return nil, fmt.Errorf("error occurred during row iteration: %w", rows.Err())
 	}
 	// мапим модель в домен
-	domainUsers := make([]domain.User, len(users))
+	domainUsers := make([]domain.UserChat, len(users))
 	for i, user := range users {
-		domainUser := userToDomain(user)
+		domainUser := userChatToDomain(user)
 		domainUsers[i] = domainUser
 	}
 	return domainUsers, nil
 }
 
 // GetUserByID implements service.IUserRepository.
-func (u *UserRepo) GetUserByID(ctx context.Context, id int) (domain.User, error) {
+func (u *UserRepo) GetUserByID(ctx context.Context, id int) (domain.UserChat, error) {
 	// SQL-запрос на получение данных Пользователя по ID
 	query := `
-		SELECT id, login, password, role, token
-		FROM myusers
+		SELECT *
+		FROM users
 		WHERE id = $1
 	`
-	var user models.User
+	var user models.UserChat
 	// Выполняем запрос и сканируем результат в структуру User
 	err := u.db.RO.QueryRow(ctx, query, id).Scan(
-		&user.ID, &user.Login, &user.Password, &user.Role, &user.Token)
+		&user.ID,
+		&user.UserExtID,
+		&user.Login,
+		&user.Password,
+		&user.Account,
+		&user.Token,
+		&user.Name,
+		&user.Surname,
+		&user.Email,
+		&user.UserType,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	)
 	if err != nil {
-		return domain.User{}, fmt.Errorf("failed to get User by id: %w", err)
+		return domain.UserChat{}, fmt.Errorf("failed to get User by id: %w", err)
 	}
 
-	domainUser := userToDomain(user)
+	domainUser := userChatToDomain(user)
 	return domainUser, nil
 }
 
 // GetUserByLogin implements service.IUserRepository.
-func (u *UserRepo) GetUserByLogin(ctx context.Context, login string) (domain.User, error) {
+func (u *UserRepo) GetUserByLogin(ctx context.Context, account, login string) (domain.UserChat, error) {
 	if login == "" {
-		return domain.User{}, fmt.Errorf("%w: login", domain.ErrRequired)
+		return domain.UserChat{}, fmt.Errorf("%w: login", domain.ErrRequired)
 	}
 
 	// SQL-запрос на получение данных Пользователя по логину
 	query := `
-		SELECT id, login, password, role, token
-		FROM myusers
-		WHERE login = $1
+		SELECT *
+		FROM users
+		WHERE (account = $1 AND login = $2)
 	`
-	var user models.User
+	var user models.UserChat
 	// Выполняем запрос и сканируем результат в структуру User
-	err := u.db.RO.QueryRow(ctx, query, login).Scan(
-		&user.ID, &user.Login, &user.Password, &user.Role, &user.Token)
+	err := u.db.RO.QueryRow(ctx, query, account, login).Scan(
+		&user.ID,
+		&user.UserExtID,
+		&user.Login,
+		&user.Password,
+		&user.Account,
+		&user.Token,
+		&user.Name,
+		&user.Surname,
+		&user.Email,
+		&user.UserType,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	)
 	if err != nil {
-		return domain.User{}, fmt.Errorf("failed to get User by login: %w", err)
+		return domain.UserChat{}, fmt.Errorf("failed to get User by login: %w", err)
 	}
 
-	domainUser := userToDomain(user)
+	domainUser := userChatToDomain(user)
 
 	return domainUser, nil
 }
 
 // UpdateUser implements service.IUserRepository.
-func (u *UserRepo) UpdateUser(ctx context.Context, user domain.User) (domain.User, error) {
-	dbUser := domainToUser(user)
-	// dbUser.UpdatedAt = time.Now()
+func (u *UserRepo) UpdateUser(ctx context.Context, user domain.UserChat) (domain.UserChat, error) {
+	dbUser := domainToUserChat(user)
+	dbUser.UpdatedAt = time.Now().Unix()
 	// Начинаем транзакцию
 	tx, err := u.db.WR.Begin(ctx)
 	if err != nil {
-		return domain.User{}, fmt.Errorf("failed to begin transaction: %w", err)
+		return domain.UserChat{}, fmt.Errorf("failed to begin transaction: %w", err)
 	}
 	defer func() {
 		err := tx.Rollback(ctx)
@@ -211,30 +340,37 @@ func (u *UserRepo) UpdateUser(ctx context.Context, user domain.User) (domain.Use
 	}()
 	// SQL-запрос на обновление данных Поставщика
 	query := `
-		UPDATE myusers
-		SET login = $1, password = $2, role = $3, token = $4
-		WHERE id = $5
+		UPDATE users
+		SET user_ext_id = $1, login = $2, account = $3, token = $4, name = $5, surname = $6, email = $7, user_type = $8, updated_at = $9
+		WHERE id = $10
 		RETURNING id, login, password, role, token
 	`
-	var updatedUser models.User
+	var updatedUser models.UserChat
 
 	// Выполняем запрос и сканируем обновленный результат в структуру User
 	err = tx.QueryRow(ctx, query,
-		dbUser.Login, dbUser.Password, dbUser.Role, dbUser.Token, dbUser.ID).
-		Scan(
-			&updatedUser.ID,
+		dbUser.UserExtID, dbUser.Login, dbUser.Account, dbUser.Token, dbUser.Name, dbUser.Surname, dbUser.Email, dbUser.UserType, dbUser.UpdatedAt).
+		Scan(&updatedUser.ID,
+			&updatedUser.UserExtID,
 			&updatedUser.Login,
 			&updatedUser.Password,
-			&updatedUser.Role,
-			&updatedUser.Token)
+			&updatedUser.Account,
+			&updatedUser.Token,
+			&updatedUser.Name,
+			&updatedUser.Surname,
+			&updatedUser.Email,
+			&updatedUser.UserType,
+			&updatedUser.CreatedAt,
+			&updatedUser.UpdatedAt,
+		)
 	if err != nil {
-		return domain.User{}, fmt.Errorf("failed to update User: %w", err)
+		return domain.UserChat{}, fmt.Errorf("failed to update User: %w", err)
 	}
 	// Фиксация транзакции
 	if err := tx.Commit(ctx); err != nil {
-		return domain.User{}, fmt.Errorf("failed to commit transaction: %w", err)
+		return domain.UserChat{}, fmt.Errorf("failed to commit transaction: %w", err)
 	}
-	domainUser := userToDomain(updatedUser)
+	domainUser := userChatToDomain(updatedUser)
 
 	return domainUser, nil
 }

@@ -16,7 +16,7 @@ type IUserService struct {
 }
 
 // CreateUser provides a mock function with given fields: _a0, _a1
-func (_m *IUserService) CreateUser(_a0 context.Context, _a1 domain.User) (domain.User, error) {
+func (_m *IUserService) CreateUser(_a0 context.Context, _a1 domain.UserChat) (domain.User, error) {
 	ret := _m.Called(_a0, _a1)
 
 	if len(ret) == 0 {

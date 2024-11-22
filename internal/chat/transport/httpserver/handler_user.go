@@ -28,11 +28,12 @@ const (
 // @Router			/auth/user [get]
 func (h HTTPServer) GetUser(c *gin.Context) {
 	var userRequest UserRequest
+	accountQuery := c.Query("account")
 	idQuery := c.Query("id")
 	loginQuery := c.Query("login")
 
 	// check auth
-	userCtx, err := utils.GetDataFromContext[domain.User](c, "user")
+	userCtx, err := utils.GetDataFromContext[domain.UserChat](c, "user")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": domain.ErrNoUserInContext.Error()})
 		return
@@ -47,20 +48,20 @@ func (h HTTPServer) GetUser(c *gin.Context) {
 			return
 		}
 
-		domainUser, err := h.userService.GetUserByLogin(c, loginQuery)
+		domainUser, err := h.userChatService.GetUserByLogin(c, accountQuery, loginQuery)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{errorGetUsers: err.Error()})
 			return
 		}
 		// auth login
-		if userCtx.Login() != domainUser.Login() && userCtx.Role() != config.AdminRole {
+		if userCtx.Login() != domainUser.Login() && userCtx.UserType() != config.AdminRole {
 			c.JSON(
 				http.StatusUnauthorized,
 				gin.H{"invalid user login or role": domain.ErrAccessDenied.Error()},
 			)
 			return
 		}
-		response := toResponseUser(domainUser)
+		response := toResponseUserChat(domainUser)
 		c.JSON(http.StatusOK, response)
 		return
 	}
@@ -77,19 +78,19 @@ func (h HTTPServer) GetUser(c *gin.Context) {
 		}
 
 		// auth user id
-		if userCtx.ID() != userID && userCtx.Role() != config.AdminRole {
+		if userCtx.ID() != userID && userCtx.UserType() != config.AdminRole {
 			c.JSON(
 				http.StatusUnauthorized,
 				gin.H{"invalid user id or role": domain.ErrAccessDenied.Error()},
 			)
 			return
 		}
-		user, err := h.userService.GetUserByID(c, userID)
+		user, err := h.userChatService.GetUserByID(c, userID)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{errorGetUsers: err.Error()})
 			return
 		}
-		response := toResponseUser(user)
+		response := toResponseUserChat(user)
 		c.JSON(http.StatusOK, response)
 		return
 	}
@@ -108,13 +109,13 @@ func (h HTTPServer) GetUser(c *gin.Context) {
 // @failure			404 {string} err.Error()
 // @Router			/admin/users [get]
 func (h HTTPServer) GetUsers(c *gin.Context) {
-	userCtx, err := utils.GetDataFromContext[domain.User](c, "user")
+	userCtx, err := utils.GetDataFromContext[domain.UserChat](c, "user")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": domain.ErrNoUserInContext.Error()})
 		return
 	}
 	// check admin
-	if userCtx.Role() != config.AdminRole {
+	if userCtx.UserType() != config.AdminRole {
 		c.JSON(
 			http.StatusUnauthorized,
 			gin.H{"invalid user id or role": domain.ErrAccessDenied.Error()},
@@ -144,15 +145,15 @@ func (h HTTPServer) GetUsers(c *gin.Context) {
 		return
 	}
 
-	users, err := h.userService.GetUsers(c, limit, offset)
+	users, err := h.userChatService.GetUsers(c, limit, offset)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error get users": err.Error()})
 		return
 	}
 
-	response := make([]UserResponse, 0, len(users))
+	response := make([]UserChatResponse, 0, len(users))
 	for _, user := range users {
-		response = append(response, toResponseUser(user))
+		response = append(response, toResponseUserChat(user))
 	}
 
 	c.JSON(http.StatusOK, response)

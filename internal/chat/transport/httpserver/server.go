@@ -62,7 +62,7 @@ func NewRouter() *Router {
 	// создаем сервисы
 	stateService := services.NewStateService(stateRepo)
 	userChatService := services.NewUserChatService(userRepo)
-	userService := services.NewUserService(userRepo)
+	// userService := services.NewUserService(userRepo)
 	tokenService := services.NewTokenService(
 		userRepo,
 		config.Cfg.TokenTimeDuration,
@@ -71,7 +71,7 @@ func NewRouter() *Router {
 	// создаем http сервер
 	httpServer := NewHTTPServer(
 		userChatService,
-		userService,
+		// userService,
 		tokenService,
 		stateService,
 	)

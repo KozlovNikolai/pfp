@@ -11,7 +11,7 @@
             "request": "launch",
             "mode": "auto",
             "program":"${workspaceFolder}/cmd/chat/main.go",
-            "cwd": "/home/user/go/src/pfp"
+            "cwd": "${workspaceFolder}"
             // "program": "${fileDirname}/cmd/chat/main.go"
         }
     ]

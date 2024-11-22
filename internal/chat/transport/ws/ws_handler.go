@@ -67,7 +67,7 @@ var upgrade = websocket.Upgrader{
 
 // JoinRoom ...
 func (h *Handler) JoinRoom(c *gin.Context) {
-	user, err := utils.GetDataFromContext[domain.User](c, "user")
+	user, err := utils.GetDataFromContext[domain.UserChat](c, "user")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
