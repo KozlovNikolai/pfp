@@ -29,7 +29,6 @@ func (u *UserRepo) CreateUserChat(ctx context.Context, user domain.UserChat) (do
 	dbUser := domainToUserChat(user)
 
 	dbUser.Login = dbUser.Email
-	dbUser.Account = constants.Account_name_magnum
 	dbUser.CreatedAt = time.Now().Unix()
 	dbUser.UpdatedAt = dbUser.CreatedAt
 	dbUser.UserType = constants.User_type
@@ -131,48 +130,6 @@ func (u *UserRepo) GetUserByExtID(ctx context.Context, account, extID string) (d
 	return domainUserChat, nil
 }
 
-// // CreateUser implements services.IUserRepository.
-// func (u *UserRepo) CreateUser(ctx context.Context, user domain.UserChat) (domain.UserChat, error) {
-// 	dbUser := domainToUserChat(user)
-
-// 	var insertedUser models.UserChat
-
-// 	// Начинаем транзакцию
-// 	tx, err := u.db.WR.Begin(ctx)
-// 	if err != nil {
-// 		return domain.UserChat{}, fmt.Errorf(failedToBeginTransaction, err)
-// 	}
-// 	defer func() {
-// 		err := tx.Rollback(ctx)
-// 		if err != nil {
-// 			log.Printf("error:%v", err)
-// 		}
-// 	}()
-// 	// Вставка данных о пользователе и получение ID
-// 	err = tx.QueryRow(ctx, `
-// 			INSERT INTO users (login,password,role,token)
-// 			VALUES ($1, $2, $3, $4)
-// 			RETURNING id,login,password,role,token`,
-// 		dbUser.Login, dbUser.Password, dbUser.Role, dbUser.Token).
-// 		Scan(
-// 			&insertedUser.ID,
-// 			&insertedUser.Login,
-// 			&insertedUser.Password,
-// 			&insertedUser.Role,
-// 			&insertedUser.Token)
-// 	if err != nil {
-// 		return domain.User{}, fmt.Errorf("failed to insert User: %w", err)
-// 	}
-// 	// Фиксация транзакции
-// 	if err := tx.Commit(ctx); err != nil {
-// 		return domain.User{}, fmt.Errorf(failedToBeginTransaction, err)
-// 	}
-
-// 	domainUser := userToDomain(insertedUser)
-
-// 	return domainUser, nil
-// }
-
 // DeleteUser implements service.IUserRepository.
 func (u *UserRepo) DeleteUser(ctx context.Context, id int) error {
 	if id == 0 {
@@ -216,15 +173,16 @@ func (u *UserRepo) DeleteUser(ctx context.Context, id int) error {
 }
 
 // GetUsers implements service.IUserRepository.
-func (u *UserRepo) GetUsers(ctx context.Context, limit, offset int) ([]domain.UserChat, error) {
+func (u *UserRepo) GetUsers(ctx context.Context, account string, limit, offset int) ([]domain.UserChat, error) {
 	query := `
-		SELECT id, login, password, role, token
+		SELECT *
 		FROM users
+		WHERE account=$1
 		ORDER BY id
-		LIMIT $1 OFFSET $2
+		LIMIT $2 OFFSET $3
 	`
 	// Запрос
-	rows, err := u.db.RO.Query(ctx, query, limit, offset)
+	rows, err := u.db.RO.Query(ctx, query, account, limit, offset)
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute query: %w", err)
 	}
@@ -232,13 +190,24 @@ func (u *UserRepo) GetUsers(ctx context.Context, limit, offset int) ([]domain.Us
 	// Заполняем массив пользователей
 	var users []models.UserChat
 	for rows.Next() {
-		var user models.UserChat
+		var userChat models.UserChat
 		err := rows.Scan(
-			&user.ID, &user.Login, &user.Password, &user.UserType, &user.Token)
+			&userChat.ID,
+			&userChat.UserExtID,
+			&userChat.Login,
+			&userChat.Password,
+			&userChat.Account,
+			&userChat.Token,
+			&userChat.Name,
+			&userChat.Surname,
+			&userChat.Email,
+			&userChat.UserType,
+			&userChat.CreatedAt,
+			&userChat.UpdatedAt)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan row: %w", err)
 		}
-		users = append(users, user)
+		users = append(users, userChat)
 	}
 
 	// Проверка на ошибки, возникшие при итерации по строкам
@@ -315,7 +284,7 @@ func (u *UserRepo) GetUserByLogin(ctx context.Context, account, login string) (d
 		&user.UpdatedAt,
 	)
 	if err != nil {
-		return domain.UserChat{}, fmt.Errorf("failed to get User by login: %w", err)
+		return domain.UserChat{}, fmt.Errorf("failed to get User by account: %s, login: %s, error: %w", account, login, err)
 	}
 
 	domainUser := userChatToDomain(user)

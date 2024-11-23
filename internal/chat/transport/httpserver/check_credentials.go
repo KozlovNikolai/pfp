@@ -28,7 +28,7 @@ func (h HTTPServer) CheckAdmin() gin.HandlerFunc {
 
 		token := c.GetHeader(AuthorizationHeader)
 		token = strings.TrimPrefix(token, BearerPrefix)
-		user, err := h.tokenService.GetUser(token)
+		user, err := h.tokenService.GetUser(c, token)
 		if err != nil {
 			c.AbortWithStatusJSON(
 				http.StatusInternalServerError,
@@ -65,7 +65,7 @@ func (h HTTPServer) CheckAuthorizedUser() gin.HandlerFunc {
 		token := c.GetHeader(AuthorizationHeader)
 		fmt.Printf("token = %s\n", token)
 		token = strings.TrimPrefix(token, BearerPrefix)
-		user, err := h.tokenService.GetUser(token)
+		user, err := h.tokenService.GetUser(c, token)
 		if err != nil {
 			c.AbortWithStatusJSON(
 				http.StatusInternalServerError,

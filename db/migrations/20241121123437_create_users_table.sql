@@ -15,11 +15,14 @@ CREATE TABLE IF NOT EXISTS "users"(
     "updated_at" INTEGER NOT NULL
 );
 
-CREATE unique INDEX "users_user_ext_id_account_index"
-ON "users" ("user_ext_id", "account");
+-- CREATE unique INDEX "users_user_ext_id_account_index"
+-- ON "users" ("user_ext_id", "account");
 
-CREATE unique INDEX "users_login_account_index"
-ON "users" ("login", "account");
+-- CREATE unique INDEX "users_login_account_index"
+-- ON "users" ("login", "account");
+
+CREATE unique INDEX "users_login_account_user_ext_id_index"
+ON "users" ("login", "account", "user_ext_id");
 -- +goose StatementEnd
 
 -- +goose Down

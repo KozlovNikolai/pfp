@@ -115,7 +115,7 @@ func NewRouter() *Router {
 	// доступ для авторизации по токену спутника
 	authSputnik := server.router.Group("/sputnik/")
 	authSputnik.Use(middlewares.AuthSputnikMiddleware())
-	authSputnik.GET("login", httpServer.LoginUserByToken)
+	authSputnik.GET("login", httpServer.LoginUserByTokenSputnik)
 
 	// доступ для любых зарегистрированных пользователей
 	authorized := server.router.Group("/auth/")

@@ -10,7 +10,7 @@ import (
 // IUserRepository is ...
 type IUserRepository interface {
 	CreateUserChat(context.Context, domain.UserChat) (domain.UserChat, error)
-	GetUsers(context.Context, int, int) ([]domain.UserChat, error)
+	GetUsers(context.Context, string, int, int) ([]domain.UserChat, error)
 	GetUserByID(context.Context, int) (domain.UserChat, error)
 	GetUserByExtID(context.Context, string, string) (domain.UserChat, error)
 	GetUserByLogin(context.Context, string, string) (domain.UserChat, error)
@@ -20,4 +20,5 @@ type IUserRepository interface {
 
 type IStateRepository interface {
 	GetState(context.Context, domain.UserChat) (domain.State, error)
+	SetState(context.Context, domain.UserChat) (domain.State, error)
 }

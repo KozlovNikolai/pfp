@@ -2,14 +2,12 @@
 package httpserver
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/KozlovNikolai/pfp/internal/chat/domain"
 	"github.com/KozlovNikolai/pfp/internal/chat/transport/httpserver/middlewares"
 	"github.com/KozlovNikolai/pfp/internal/pkg/utils"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 const (
@@ -80,16 +78,21 @@ func (h HTTPServer) SignIn(c *gin.Context) {
 		return
 	}
 
-	token, err := h.tokenService.GenerateToken(c, userRequest.Account, userRequest.Login, userRequest.Password)
+	userChat, token, err := h.tokenService.GenerateToken(c, userRequest.Account, userRequest.Login, userRequest.Password)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error-generated-token": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"token": token})
 
+	pubsub, err := h.tokenService.GetPubsubToken(c, userChat)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error-generated-pubsub": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"pubsub": pubsub, "token": token, "user": toResponseUserChat(userChat)})
 }
 
-// LoginUserByToken is ...
+// LoginUserByTokenSputnik is ...
 // LoginUserByTokenTags		godoc
 // @Summary				Авторизоваться по токену.
 // @Description			Logging in as an existing user from remote Auth service.
@@ -99,31 +102,35 @@ func (h HTTPServer) SignIn(c *gin.Context) {
 // @failure				400 {string} err.Error()
 // @failure				500 {string} err.Error()
 // @Router				/auth/login [get]
-func (h HTTPServer) LoginUserByToken(c *gin.Context) {
+func (h HTTPServer) LoginUserByTokenSputnik(c *gin.Context) {
 
 	userSputnik, err := utils.GetDataFromContext[middlewares.ReceiveUserSputnik](c, "user_sputnik")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": domain.ErrNoUserInContext.Error()})
 		return
 	}
+	domainUserChat := toDomainUserFromUserSputnik(userSputnik)
 
-	tokenWS := uuid.New()
-
-	domainUserChat := toDomainUserSputnik(userSputnik)
-
-	registeredDomainUserChat, err := h.userChatService.RegisterUser(c, domainUserChat)
+	registeredUser, err := h.userChatService.RegisterUser(c, domainUserChat)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error service User": err.Error()})
 		return
 	}
 
-	response := toResponseUserChat(registeredDomainUserChat)
+	token, err := h.tokenService.GenerateTokenForRegisteredUsers(c, registeredUser)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error-generated-token": err.Error()})
+		return
+	}
 
-	fmt.Println()
-	fmt.Printf("Result: %+v\n", userSputnik)
-	fmt.Println()
+	pubsub, err := h.tokenService.GetPubsubToken(c, registeredUser)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error-generated-pubsub": err.Error()})
+		return
+	}
 
-	c.JSON(http.StatusOK, gin.H{"websocket token": tokenWS, "user chat": response})
+	response := toResponseUserChat(registeredUser)
+	c.JSON(http.StatusOK, gin.H{"pubsub": pubsub, "token": token, "user chat": response})
 }
 
 // SignOut ...

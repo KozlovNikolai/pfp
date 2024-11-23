@@ -26,26 +26,32 @@ func NewUserChatService(repo IUserRepository) UserChatService {
 func (s UserChatService) CreateUser(ctx context.Context, user domain.UserChat) (domain.UserChat, error) {
 	creatingTime := time.Now().Unix()
 
-	password, err := utils.HashPassword(user.Password())
+	userChat, err := s.GetUserByLogin(ctx, user.Account(), user.Login())
 	if err != nil {
-		return domain.UserChat{}, fmt.Errorf("error-hashing-password: %v", err.Error())
-	}
+		if strings.HasSuffix(err.Error(), "no rows in result set") {
+			password, err := utils.HashPassword(user.Password())
+			if err != nil {
+				return domain.UserChat{}, fmt.Errorf("error-hashing-password: %v", err.Error())
+			}
 
-	newUser := domain.NewUserChatData{
-		UserExtID: user.UserExtID(),
-		Login:     user.Login(),
-		Password:  password,
-		Account:   user.Account(),
-		Token:     user.Token(),
-		Name:      user.Name(),
-		Surname:   user.Surname(),
-		Email:     user.Email(),
-		UserType:  user.UserType(),
-		CreatedAt: creatingTime,
-		UpdatedAt: creatingTime,
+			newUser := domain.NewUserChatData{
+				UserExtID: user.UserExtID(),
+				Login:     user.Login(),
+				Password:  password,
+				Account:   user.Account(),
+				Token:     user.Token(),
+				Name:      user.Name(),
+				Surname:   user.Surname(),
+				Email:     user.Email(),
+				UserType:  user.UserType(),
+				CreatedAt: creatingTime,
+				UpdatedAt: creatingTime,
+			}
+			creatingUser := domain.NewUserChat(newUser)
+			return s.repo.CreateUserChat(ctx, creatingUser)
+		}
 	}
-	creatingUser := domain.NewUserChat(newUser)
-	return s.repo.CreateUserChat(ctx, creatingUser)
+	return domain.UserChat{}, fmt.Errorf("user with account: %s and login: %s already exists", userChat.Account(), userChat.Login())
 }
 
 // // GetUserByID ...
@@ -87,6 +93,8 @@ func (s UserChatService) DeleteUser(ctx context.Context, id int) error {
 }
 
 // GetUsers ...
-func (s UserChatService) GetUsers(ctx context.Context, limit, offset int) ([]domain.UserChat, error) {
-	return s.repo.GetUsers(ctx, limit, offset)
+func (s UserChatService) GetUsers(ctx context.Context, user domain.UserChat, limit, offset int) ([]domain.UserChat, error) {
+	account := user.Account()
+	fmt.Println(account, limit, offset)
+	return s.repo.GetUsers(ctx, account, limit, offset)
 }

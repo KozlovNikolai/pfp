@@ -12,6 +12,11 @@ type StateRepo struct {
 	mutex sync.RWMutex
 }
 
+// SetState implements services.IStateRepository.
+func (s *StateRepo) SetState(context.Context, domain.UserChat) (domain.State, error) {
+	panic("unimplemented")
+}
+
 func NewStateRepo(db *stateStore) *StateRepo {
 	return &StateRepo{
 		db: db,

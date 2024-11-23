@@ -8,17 +8,6 @@ import (
 	"github.com/KozlovNikolai/pfp/internal/chat/transport/httpserver/middlewares"
 )
 
-// #########################################################
-// func toResponseUser(user domain.User) UserResponse {
-// 	return UserResponse{
-// 		ID:       user.ID(),
-// 		Login:    user.Login(),
-// 		Password: user.Password(),
-// 		Role:     user.Role(),
-// 		Token:    user.Token(),
-// 	}
-// }
-
 func toDomainUserChat(user UserRequest) domain.UserChat {
 	return domain.NewUserChat(domain.NewUserChatData{
 		UserExtID: "0",
@@ -26,8 +15,8 @@ func toDomainUserChat(user UserRequest) domain.UserChat {
 		Password:  user.Password,
 		Account:   user.Account,
 		Token:     "",
-		Name:      "",
-		Surname:   "",
+		Name:      user.Name,
+		Surname:   user.Surname,
 		Email:     user.Login,
 		UserType:  "regular",
 		CreatedAt: 0,
@@ -42,7 +31,7 @@ func toResponseUserChat(user domain.UserChat) UserChatResponse {
 		ID:        user.ID(),
 		UserExtID: user.UserExtID(),
 		Login:     user.Login(),
-		Password:  user.Password(),
+		// Password:  user.Password(),
 		Account:   user.Account(),
 		Token:     user.Token(),
 		Name:      user.Name(),
@@ -54,7 +43,7 @@ func toResponseUserChat(user domain.UserChat) UserChatResponse {
 	}
 }
 
-func toDomainUserSputnik(user middlewares.ReceiveUserSputnik) domain.UserChat {
+func toDomainUserFromUserSputnik(user middlewares.ReceiveUserSputnik) domain.UserChat {
 	return domain.NewUserChat(domain.NewUserChatData{
 		UserExtID: strconv.Itoa(user.Payload.UserID),
 		Login:     user.Payload.Email,

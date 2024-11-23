@@ -36,21 +36,21 @@ func NewTokenService(
 // UserClaims ...
 type UserClaims struct {
 	AuthID       int    `json:"auth_id"`
+	AuthAccount  string `json:"account"`
 	AuthLogin    string `json:"auth_login"`
 	AuthUserType string `json:"auth_user_type"`
 	jwt.StandardClaims
 }
 
 // GenerateToken generates a token
-// func (s TokenService) GenerateToken(user domain.User) (string, error) {
-func (s TokenService) GenerateToken(ctx context.Context, account, login, password string) (string, error) {
+func (s TokenService) GenerateToken(ctx context.Context, account, login, password string) (domain.UserChat, string, error) {
 	domainUserChat, err := s.repo.GetUserByLogin(ctx, account, login)
 	if err != nil {
-		return "", fmt.Errorf("invaldRequest: %v", err.Error())
+		return domain.UserChat{}, "", fmt.Errorf("invaldRequest: %v", err.Error())
 	}
 
 	if !utils.CheckPasswordHash(password, domainUserChat.Password()) {
-		return "", fmt.Errorf("error: invalid-password")
+		return domain.UserChat{}, "", fmt.Errorf("error: invalid-password")
 	}
 	fmt.Printf("func GenerateToken: domainUser: %+v\n", domainUserChat)
 	payload := UserClaims{
@@ -68,14 +68,15 @@ func (s TokenService) GenerateToken(ctx context.Context, account, login, passwor
 
 	t, err := token.SignedString(jwtSecretKey)
 	if err != nil {
-		return "", fmt.Errorf("failed to sign token: %w", err)
+		return domain.UserChat{}, "", fmt.Errorf("failed to sign token: %w", err)
 	}
 
-	return t, nil
+	return domainUserChat, t, nil
 }
 
 // GetUser ...
-func (s TokenService) GetUser(token string) (domain.UserChat, error) {
+func (s TokenService) GetUser(ctx context.Context, token string) (domain.UserChat, error) {
+	_ = ctx
 	var userClaims UserClaims
 	t, err := jwt.ParseWithClaims(token, &userClaims, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -96,7 +97,32 @@ func (s TokenService) GetUser(token string) (domain.UserChat, error) {
 func userClaimsToDomainUser(claims UserClaims) domain.UserChat {
 	return domain.NewUserChat(domain.NewUserChatData{
 		ID:       claims.AuthID,
+		Account:  claims.AuthAccount,
 		Login:    claims.AuthLogin,
 		UserType: claims.AuthUserType,
 	})
+}
+
+func (s TokenService) GenerateTokenForRegisteredUsers(ctx context.Context, user domain.UserChat) (string, error) {
+
+	payload := UserClaims{
+		AuthID:       user.ID(),
+		AuthAccount:  user.Account(),
+		AuthLogin:    user.Login(),
+		AuthUserType: user.UserType(),
+		StandardClaims: jwt.StandardClaims{
+			IssuedAt: time.Now().Unix(),
+			// ExpiresAt: time.Now().Add(time.Minute * 15).Unix(),
+			ExpiresAt: time.Now().Add(config.Cfg.TokenTimeDuration).Unix(),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
+
+	t, err := token.SignedString(jwtSecretKey)
+	if err != nil {
+		return "", fmt.Errorf("failed to sign token: %w", err)
+	}
+
+	return t, nil
 }
