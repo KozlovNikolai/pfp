@@ -13,7 +13,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"login\": \"cmd@cmd.bk\",\n  \"password\": \"123456\"\n}",
+					"raw": "{\n  \"account\":\"email\",\n  \"login\": \"cmd@cmd.bk\",\n  \"password\": \"123456\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -54,7 +54,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"login\": \"cmd@cmd.ru\",\n  \"password\": \"123456\"\n}",
+					"raw": "{\n  \"account\":\"email\",\n  \"login\": \"cmd@cmd.bk\",\n  \"password\": \"123456\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -128,7 +128,7 @@
 			"response": []
 		},
 		{
-			"name": "/auth/login",
+			"name": "/sputnik/login Коля",
 			"event": [
 				{
 					"listen": "test",
@@ -166,14 +166,67 @@
 					}
 				],
 				"url": {
-					"raw": "https://localhost:8443/auth/login",
+					"raw": "https://localhost:8443/sputnik/login",
 					"protocol": "https",
 					"host": [
 						"localhost"
 					],
 					"port": "8443",
 					"path": [
-						"auth",
+						"sputnik",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/sputnik/login Паша",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJleHAiOjE3MzM5MDI2NTgsImp0aSI6ImU3YTM2YjU2LWI4NDMtNGVmNi1hMGI3LThlMjQzZmQxZWZhYSJ9.MArF0EBOZ0L2pWqkWErqX7t-XNG8tZ5OMr7Q19AcUQ4",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Application",
+						"value": "Sputnik51",
+						"type": "text"
+					},
+					{
+						"key": "user-id",
+						"value": "1234560",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://localhost:8443/sputnik/login",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "8443",
+					"path": [
+						"sputnik",
 						"login"
 					]
 				}
