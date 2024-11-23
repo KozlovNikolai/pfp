@@ -1,7 +1,9 @@
 package domain
 
+import "time"
+
 // User is a domain User
-type UserChat struct {
+type User struct {
 	id        int
 	userExtID string
 	login     string
@@ -17,7 +19,7 @@ type UserChat struct {
 }
 
 // NewUserData is a domain User
-type NewUserChatData struct {
+type NewUserData struct {
 	ID        int    `json:"id" db:"id"`
 	UserExtID string `json:"user_ext_id" db:"user_ext_id"`
 	Login     string `json:"login" db:"login"`
@@ -33,8 +35,9 @@ type NewUserChatData struct {
 }
 
 // NewUser ...
-func NewUserChat(data NewUserChatData) UserChat {
-	return UserChat{
+func NewUser(data NewUserData) User {
+	createdTime := time.Now().Unix()
+	return User{
 		id:        data.ID,
 		userExtID: data.UserExtID,
 		login:     data.Login,
@@ -45,60 +48,60 @@ func NewUserChat(data NewUserChatData) UserChat {
 		surname:   data.Surname,
 		email:     data.Email,
 		userType:  data.UserType,
-		createdAt: data.CreatedAt,
-		updatedAt: data.UpdatedAt,
+		createdAt: createdTime,
+		updatedAt: createdTime,
 	}
 }
 
 // ID ...
-func (u UserChat) ID() int {
+func (u User) ID() int {
 	return u.id
 }
 
 // Login ...
-func (u UserChat) UserExtID() string {
+func (u User) UserExtID() string {
 	return u.userExtID
 }
 
-func (u UserChat) Login() string {
+func (u User) Login() string {
 	return u.login
 }
-func (u UserChat) Password() string {
+func (u User) Password() string {
 	return u.password
 }
-func (u UserChat) Account() string {
+func (u User) Account() string {
 	return u.account
 }
-func (u UserChat) Token() string {
+func (u User) Token() string {
 	return u.token
 }
 
 // Password ...
-func (u UserChat) Name() string {
+func (u User) Name() string {
 	return u.name
 }
 
 // Role ...
-func (u UserChat) Surname() string {
+func (u User) Surname() string {
 	return u.surname
 }
 
 // Token ...
-func (u UserChat) Email() string {
+func (u User) Email() string {
 	return u.email
 }
 
 // Token ...
-func (u UserChat) UserType() string {
+func (u User) UserType() string {
 	return u.userType
 }
 
 // CreratedAt ...
-func (u UserChat) CreatedAt() int64 {
+func (u User) CreatedAt() int64 {
 	return u.createdAt
 }
 
 // UpdatedAt ...
-func (u UserChat) UpdatedAt() int64 {
+func (u User) UpdatedAt() int64 {
 	return u.updatedAt
 }

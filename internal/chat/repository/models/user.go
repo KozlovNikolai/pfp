@@ -1,7 +1,7 @@
 // Package models ...
 package models
 
-type UserChat struct {
+type User struct {
 	ID        int
 	UserExtID string
 	Login     string

@@ -7,8 +7,8 @@ CREATE TABLE IF NOT EXISTS "chat_members"(
     "role" TEXT,
     "last_read_msg_id" INTEGER,
     "notifications" BOOLEAN,
-    "created_at" TIMESTAMP NOT NULL,
-    "updated_at" TIMESTAMP NOT NULL
+    "created_at" INTEGER NOT NULL,
+    "updated_at" INTEGER NOT NULL
 );
 
 ALTER TABLE "chat_members"

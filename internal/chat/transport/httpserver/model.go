@@ -1,6 +1,7 @@
 package httpserver
 
 import (
+	"github.com/KozlovNikolai/pfp/internal/chat/domain"
 	"github.com/go-playground/validator/v10"
 )
 
@@ -19,7 +20,7 @@ func (u *UserRequest) Validate() error {
 	return validate.Struct(u)
 }
 
-type UserChatResponse struct {
+type UserResponse struct {
 	ID        int    `json:"id" db:"id"`
 	UserExtID string `json:"user_ext_id" db:"user_ext_id"`
 	Login     string `json:"login" db:"login"`
@@ -32,4 +33,26 @@ type UserChatResponse struct {
 	UserType  string `json:"type" db:"type"`
 	CreatedAt int64  `json:"created_at" db:"created_at"`
 	UpdatedAt int64  `json:"updated_at" db:"updated_at"`
+}
+
+type ChatCreateRequest struct {
+	OwnerID  int
+	Name     string `json:"name" db:"name" validate:"required"`
+	ChatType string `json:"chat_type" db:"chat_type" validate:"required"`
+}
+
+func (c *ChatCreateRequest) Validate() error {
+	validate := validator.New(validator.WithRequiredStructEnabled())
+	return validate.Struct(c)
+}
+
+type ChatResponse struct {
+	Id            int
+	Name          string
+	OwnerID       int
+	ChatType      string
+	LastChatMsgID uint64
+	Contacts      []domain.Contact
+	CreatedAt     int64
+	UpdatedAt     int64
 }

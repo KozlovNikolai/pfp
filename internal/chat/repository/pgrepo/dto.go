@@ -5,8 +5,8 @@ import (
 	"github.com/KozlovNikolai/pfp/internal/chat/repository/models"
 )
 
-func domainToUserChat(user domain.UserChat) models.UserChat {
-	return models.UserChat{
+func domainToUser(user domain.User) models.User {
+	return models.User{
 		ID:        user.ID(),
 		UserExtID: user.UserExtID(),
 		Login:     user.Login(),
@@ -22,8 +22,8 @@ func domainToUserChat(user domain.UserChat) models.UserChat {
 	}
 }
 
-func userChatToDomain(user models.UserChat) domain.UserChat {
-	return domain.NewUserChat(domain.NewUserChatData{
+func userToDomain(user models.User) domain.User {
+	return domain.NewUser(domain.NewUserData{
 		ID:        user.ID,
 		UserExtID: user.UserExtID,
 		Login:     user.Login,
@@ -36,5 +36,29 @@ func userChatToDomain(user models.UserChat) domain.UserChat {
 		UserType:  user.UserType,
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,
+	})
+}
+
+func domainToChat(chat domain.Chat) models.Chat {
+	return models.Chat{
+		Id:            chat.ID(),
+		Name:          chat.Name(),
+		OwnerID:       chat.OwnerID(),
+		ChatType:      chat.ChatType(),
+		LastChatMsgID: chat.LastMsgID(),
+		Contacts:      chat.Contacts(),
+		CreatedAt:     chat.CreatedAt(),
+		UpdatedAt:     chat.UpdatedAt(),
+	}
+}
+
+func chatToDomain(chat models.Chat) domain.Chat {
+	return domain.NewChat(domain.NewChatData{
+		ID:            chat.Id,
+		Name:          chat.Name,
+		OwnerID:       chat.OwnerID,
+		ChatType:      chat.ChatType,
+		LastChatMsgID: chat.LastChatMsgID,
+		Contacts:      chat.Contacts,
 	})
 }

@@ -2,23 +2,23 @@ package httpserver
 
 // HTTPServer is a HTTP server for ports
 type HTTPServer struct {
-	userChatService IUserChatService
-	// userService     IUserService
+	userService  IUserService
 	tokenService ITokenService
 	stateService IStateService
+	chatService  IChatService
 }
 
 // NewHTTPServer creates a new HTTP server for ports
 func NewHTTPServer(
-	userChatService IUserChatService,
-	// userService IUserService,
+	userService IUserService,
+	chatService IChatService,
 	tokenService ITokenService,
 	stateService IStateService,
 ) HTTPServer {
 	return HTTPServer{
-		userChatService: userChatService,
-		// userService:     userService,
+		userService:  userService,
 		tokenService: tokenService,
 		stateService: stateService,
+		chatService:  chatService,
 	}
 }

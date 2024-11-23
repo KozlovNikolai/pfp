@@ -7,23 +7,23 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-// Client ...
-type Client struct {
+// Subscriber ...
+type Subscriber struct {
 	Conn     *websocket.Conn
 	Message  chan *Message
 	ID       string `json:"id"`
-	RoomID   string `json:"room_id"`
+	ChatID   string `json:"chat_id"`
 	Username string `json:"username"`
 }
 
 // Message ...
 type Message struct {
 	Content  string `json:"content"`
-	RoomID   string `json:"room_id"`
+	ChatID   string `json:"chat_id"`
 	Username string `json:"username"`
 }
 
-func (c *Client) writeMessage() {
+func (c *Subscriber) writeMessage() {
 	defer func() {
 		c.Conn.Close()
 	}()
@@ -39,7 +39,7 @@ func (c *Client) writeMessage() {
 	}
 }
 
-func (c *Client) readMessage(hub *Hub) {
+func (c *Subscriber) readMessage(hub *Hub) {
 	defer func() {
 		hub.Unregister <- c
 		c.Conn.Close()
@@ -58,7 +58,7 @@ func (c *Client) readMessage(hub *Hub) {
 		}
 		msg := &Message{
 			Content:  string(message),
-			RoomID:   c.RoomID,
+			ChatID:   c.ChatID,
 			Username: c.Username,
 		}
 		hub.Broadcast <- msg

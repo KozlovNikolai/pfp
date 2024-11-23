@@ -41,7 +41,7 @@ func NewRouter() *Router {
 	}
 
 	var userRepo services.IUserRepository
-
+	var chatRepo services.IChatRepository
 	// Выбор репозитория
 	switch config.Cfg.RepoType {
 	case "postgres":
@@ -50,6 +50,7 @@ func NewRouter() *Router {
 			logger.Fatal("pg.Dial failed: %w", zap.Error(err))
 		}
 		userRepo = pgrepo.NewUserRepo(pgDB)
+		chatRepo = pgrepo.NewChatRepo(pgDB)
 	default:
 		logger.Fatal("Invalid repository type")
 	}
@@ -60,8 +61,9 @@ func NewRouter() *Router {
 	stateRepo = staterepo.NewStateRepo(stateDB)
 
 	// создаем сервисы
+	chatService := services.NewChatService(chatRepo)
 	stateService := services.NewStateService(stateRepo)
-	userChatService := services.NewUserChatService(userRepo)
+	userService := services.NewUserService(userRepo)
 	// userService := services.NewUserService(userRepo)
 	tokenService := services.NewTokenService(
 		userRepo,
@@ -70,8 +72,8 @@ func NewRouter() *Router {
 
 	// создаем http сервер
 	httpServer := NewHTTPServer(
-		userChatService,
-		// userService,
+		userService,
+		chatService,
 		tokenService,
 		stateService,
 	)
@@ -124,10 +126,11 @@ func NewRouter() *Router {
 	authorized.GET("signout", httpServer.SignOut)
 
 	// websocket routes
-	authorized.POST("/ws/createRoom", wsHandler.CreateRoom)
-	authorized.GET("/ws/getRooms", wsHandler.GetRooms)
-	authorized.GET("/ws/getClients/:roomID", wsHandler.GetClients)
-	authorized.GET("/ws/joinRoom/:roomID", wsHandler.JoinRoom)
+	authorized.POST("/createChat", httpServer.CreateChat)
+	authorized.GET("/getChats", wsHandler.GetChats)
+	authorized.GET("/getClients/:chatID", wsHandler.GetClients)
+	authorized.GET("/joinChat/:chatID", wsHandler.JoinChat)
+	authorized.GET("/subscribe", wsHandler.Subscribe)
 
 	return server
 }

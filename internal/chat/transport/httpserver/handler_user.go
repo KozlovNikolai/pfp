@@ -34,7 +34,7 @@ func (h HTTPServer) GetUser(c *gin.Context) {
 	loginQuery := c.Query("login")
 
 	// check auth
-	userCtx, err := utils.GetDataFromContext[domain.UserChat](c, "user")
+	userCtx, err := utils.GetDataFromContext[domain.User](c, "user")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": domain.ErrNoUserInContext.Error()})
 		return
@@ -49,7 +49,7 @@ func (h HTTPServer) GetUser(c *gin.Context) {
 			return
 		}
 
-		domainUser, err := h.userChatService.GetUserByLogin(c, accountQuery, loginQuery)
+		domainUser, err := h.userService.GetUserByLogin(c, accountQuery, loginQuery)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{errorGetUsers: err.Error()})
 			return
@@ -62,7 +62,7 @@ func (h HTTPServer) GetUser(c *gin.Context) {
 			)
 			return
 		}
-		response := toResponseUserChat(domainUser)
+		response := toResponseUser(domainUser)
 		c.JSON(http.StatusOK, response)
 		return
 	}
@@ -86,12 +86,12 @@ func (h HTTPServer) GetUser(c *gin.Context) {
 			)
 			return
 		}
-		user, err := h.userChatService.GetUserByID(c, userID)
+		user, err := h.userService.GetUserByID(c, userID)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{errorGetUsers: err.Error()})
 			return
 		}
-		response := toResponseUserChat(user)
+		response := toResponseUser(user)
 		c.JSON(http.StatusOK, response)
 		return
 	}
@@ -110,12 +110,12 @@ func (h HTTPServer) GetUser(c *gin.Context) {
 // @failure			404 {string} err.Error()
 // @Router			/admin/users [get]
 func (h HTTPServer) GetUsers(c *gin.Context) {
-	userCtx, err := utils.GetDataFromContext[domain.UserChat](c, "user")
+	userCtx, err := utils.GetDataFromContext[domain.User](c, "user")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": domain.ErrNoUserInContext.Error()})
 		return
 	}
-	userCtx, err = h.userChatService.GetUserByID(c, userCtx.ID())
+	userCtx, err = h.userService.GetUserByID(c, userCtx.ID())
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": domain.ErrNotFound.Error()})
 		return
@@ -152,15 +152,15 @@ func (h HTTPServer) GetUsers(c *gin.Context) {
 		return
 	}
 
-	users, err := h.userChatService.GetUsers(c, userCtx, limit, offset)
+	users, err := h.userService.GetUsers(c, userCtx, limit, offset)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error get users": err.Error()})
 		return
 	}
 
-	response := make([]UserChatResponse, 0, len(users))
+	response := make([]UserResponse, 0, len(users))
 	for _, user := range users {
-		response = append(response, toResponseUserChat(user))
+		response = append(response, toResponseUser(user))
 	}
 
 	c.JSON(http.StatusOK, response)

@@ -44,14 +44,14 @@ func (h HTTPServer) SignUp(c *gin.Context) {
 	// 	return
 	// }
 
-	domainUser := toDomainUserChat(userRequest)
+	domainUser := toDomainUser(userRequest)
 
-	createdUser, err := h.userChatService.CreateUser(c, domainUser)
+	createdUser, err := h.userService.CreateUser(c, domainUser)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error service User": err.Error()})
 		return
 	}
-	response := toResponseUserChat(createdUser)
+	response := toResponseUser(createdUser)
 	c.JSON(http.StatusCreated, response)
 }
 
@@ -78,18 +78,18 @@ func (h HTTPServer) SignIn(c *gin.Context) {
 		return
 	}
 
-	userChat, token, err := h.tokenService.GenerateToken(c, userRequest.Account, userRequest.Login, userRequest.Password)
+	user, token, err := h.tokenService.GenerateToken(c, userRequest.Account, userRequest.Login, userRequest.Password)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error-generated-token": err.Error()})
 		return
 	}
 
-	pubsub, err := h.tokenService.GetPubsubToken(c, userChat)
+	pubsub, err := h.tokenService.GetPubsubToken(c, user)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error-generated-pubsub": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"pubsub": pubsub, "token": token, "user": toResponseUserChat(userChat)})
+	c.JSON(http.StatusOK, gin.H{"pubsub": pubsub, "token": token, "user": toResponseUser(user)})
 }
 
 // LoginUserByTokenSputnik is ...
@@ -109,9 +109,9 @@ func (h HTTPServer) LoginUserByTokenSputnik(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": domain.ErrNoUserInContext.Error()})
 		return
 	}
-	domainUserChat := toDomainUserFromUserSputnik(userSputnik)
+	domainUser := toDomainUserFromUserSputnik(userSputnik)
 
-	registeredUser, err := h.userChatService.RegisterUser(c, domainUserChat)
+	registeredUser, err := h.userService.RegisterUser(c, domainUser)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error service User": err.Error()})
 		return
@@ -129,7 +129,7 @@ func (h HTTPServer) LoginUserByTokenSputnik(c *gin.Context) {
 		return
 	}
 
-	response := toResponseUserChat(registeredUser)
+	response := toResponseUser(registeredUser)
 	c.JSON(http.StatusOK, gin.H{"pubsub": pubsub, "token": token, "user chat": response})
 }
 

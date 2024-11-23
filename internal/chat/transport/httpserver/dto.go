@@ -8,8 +8,8 @@ import (
 	"github.com/KozlovNikolai/pfp/internal/chat/transport/httpserver/middlewares"
 )
 
-func toDomainUserChat(user UserRequest) domain.UserChat {
-	return domain.NewUserChat(domain.NewUserChatData{
+func toDomainUser(user UserRequest) domain.User {
+	return domain.NewUser(domain.NewUserData{
 		UserExtID: "0",
 		Login:     user.Login,
 		Password:  user.Password,
@@ -26,8 +26,8 @@ func toDomainUserChat(user UserRequest) domain.UserChat {
 
 // #########################################################
 
-func toResponseUserChat(user domain.UserChat) UserChatResponse {
-	return UserChatResponse{
+func toResponseUser(user domain.User) UserResponse {
+	return UserResponse{
 		ID:        user.ID(),
 		UserExtID: user.UserExtID(),
 		Login:     user.Login(),
@@ -43,8 +43,8 @@ func toResponseUserChat(user domain.UserChat) UserChatResponse {
 	}
 }
 
-func toDomainUserFromUserSputnik(user middlewares.ReceiveUserSputnik) domain.UserChat {
-	return domain.NewUserChat(domain.NewUserChatData{
+func toDomainUserFromUserSputnik(user middlewares.ReceiveUserSputnik) domain.User {
+	return domain.NewUser(domain.NewUserData{
 		UserExtID: strconv.Itoa(user.Payload.UserID),
 		Login:     user.Payload.Email,
 		Password:  "",
@@ -57,4 +57,26 @@ func toDomainUserFromUserSputnik(user middlewares.ReceiveUserSputnik) domain.Use
 		CreatedAt: 0,
 		UpdatedAt: 0,
 	})
+}
+
+func toDomainChat(chat ChatCreateRequest) domain.Chat {
+	return domain.NewChat(domain.NewChatData{
+		OwnerID:       chat.OwnerID,
+		Name:          chat.Name,
+		ChatType:      chat.ChatType,
+		LastChatMsgID: 0,
+	})
+}
+
+func toResponseChat(chat domain.Chat) ChatResponse {
+	return ChatResponse{
+		Id:            chat.ID(),
+		Name:          chat.Name(),
+		OwnerID:       chat.OwnerID(),
+		ChatType:      chat.ChatType(),
+		LastChatMsgID: chat.LastMsgID(),
+		Contacts:      chat.Contacts(),
+		CreatedAt:     chat.CreatedAt(),
+		UpdatedAt:     chat.UpdatedAt(),
+	}
 }

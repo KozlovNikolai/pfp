@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/KozlovNikolai/pfp/internal/chat/constants"
 	"github.com/KozlovNikolai/pfp/internal/chat/domain"
 	"github.com/KozlovNikolai/pfp/internal/pkg/utils"
 	"github.com/gin-gonic/gin"
@@ -23,39 +24,39 @@ func NewHandler(hub *Hub) *Handler {
 	}
 }
 
-// CreateRoomReq ...
-type CreateRoomReq struct {
+// CreateChatRequest ...
+type CreateChatRequest struct {
 	ID   string `json:"id" example:"1"`
-	Name string `json:"name" example:"Room1"`
+	Name string `json:"name" example:"Chat1"`
 }
 
-// CreateRoom is ...
-// CreateRoomTags		godoc
+// CreateChat is ...
+// CreateChatTags		godoc
 // @Summary				Создать комнату.
-// @Description			Create new room in the system.
-// @Param				CreateRoomReq body CreateRoomReq true "Create room."
+// @Description			Create new chat in the system.
+// @Param				CreateChatReq body CreateChatReq true "Create chat."
 // @Produce				application/json
-// @Tags				Room
+// @Tags				Chat
 // @Security			BearerAuth
-// @Success				201 {object} CreateRoomReq
+// @Success				201 {object} CreateChatReq
 // @failure				400 {string} err.Error()
-// @failure				500 {string} string "error-to-create-room"
-// @Router				/auth/ws/createRoom [post]
-func (h *Handler) CreateRoom(c *gin.Context) {
-	var req CreateRoomReq
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+// @failure				500 {string} string "error-to-create-chat"
+// @Router				/auth/ws/createChat [post]
+// func (h *Handler) CreateChat(c *gin.Context) {
+// 	var req CreateChatRequest
+// 	if err := c.ShouldBindJSON(&req); err != nil {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+// 		return
+// 	}
 
-	h.hub.Rooms[req.ID] = &Room{
-		ID:      req.ID,
-		Name:    req.Name,
-		Clients: make(map[string]*Client),
-	}
+// 	h.hub.Chats[req.ID] = &Chat{
+// 		ID:      req.ID,
+// 		Name:    req.Name,
+// 		Clients: make(map[string]*Subscriber),
+// 	}
 
-	c.JSON(http.StatusCreated, req)
-}
+// 	c.JSON(http.StatusCreated, req)
+// }
 
 var upgrade = websocket.Upgrader{
 	ReadBufferSize:  1024,
@@ -65,9 +66,9 @@ var upgrade = websocket.Upgrader{
 	},
 }
 
-// JoinRoom ...
-func (h *Handler) JoinRoom(c *gin.Context) {
-	user, err := utils.GetDataFromContext[domain.UserChat](c, "user")
+// JoinChat ...
+func (h *Handler) JoinChat(c *gin.Context) {
+	user, err := utils.GetDataFromContext[domain.User](c, "user")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
@@ -76,22 +77,23 @@ func (h *Handler) JoinRoom(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
-	roomID := c.Param("roomID")
+
+	chatID := c.Param("chatID")
 	clientID := strconv.Itoa(user.ID())
 	username := user.Login()
-	fmt.Printf("\nroomID: %s, clientID: %s, username: %s\n\n", roomID, clientID, username)
+	fmt.Printf("\nchatID: %s, clientID: %s, username: %s\n\n", chatID, clientID, username)
 
-	client := &Client{
+	client := &Subscriber{
 		Conn:     conn,
 		Message:  make(chan *Message, 10),
 		ID:       clientID,
-		RoomID:   roomID,
+		ChatID:   chatID,
 		Username: username,
 	}
 
 	msg := &Message{
-		Content:  "a new user joined the room",
-		RoomID:   roomID,
+		Content:  "a new user joined the chat",
+		ChatID:   chatID,
 		Username: username,
 	}
 
@@ -102,36 +104,79 @@ func (h *Handler) JoinRoom(c *gin.Context) {
 	client.readMessage(h.hub)
 }
 
-// RoomRes ...
-type RoomRes struct {
+// JoinChat ...
+func (h *Handler) Subscribe(c *gin.Context) {
+	user, err := utils.GetDataFromContext[domain.User](c, "user")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+
+	conn, err := upgrade.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+
+	pubsub := c.Param("pubsub")
+	clientID := strconv.Itoa(user.ID())
+	login := user.Login()
+	name := user.Name()
+	surname := user.Surname()
+	account := user.Account()
+	fmt.Printf("\nclientID: %s, login: %s, pubsub: %s\n", clientID, login, pubsub)
+	fmt.Printf("%s %s, %s\nIs connected!\n", name, surname, account)
+
+	username := name + " " + surname
+	subscriber := &Subscriber{
+		Conn:     conn,
+		Message:  make(chan *Message, 10),
+		ID:       clientID,
+		ChatID:   constants.SystemChat,
+		Username: username,
+	}
+
+	msg := &Message{
+		Content:  "a new user joined the chat",
+		ChatID:   constants.SystemChat,
+		Username: username,
+	}
+
+	h.hub.Register <- subscriber
+	h.hub.Broadcast <- msg
+
+	go subscriber.writeMessage()
+	subscriber.readMessage(h.hub)
+}
+
+// ChatResponse ...
+type ChatResponse struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
 }
 
-// GetRooms is ...
-// GetRoomsTags 		godoc
+// GetChats is ...
+// GetChatsTags 		godoc
 // @Summary			Получить список всех комнат.
-// @Description		Return rooms list.
-// @Tags			Room
+// @Description		Return chats list.
+// @Tags			Chat
 // @Security		BearerAuth
 // @Produce      	json
-// @Success			200 {object} []RoomRes
+// @Success			200 {object} []ChatRes
 // @failure			404 {string} err.Error()
-// @Router			/auth/ws/getRooms [get]
-func (h *Handler) GetRooms(c *gin.Context) {
-	rooms := make([]RoomRes, 0)
-	for _, room := range h.hub.Rooms {
-		rooms = append(rooms, RoomRes{
-			ID:   room.ID,
-			Name: room.Name,
+// @Router			/auth/ws/getChats [get]
+func (h *Handler) GetChats(c *gin.Context) {
+	chats := make([]ChatResponse, 0)
+	for _, chat := range h.hub.Chats {
+		chats = append(chats, ChatResponse{
+			ID:   chat.ID,
+			Name: chat.Name,
 		})
 	}
-	fmt.Printf("rooms: %v\n", rooms)
-	c.JSON(http.StatusOK, rooms)
+	fmt.Printf("chats: %v\n", chats)
+	c.JSON(http.StatusOK, chats)
 }
 
-// ClientRes ...
-type ClientRes struct {
+// ClientResponse ...
+type ClientResponse struct {
 	ID       string `json:"id"`
 	Username string `json:"username"`
 }
@@ -139,26 +184,26 @@ type ClientRes struct {
 // GetClients is ...
 // GetClientsTags 		godoc
 // @Summary			Получить список всех участников группы.
-// @Description		Return room clients list.
-// @Tags			Room
+// @Description		Return chat clients list.
+// @Tags			Chat
 // @Security		BearerAuth
-// @Param			roomID path int true "Room ID" example(1) default(1)
+// @Param			chatID path int true "Chat ID" example(1) default(1)
 // @Produce      	json
 // @Success			200 {object} []ClientRes
 // @failure			404 {string} err.Error()
-// @Router			/auth/ws/getClients/{roomID} [get]
+// @Router			/auth/ws/getClients/{chatID} [get]
 func (h *Handler) GetClients(c *gin.Context) {
-	clients := make([]ClientRes, 0)
-	roomID := c.Param("roomID")
+	clients := make([]ClientResponse, 0)
+	chatID := c.Param("chatID")
 
-	if _, ok := h.hub.Rooms[roomID]; !ok {
-		c.JSON(http.StatusNotFound, gin.H{"error": "room not found"})
+	if _, ok := h.hub.Chats[chatID]; !ok {
+		c.JSON(http.StatusNotFound, gin.H{"error": "chat not found"})
 		return
 	}
 
-	for _, client := range h.hub.Rooms[roomID].Clients {
+	for _, client := range h.hub.Chats[chatID].Clients {
 		fmt.Printf("clients: %+v\n", client)
-		clients = append(clients, ClientRes{
+		clients = append(clients, ClientResponse{
 			ID:       client.ID,
 			Username: client.Username,
 		})

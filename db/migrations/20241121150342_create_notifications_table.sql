@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS "notifications"(
     "is_deleted" BOOLEAN,
     "notification_type" TEXT NOT NULL,
     "is_seen" BOOLEAN,
-    "created_at" TIMESTAMP NOT NULL
+    "created_at" INTEGER NOT NULL
 );
 
 ALTER TABLE "notifications"

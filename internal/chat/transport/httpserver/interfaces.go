@@ -9,22 +9,26 @@ import (
 
 // ITokenService is a token service
 type ITokenService interface {
-	GenerateTokenForRegisteredUsers(ctx context.Context, user domain.UserChat) (string, error)
-	GenerateToken(ctx context.Context, account, login, password string) (domain.UserChat, string, error)
-	GetUser(ctx context.Context, token string) (domain.UserChat, error)
-	GetPubsubToken(ctx context.Context, user domain.UserChat) (uuid.UUID, error)
+	GenerateTokenForRegisteredUsers(ctx context.Context, user domain.User) (string, error)
+	GenerateToken(ctx context.Context, account, login, password string) (domain.User, string, error)
+	GetUser(ctx context.Context, token string) (domain.User, error)
+	GetPubsubToken(ctx context.Context, user domain.User) (uuid.UUID, error)
 }
 
 type IStateService interface {
 }
 
-type IUserChatService interface {
-	CreateUser(context.Context, domain.UserChat) (domain.UserChat, error)
-	RegisterUser(context.Context, domain.UserChat) (domain.UserChat, error)
-	GetUsers(context.Context, domain.UserChat, int, int) ([]domain.UserChat, error)
-	GetUserByID(context.Context, int) (domain.UserChat, error)
-	GetUserByExtID(context.Context, string, string) (domain.UserChat, error)
-	GetUserByLogin(context.Context, string, string) (domain.UserChat, error)
-	UpdateUser(context.Context, domain.UserChat) (domain.UserChat, error)
+type IUserService interface {
+	CreateUser(context.Context, domain.User) (domain.User, error)
+	RegisterUser(context.Context, domain.User) (domain.User, error)
+	GetUsers(context.Context, domain.User, int, int) ([]domain.User, error)
+	GetUserByID(context.Context, int) (domain.User, error)
+	GetUserByExtID(context.Context, string, string) (domain.User, error)
+	GetUserByLogin(context.Context, string, string) (domain.User, error)
+	UpdateUser(context.Context, domain.User) (domain.User, error)
 	DeleteUser(context.Context, int) error
+}
+
+type IChatService interface {
+	CreateChat(context.Context, domain.Chat) (domain.Chat, error)
 }
