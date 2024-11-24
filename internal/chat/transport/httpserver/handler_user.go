@@ -1,7 +1,6 @@
 package httpserver
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -120,7 +119,7 @@ func (h HTTPServer) GetUsers(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": domain.ErrNotFound.Error()})
 		return
 	}
-	fmt.Printf("\nuserCtx: %+v\n", userCtx)
+	// fmt.Printf("\nuserCtx: %+v\n", userCtx)
 	// check admin
 	if userCtx.UserType() != config.AdminRole {
 		c.JSON(

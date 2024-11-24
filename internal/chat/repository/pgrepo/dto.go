@@ -60,3 +60,29 @@ func chatToDomain(chat models.Chat) domain.Chat {
 		LastChatMsgID: chat.LastChatMsgID,
 	})
 }
+
+func domainToMessage(msg domain.Message) models.Message {
+	return models.Message{
+		Id:        msg.ID(),
+		SenderID:  msg.SenderID(),
+		ChatID:    msg.ChatID(),
+		MsgType:   msg.MsgType(),
+		Text:      msg.Text(),
+		IsDeleted: msg.IsDeleted(),
+		CreatedAt: msg.CreatedAt(),
+		UpdatedAt: msg.UpdatedAt(),
+	}
+}
+
+func messageToDomain(msg models.Message) domain.Message {
+	return domain.NewMessage(domain.NewMessageData{
+		Id:        msg.Id,
+		SenderID:  msg.SenderID,
+		ChatID:    msg.ChatID,
+		MsgType:   msg.MsgType,
+		Text:      msg.Text,
+		IsDeleted: msg.IsDeleted,
+		CreatedAt: msg.CreatedAt,
+		UpdatedAt: msg.UpdatedAt,
+	})
+}

@@ -2,21 +2,22 @@ package httpserver
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/KozlovNikolai/pfp/internal/chat/domain"
 	"github.com/KozlovNikolai/pfp/internal/pkg/utils"
 	"github.com/gin-gonic/gin"
 )
 
-func (h HTTPServer) CreateChat(c *gin.Context) {
-	var chatCreateRequest ChatCreateRequest
+func (h HTTPServer) SendMessage(c *gin.Context) {
+	var msgRequest SendMessageRequest
 	var err error
-	if err = c.ShouldBindJSON(&chatCreateRequest); err != nil {
+	if err = c.ShouldBindJSON(&msgRequest); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"invalid-json": err.Error()})
 		return
 	}
 
-	if err = chatCreateRequest.Validate(); err != nil {
+	if err = msgRequest.Validate(); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{invaldRequest: err.Error()})
 		return
 	}
@@ -25,18 +26,58 @@ func (h HTTPServer) CreateChat(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": domain.ErrNoUserInContext.Error()})
 		return
 	}
-	// fmt.Printf("\nchatFromCtx: %+v\n\n", userCtx)
-	chatCreateRequest.OwnerID = userCtx.ID()
-	// fmt.Printf("\nchatRequest: %+v\n\n", chatCreateRequest)
-	domainChat := toDomainChat(chatCreateRequest)
-	// fmt.Printf("\nchatDomain: %+v\n\n", domainChat)
-	createdChat, err := h.chatService.CreateChat(c, domainChat)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error service User": err.Error()})
+	createdAt := time.Now().Unix()
+	msgRequest.SenderID = userCtx.ID()
+	msgRequest.CreatedAt = createdAt
+	msgRequest.UpdatedAt = createdAt
+	// log.Printf("model req Message: %+v", msgRequest)
+	domainMsg := toDomainMessage(msgRequest)
+	// log.Printf("domain    Message: %+v", domainMsg)
+	if err := h.msgService.SaveMsg(c, domainMsg); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	response := toResponseChat(createdChat)
-	c.JSON(http.StatusCreated, response)
+
+	c.JSON(http.StatusCreated, "message sent")
+}
+
+func (h HTTPServer) GetMessages(c *gin.Context) {
+	var msgsRequest GetMessagesRequest
+	var err error
+	if err = c.ShouldBindJSON(&msgsRequest); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"invalid-json": err.Error()})
+		return
+	}
+
+	if err = msgsRequest.Validate(); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{invaldRequest: err.Error()})
+		return
+	}
+	userCtx, err := utils.GetDataFromContext[domain.User](c, "user")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": domain.ErrNoUserInContext.Error()})
+		return
+	}
+
+	msgsRequest.UserID = userCtx.ID()
+
+	msgsDomain, err := h.msgService.GetMessagesByChatID(
+		c,
+		msgsRequest.ChatID,
+		msgsRequest.Limit,
+		msgsRequest.Offset,
+	)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	msgsResponse := make([]MessageResponse, len(msgsDomain))
+	for i, msgDomain := range msgsDomain {
+		msgsResponse[i] = toResponseMessage(msgDomain)
+	}
+	c.JSON(http.StatusCreated, msgsResponse)
 }
 
 // const (

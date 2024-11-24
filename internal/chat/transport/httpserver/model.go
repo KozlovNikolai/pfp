@@ -56,3 +56,41 @@ type ChatResponse struct {
 	CreatedAt     int64            `json:"created_at"`
 	UpdatedAt     int64            `json:"updated_at"`
 }
+
+type SendMessageRequest struct {
+	SenderID  int
+	ChatID    int    `json:"chat_id" db:"chat_id" validate:"required"`
+	MsgType   string `json:"msg_type" db:"msg_type" validate:"required"`
+	Text      string `json:"text" db:"text" validate:"required"`
+	CreatedAt int64
+	UpdatedAt int64
+}
+
+func (c *SendMessageRequest) Validate() error {
+	validate := validator.New(validator.WithRequiredStructEnabled())
+	return validate.Struct(c)
+}
+
+type MessageResponse struct {
+	Id        int
+	SenderID  int
+	ChatID    int
+	MsgType   string
+	Text      string
+	IsDeleted bool
+	CreatedAt int64
+	UpdatedAt int64
+}
+
+type GetMessagesRequest struct {
+	UserID  int
+	ChatID  int    `json:"chat_id" db:"chat_id" validate:"required"`
+	MsgType string `json:"msg_type" db:"msg_type" validate:"required"`
+	Limit   int    `json:"limit" db:"limit" validate:"gt=0,max=20,required"`
+	Offset  int    `json:"offset" db:"offset" validate:"gte=0"`
+}
+
+func (c *GetMessagesRequest) Validate() error {
+	validate := validator.New(validator.WithRequiredStructEnabled())
+	return validate.Struct(c)
+}

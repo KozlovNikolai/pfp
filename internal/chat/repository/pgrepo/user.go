@@ -85,9 +85,9 @@ func (u *UserRepo) CreateUser(ctx context.Context, user domain.User) (domain.Use
 	if err := tx.Commit(ctx); err != nil {
 		return domain.User{}, fmt.Errorf(constants.FailedToBeginTransaction, err)
 	}
-	fmt.Printf("insertedUser: %v\n", insertedUser)
+	// fmt.Printf("insertedUser: %v\n", insertedUser)
 	domainUser := userToDomain(insertedUser)
-	fmt.Printf("domainUser: %v\n", domainUser)
+	// fmt.Printf("domainUser: %v\n", domainUser)
 	return domainUser, nil
 }
 

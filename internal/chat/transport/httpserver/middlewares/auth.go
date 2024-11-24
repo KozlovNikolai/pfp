@@ -2,7 +2,7 @@
 package middlewares
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -105,9 +105,12 @@ func AuthSputnikMiddleware() gin.HandlerFunc {
 		rawToken := c.GetHeader(AuthorizationHeader)
 		userIdToken := c.GetHeader(UserIdToken)
 		headerApplication := c.GetHeader(HeaderApplication)
-		fmt.Println("Get headers:")
-		fmt.Printf("rawToken: %s, userIdToken: %s, headerApplication: %s\n",
-			rawToken, userIdToken, headerApplication)
+		_ = userIdToken
+		_ = headerApplication
+
+		// fmt.Println("Get headers:")
+		// fmt.Printf("rawToken: %s, userIdToken: %s, headerApplication: %s\n",
+		// rawToken, userIdToken, headerApplication)
 
 		authHeaders := map[string]string{
 			AuthorizationHeader: rawToken,
@@ -115,7 +118,7 @@ func AuthSputnikMiddleware() gin.HandlerFunc {
 
 		resp, err := utils.DoRequest[ReceiveUserSputnik]("GET", sputnikUrl, nil, authHeaders)
 		if err != nil {
-			fmt.Println("Error DoRequest")
+			log.Println("Error DoRequest")
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err})
 			return
 		}

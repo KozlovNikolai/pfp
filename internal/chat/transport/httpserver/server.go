@@ -42,6 +42,7 @@ func NewRouter() *Router {
 
 	var userRepo services.IUserRepository
 	var chatRepo services.IChatRepository
+	var msgRepo services.IMessageRepository
 	// Выбор репозитория
 	switch config.Cfg.RepoType {
 	case "postgres":
@@ -51,6 +52,7 @@ func NewRouter() *Router {
 		}
 		userRepo = pgrepo.NewUserRepo(pgDB)
 		chatRepo = pgrepo.NewChatRepo(pgDB)
+		msgRepo = pgrepo.NewMsgRepo(pgDB)
 	default:
 		logger.Fatal("Invalid repository type")
 	}
@@ -64,7 +66,7 @@ func NewRouter() *Router {
 	chatService := services.NewChatService(chatRepo)
 	stateService := services.NewStateService(stateRepo)
 	userService := services.NewUserService(userRepo)
-	// userService := services.NewUserService(userRepo)
+	msgService := services.NewMessageService(msgRepo)
 	tokenService := services.NewTokenService(
 		userRepo,
 		config.Cfg.TokenTimeDuration,
@@ -76,6 +78,7 @@ func NewRouter() *Router {
 		chatService,
 		tokenService,
 		stateService,
+		msgService,
 	)
 	hub := ws.NewHub() // создаем hub
 	go hub.Run()
@@ -124,6 +127,8 @@ func NewRouter() *Router {
 	authorized.Use(httpServer.CheckAuthorizedUser())
 	authorized.GET("user", httpServer.GetUser)
 	authorized.GET("signout", httpServer.SignOut)
+	authorized.POST("sendmsg", httpServer.SendMessage)
+	authorized.POST("getmsgs", httpServer.GetMessages)
 
 	// websocket routes
 	authorized.POST("/createChat", httpServer.CreateChat)

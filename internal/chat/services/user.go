@@ -97,6 +97,6 @@ func (s UserService) DeleteUser(ctx context.Context, id int) error {
 // GetUsers ...
 func (s UserService) GetUsers(ctx context.Context, user domain.User, limit, offset int) ([]domain.User, error) {
 	account := user.Account()
-	fmt.Println(account, limit, offset)
+	// fmt.Println(account, limit, offset)
 	return s.repo.GetUsers(ctx, account, limit, offset)
 }

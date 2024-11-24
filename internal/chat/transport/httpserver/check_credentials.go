@@ -1,7 +1,6 @@
 package httpserver
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -24,7 +23,7 @@ const (
 // CheckAdmin ...
 func (h HTTPServer) CheckAdmin() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		fmt.Println("CheckAdmin----------------------->>>")
+		// fmt.Println("CheckAdmin----------------------->>>")
 
 		token := c.GetHeader(AuthorizationHeader)
 		token = strings.TrimPrefix(token, BearerPrefix)
@@ -60,10 +59,10 @@ func (h HTTPServer) CheckAdmin() gin.HandlerFunc {
 // CheckAuthorizedUser ...
 func (h HTTPServer) CheckAuthorizedUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		fmt.Println("CheckAuthorizedUser---------------------->>>")
+		// fmt.Println("CheckAuthorizedUser---------------------->>>")
 
 		token := c.GetHeader(AuthorizationHeader)
-		fmt.Printf("token = %s\n", token)
+		// fmt.Printf("token = %s\n", token)
 		token = strings.TrimPrefix(token, BearerPrefix)
 		user, err := h.tokenService.GetUser(c, token)
 		if err != nil {
@@ -73,7 +72,7 @@ func (h HTTPServer) CheckAuthorizedUser() gin.HandlerFunc {
 			)
 			return
 		}
-		fmt.Printf("user = %+v\n", user)
+		// fmt.Printf("user = %+v\n", user)
 		if user.Login() == "" {
 			c.AbortWithStatusJSON(
 				http.StatusInternalServerError,

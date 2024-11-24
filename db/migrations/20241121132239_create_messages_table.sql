@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS "messages"(
     "id"  serial NOT NULL PRIMARY KEY,
     "sender_id" INTEGER NOT NULL,
     "chat_id" INTEGER NOT NULL,
-    "type" TEXT NOT NULL,
+    "msg_type" TEXT NOT NULL,
     "text" TEXT,
     "is_deleted" BOOLEAN,
     "created_at" INTEGER NOT NULL,

@@ -30,7 +30,7 @@ func (c *ChatRepo) CreateChat(ctx context.Context, chat domain.Chat) (domain.Cha
 
 	dbChat.CreatedAt = time.Now().Unix()
 	dbChat.UpdatedAt = dbChat.CreatedAt
-	fmt.Printf("\ndbChat: %+v\n\n", dbChat)
+	// fmt.Printf("\ndbChat: %+v\n\n", dbChat)
 	var insertedChat models.Chat
 
 	// Начинаем транзакцию
@@ -73,9 +73,9 @@ func (c *ChatRepo) CreateChat(ctx context.Context, chat domain.Chat) (domain.Cha
 	if err := tx.Commit(ctx); err != nil {
 		return domain.Chat{}, fmt.Errorf(constants.FailedToBeginTransaction, err)
 	}
-	fmt.Printf("insertedChat: %v\n", insertedChat)
+	// fmt.Printf("insertedChat: %v\n", insertedChat)
 	domainChat := chatToDomain(insertedChat)
-	fmt.Printf("domainChat: %v\n", domainChat)
+	// fmt.Printf("domainChat: %v\n", domainChat)
 	return domainChat, nil
 }
 
@@ -154,12 +154,12 @@ func (c *ChatRepo) GetChatsByUser(ctx context.Context, userID int) ([]domain.Cha
 	if err != nil {
 		return nil, fmt.Errorf("failed get chats by user_id: %d: %w", userID, err)
 	}
-	log.Printf("SQL-запрос на получение чатов по userID: %d", userID)
+	// log.Printf("SQL-запрос на получение чатов по userID: %d", userID)
 	// Фиксация транзакции
 	if err := tx.Commit(ctx); err != nil {
 		return nil, fmt.Errorf(constants.FailedToBeginTransaction, err)
 	}
-	log.Println("Заполняем массив")
+	// log.Println("Заполняем массив")
 	// заполняем массив
 	var chats []models.Chat
 	for rows.Next() {
@@ -177,12 +177,12 @@ func (c *ChatRepo) GetChatsByUser(ctx context.Context, userID int) ([]domain.Cha
 		}
 		chats = append(chats, chat)
 	}
-	log.Println("проверка на ошибки итерации")
+	// log.Println("проверка на ошибки итерации")
 	// Проверка на ошибки, возникшие при итерации по строкам
 	if rows.Err() != nil {
 		return nil, fmt.Errorf("error occurred during row iteration: %w", rows.Err())
 	}
-	log.Println("мапим модель в домен")
+	// log.Println("мапим модель в домен")
 
 	// мапим модель в домен
 	domainChats := make([]domain.Chat, len(chats))

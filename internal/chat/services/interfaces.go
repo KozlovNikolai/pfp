@@ -29,3 +29,8 @@ type IChatRepository interface {
 	GetChatByNameAndType(context.Context, string, string) (domain.Chat, error)
 	GetChatsByUser(ctx context.Context, userID int) ([]domain.Chat, error)
 }
+
+type IMessageRepository interface {
+	SaveMsg(ctx context.Context, msg domain.Message) error
+	GetMessagesByChatID(ctx context.Context, chatID, limit, offset int) ([]domain.Message, error)
+}

@@ -1,8 +1,6 @@
 package utils
 
 import (
-	"fmt"
-
 	"github.com/KozlovNikolai/pfp/internal/chat/domain"
 	"github.com/gin-gonic/gin"
 )
@@ -37,7 +35,7 @@ func GetDataFromContext[T any](ctx *gin.Context, key string) (T, error) {
 		return result, domain.ErrNoUserInContext
 	}
 
-	fmt.Printf("contextData %v\n", contextData)
+	// fmt.Printf("contextData %v\n", contextData)
 	if contextData == nil {
 		return result, domain.ErrNoUserInContext
 	}

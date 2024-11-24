@@ -52,7 +52,7 @@ func (s TokenService) GenerateToken(ctx context.Context, account, login, passwor
 	if !utils.CheckPasswordHash(password, domainUserChat.Password()) {
 		return domain.User{}, "", fmt.Errorf("error: invalid-password")
 	}
-	fmt.Printf("func GenerateToken: domainUser: %+v\n", domainUserChat)
+	// fmt.Printf("func GenerateToken: domainUser: %+v\n", domainUserChat)
 	payload := UserClaims{
 		AuthID:       domainUserChat.ID(),
 		AuthLogin:    domainUserChat.Login(),

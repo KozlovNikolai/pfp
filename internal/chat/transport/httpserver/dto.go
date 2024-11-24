@@ -80,3 +80,27 @@ func toResponseChat(chat domain.Chat) ChatResponse {
 		UpdatedAt:     chat.UpdatedAt(),
 	}
 }
+
+func toDomainMessage(msg SendMessageRequest) domain.Message {
+	return domain.NewMessage(domain.NewMessageData{
+		SenderID:  msg.SenderID,
+		ChatID:    msg.ChatID,
+		MsgType:   msg.MsgType,
+		Text:      msg.Text,
+		CreatedAt: msg.CreatedAt,
+		UpdatedAt: msg.UpdatedAt,
+	})
+}
+
+func toResponseMessage(msg domain.Message) MessageResponse {
+	return MessageResponse{
+		Id:        msg.ID(),
+		SenderID:  msg.SenderID(),
+		ChatID:    msg.ChatID(),
+		MsgType:   msg.MsgType(),
+		Text:      msg.Text(),
+		IsDeleted: msg.IsDeleted(),
+		CreatedAt: msg.CreatedAt(),
+		UpdatedAt: msg.UpdatedAt(),
+	}
+}

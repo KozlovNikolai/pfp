@@ -6,6 +6,7 @@ type HTTPServer struct {
 	tokenService ITokenService
 	stateService IStateService
 	chatService  IChatService
+	msgService   IMessageService
 }
 
 // NewHTTPServer creates a new HTTP server for ports
@@ -14,11 +15,13 @@ func NewHTTPServer(
 	chatService IChatService,
 	tokenService ITokenService,
 	stateService IStateService,
+	msgService IMessageService,
 ) HTTPServer {
 	return HTTPServer{
 		userService:  userService,
 		tokenService: tokenService,
 		stateService: stateService,
 		chatService:  chatService,
+		msgService:   msgService,
 	}
 }
