@@ -11,6 +11,9 @@ CREATE TABLE IF NOT EXISTS "chat_members"(
     "updated_at" INTEGER NOT NULL
 );
 
+CREATE unique INDEX "chat_members_chat_id_user_id_index"
+ON "chat_members" ("chat_id", "user_id");
+
 ALTER TABLE "chat_members"
 ADD FOREIGN KEY("user_id") REFERENCES "users"("id")
 ON UPDATE NO ACTION ON DELETE NO ACTION;

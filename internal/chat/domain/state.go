@@ -14,12 +14,12 @@ type Connect struct {
 }
 
 type Contact struct {
-	UserID  uint64
-	Status  string
-	Event   string
-	Name    string
-	Surname string
-	Email   string
+	UserID  uint64 `json:"user_id" db:"user_id"`
+	Status  string `json:"status" db:"status"`
+	Event   string `json:"event" db:"event"`
+	Name    string `json:"name" db:"name"`
+	Surname string `json:"surname" db:"surname"`
+	Email   string `json:"email" db:"email"`
 }
 
 func NewState() *State {

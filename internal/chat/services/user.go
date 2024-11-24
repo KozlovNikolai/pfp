@@ -70,16 +70,18 @@ func (s UserService) GetUserByLogin(ctx context.Context, account, login string) 
 }
 
 // RegisterUser ...
-func (s UserService) RegisterUser(ctx context.Context, user domain.User) (domain.User, error) {
+func (s UserService) RegisterUser(ctx context.Context, user domain.User) (domain.User, bool, error) {
 	userDb, err := s.GetUserByExtID(ctx, user.Account(), user.UserExtID())
 
 	if err != nil {
 		if strings.HasSuffix(err.Error(), "no rows in result set") {
-			return s.repo.CreateUser(ctx, user)
+			userDomain, err := s.repo.CreateUser(ctx, user)
+
+			return userDomain, true, err
 		}
-		return domain.User{}, fmt.Errorf("register failure of user with ext id: %s, error: %s", user.UserExtID(), err.Error())
+		return domain.User{}, false, fmt.Errorf("register failure of user with ext id: %s, error: %s", user.UserExtID(), err.Error())
 	}
-	return userDb, nil
+	return userDb, false, nil
 }
 
 // UpdateUser ...

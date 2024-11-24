@@ -4,6 +4,8 @@ package httpserver
 import (
 	"net/http"
 
+	"log"
+
 	"github.com/KozlovNikolai/pfp/internal/chat/domain"
 	"github.com/KozlovNikolai/pfp/internal/chat/transport/httpserver/middlewares"
 	"github.com/KozlovNikolai/pfp/internal/pkg/utils"
@@ -51,8 +53,25 @@ func (h HTTPServer) SignUp(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error service User": err.Error()})
 		return
 	}
+	var chats []ChatResponse
+	chat, err := h.chatService.GetChatByNameAndType(c, "common chat", "system")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"failure get common system chat id": err.Error()})
+		return
+	}
+	log.Printf("chat response: %+v", chat)
+	chatsDomain, err := h.chatService.AddUserToChat(c, createdUser.ID(), chat.ID())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"failure add user to system chat": err.Error()})
+		return
+	}
+	for _, chatDomain := range chatsDomain {
+		chats = append(chats, toResponseChat(chatDomain))
+	}
+
 	response := toResponseUser(createdUser)
-	c.JSON(http.StatusCreated, response)
+	// c.JSON(http.StatusCreated, response, chats)
+	c.JSON(http.StatusCreated, gin.H{"user": response, "chats": chats})
 }
 
 // SignIn is ...
@@ -89,7 +108,17 @@ func (h HTTPServer) SignIn(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error-generated-pubsub": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"pubsub": pubsub, "token": token, "user": toResponseUser(user)})
+	var chats []ChatResponse
+	chatsDomain, err := h.chatService.GetChatsByUser(c, user.ID())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"failure get chats by user id": err.Error()})
+		return
+	}
+	for _, chatDomain := range chatsDomain {
+		chats = append(chats, toResponseChat(chatDomain))
+	}
+
+	c.JSON(http.StatusOK, gin.H{"pubsub": pubsub, "token": token, "user": toResponseUser(user), "chats": chats})
 }
 
 // LoginUserByTokenSputnik is ...
@@ -111,12 +140,29 @@ func (h HTTPServer) LoginUserByTokenSputnik(c *gin.Context) {
 	}
 	domainUser := toDomainUserFromUserSputnik(userSputnik)
 
-	registeredUser, err := h.userService.RegisterUser(c, domainUser)
+	registeredUser, isNew, err := h.userService.RegisterUser(c, domainUser)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error service User": err.Error()})
 		return
 	}
-
+	log.Printf("isNew: %v", isNew)
+	var chats []ChatResponse
+	if isNew {
+		chat, err := h.chatService.GetChatByNameAndType(c, "common chat", "system")
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"failure get common system chat id": err.Error()})
+			return
+		}
+		log.Printf("chat response: %+v", chat)
+		chatsDomain, err := h.chatService.AddUserToChat(c, registeredUser.ID(), chat.ID())
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"failure add user to system chat": err.Error()})
+			return
+		}
+		for _, chatDomain := range chatsDomain {
+			chats = append(chats, toResponseChat(chatDomain))
+		}
+	}
 	token, err := h.tokenService.GenerateTokenForRegisteredUsers(c, registeredUser)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error-generated-token": err.Error()})
@@ -130,7 +176,7 @@ func (h HTTPServer) LoginUserByTokenSputnik(c *gin.Context) {
 	}
 
 	response := toResponseUser(registeredUser)
-	c.JSON(http.StatusOK, gin.H{"pubsub": pubsub, "token": token, "user chat": response})
+	c.JSON(http.StatusOK, gin.H{"pubsub": pubsub, "token": token, "user": response, "chats": chats})
 }
 
 // SignOut ...

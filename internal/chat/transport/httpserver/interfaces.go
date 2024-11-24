@@ -20,7 +20,7 @@ type IStateService interface {
 
 type IUserService interface {
 	CreateUser(context.Context, domain.User) (domain.User, error)
-	RegisterUser(context.Context, domain.User) (domain.User, error)
+	RegisterUser(context.Context, domain.User) (domain.User, bool, error)
 	GetUsers(context.Context, domain.User, int, int) ([]domain.User, error)
 	GetUserByID(context.Context, int) (domain.User, error)
 	GetUserByExtID(context.Context, string, string) (domain.User, error)
@@ -31,4 +31,7 @@ type IUserService interface {
 
 type IChatService interface {
 	CreateChat(context.Context, domain.Chat) (domain.Chat, error)
+	AddUserToChat(context.Context, int, int) ([]domain.Chat, error)
+	GetChatByNameAndType(context.Context, string, string) (domain.Chat, error)
+	GetChatsByUser(ctx context.Context, userID int) ([]domain.Chat, error)
 }

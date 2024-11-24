@@ -1,14 +1,11 @@
 package models
 
-import "github.com/KozlovNikolai/pfp/internal/chat/domain"
-
 type Chat struct {
-	Id            int
-	Name          string
-	OwnerID       int
-	ChatType      string
-	LastChatMsgID uint64
-	Contacts      []domain.Contact
-	CreatedAt     int64
-	UpdatedAt     int64
+	Id            int    `json:"id" db:"id"`
+	Name          string `json:"name" db:"name"`
+	OwnerID       int    `json:"owner_id" db:"owner_id"`
+	ChatType      string `json:"chat_type" db:"chat_type"`
+	LastChatMsgID uint64 `json:"last_message_id" db:"last_message_id"`
+	CreatedAt     int64  `json:"created_at" db:"created_at"`
+	UpdatedAt     int64  `json:"updated_at" db:"updated_at"`
 }

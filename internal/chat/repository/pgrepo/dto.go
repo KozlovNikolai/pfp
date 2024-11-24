@@ -46,7 +46,6 @@ func domainToChat(chat domain.Chat) models.Chat {
 		OwnerID:       chat.OwnerID(),
 		ChatType:      chat.ChatType(),
 		LastChatMsgID: chat.LastMsgID(),
-		Contacts:      chat.Contacts(),
 		CreatedAt:     chat.CreatedAt(),
 		UpdatedAt:     chat.UpdatedAt(),
 	}
@@ -59,6 +58,5 @@ func chatToDomain(chat models.Chat) domain.Chat {
 		OwnerID:       chat.OwnerID,
 		ChatType:      chat.ChatType,
 		LastChatMsgID: chat.LastChatMsgID,
-		Contacts:      chat.Contacts,
 	})
 }
