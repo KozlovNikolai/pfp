@@ -8,9 +8,9 @@ type Chat struct {
 	ownerID       int
 	chatType      string
 	lastChatMsgID uint64
-	contacts      []Contact
-	createdAt     int64
-	updatedAt     int64
+	// contacts      []Contact
+	createdAt int64
+	updatedAt int64
 }
 
 type NewChatData struct {
@@ -19,7 +19,7 @@ type NewChatData struct {
 	OwnerID       int
 	ChatType      string
 	LastChatMsgID uint64
-	Contacts      []Contact
+	// Contacts      []Contact
 }
 
 func NewChat(data NewChatData) Chat {
@@ -30,9 +30,9 @@ func NewChat(data NewChatData) Chat {
 		ownerID:       data.OwnerID,
 		chatType:      data.ChatType,
 		lastChatMsgID: data.LastChatMsgID,
-		contacts:      data.Contacts,
-		createdAt:     createdTime,
-		updatedAt:     createdTime,
+		// contacts:      data.Contacts,
+		createdAt: createdTime,
+		updatedAt: createdTime,
 	}
 }
 
@@ -53,9 +53,10 @@ func (c Chat) ChatType() string {
 func (c Chat) LastMsgID() uint64 {
 	return c.lastChatMsgID
 }
-func (c Chat) Contacts() []Contact {
-	return c.contacts
-}
+
+//	func (c Chat) Contacts() []Contact {
+//		return c.contacts
+//	}
 func (c Chat) CreatedAt() int64 {
 	return c.createdAt
 }

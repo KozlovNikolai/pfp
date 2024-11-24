@@ -75,9 +75,9 @@ func toResponseChat(chat domain.Chat) ChatResponse {
 		OwnerID:       chat.OwnerID(),
 		ChatType:      chat.ChatType(),
 		LastChatMsgID: chat.LastMsgID(),
-		Contacts:      chat.Contacts(),
-		CreatedAt:     chat.CreatedAt(),
-		UpdatedAt:     chat.UpdatedAt(),
+		// Contacts:      chat.Contacts(),
+		CreatedAt: chat.CreatedAt(),
+		UpdatedAt: chat.UpdatedAt(),
 	}
 }
 

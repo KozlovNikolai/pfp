@@ -9,17 +9,17 @@ import (
 
 // Subscriber ...
 type Subscriber struct {
-	Conn     *websocket.Conn
-	Message  chan *Message
-	ID       string `json:"id"`
-	ChatID   string `json:"chat_id"`
+	Conn    *websocket.Conn
+	Message chan *Message
+	ID      int `json:"id"`
+	//ChatID   int    `json:"chat_id"`
 	Username string `json:"username"`
 }
 
 // Message ...
 type Message struct {
 	Content  string `json:"content"`
-	ChatID   string `json:"chat_id"`
+	ChatID   int    `json:"chat_id"`
 	Username string `json:"username"`
 }
 
@@ -57,8 +57,8 @@ func (c *Subscriber) readMessage(hub *Hub) {
 			break
 		}
 		msg := &Message{
-			Content:  string(message),
-			ChatID:   c.ChatID,
+			Content: string(message),
+			//ChatID:   c.ChatID,
 			Username: c.Username,
 		}
 		hub.Broadcast <- msg

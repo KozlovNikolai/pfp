@@ -5,6 +5,8 @@ import (
 	"context"
 
 	"github.com/KozlovNikolai/pfp/internal/chat/domain"
+	"github.com/google/uuid"
+	"github.com/gorilla/websocket"
 )
 
 // IUserRepository is ...
@@ -19,8 +21,9 @@ type IUserRepository interface {
 }
 
 type IStateRepository interface {
-	GetState(context.Context, domain.User) (domain.State, error)
-	SetState(context.Context, domain.User) (domain.State, error)
+	SetState(ctx context.Context, userID int, pubsub uuid.UUID, conn *websocket.Conn) domain.State
+	GetState(ctx context.Context, userID int) (domain.State, bool)
+	DeleteConnFromState(ctx context.Context, userID int, pubsub uuid.UUID) (domain.State, bool)
 }
 
 type IChatRepository interface {

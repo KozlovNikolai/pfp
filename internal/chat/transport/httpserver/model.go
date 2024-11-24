@@ -1,7 +1,6 @@
 package httpserver
 
 import (
-	"github.com/KozlovNikolai/pfp/internal/chat/domain"
 	"github.com/go-playground/validator/v10"
 )
 
@@ -47,14 +46,14 @@ func (c *ChatCreateRequest) Validate() error {
 }
 
 type ChatResponse struct {
-	Id            int              `json:"id"`
-	Name          string           `json:"name"`
-	OwnerID       int              `json:"owner_id"`
-	ChatType      string           `json:"chat_type"`
-	LastChatMsgID uint64           `json:"last_message_id"`
-	Contacts      []domain.Contact `json:"contacts"`
-	CreatedAt     int64            `json:"created_at"`
-	UpdatedAt     int64            `json:"updated_at"`
+	Id            int    `json:"id"`
+	Name          string `json:"name"`
+	OwnerID       int    `json:"owner_id"`
+	ChatType      string `json:"chat_type"`
+	LastChatMsgID uint64 `json:"last_message_id"`
+	// Contacts      []domain.Contact `json:"contacts"`
+	CreatedAt int64 `json:"created_at"`
+	UpdatedAt int64 `json:"updated_at"`
 }
 
 type SendMessageRequest struct {

@@ -80,7 +80,7 @@ func NewRouter() *Router {
 		stateService,
 		msgService,
 	)
-	hub := ws.NewHub() // создаем hub
+	hub := ws.NewHub(stateService) // создаем hub
 	go hub.Run()
 	wsHandler := ws.NewHandler(hub) // создаем websocket handler
 	// Создание роутера
@@ -132,10 +132,10 @@ func NewRouter() *Router {
 
 	// websocket routes
 	authorized.POST("/createChat", httpServer.CreateChat)
-	authorized.GET("/getChats", wsHandler.GetChats)
+	//authorized.GET("/getChats", wsHandler.GetChats)
 	authorized.GET("/getClients/:chatID", wsHandler.GetClients)
 	authorized.GET("/joinChat/:chatID", wsHandler.JoinChat)
-	authorized.GET("/subscribe", wsHandler.Subscribe)
+	authorized.GET("/subscribe/:pubsub", wsHandler.Subscribe)
 
 	return server
 }

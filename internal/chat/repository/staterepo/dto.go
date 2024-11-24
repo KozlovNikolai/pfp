@@ -1,5 +1,47 @@
 package staterepo
 
+import (
+	"github.com/KozlovNikolai/pfp/internal/chat/domain"
+	"github.com/KozlovNikolai/pfp/internal/chat/repository/models"
+)
+
+// type State struct {
+// 	Connects []Connect `json:"connects" db:"connects"`
+// 	// Contacts []Contact `json:"contacts" db:"contacts"`
+// 	// Chats    []Chat    `json:"chats" db:"chats"`
+// }
+
+// type Connect struct {
+// 	Conn      *websocket.Conn
+// 	Pubsub    uuid.UUID `json:"pubsub" db:"pubsub"`
+// 	CreatedAt int64     `json:"created_at" db:"created_at"`
+// }
+
+func stateToDomain(state models.State) domain.State {
+	domainConnects := make([]domain.Connect, len(state.Connects))
+	for i, connect := range state.Connects {
+		domainConnects[i].Conn = connect.Conn
+		domainConnects[i].Pubsub = connect.Pubsub
+		domainConnects[i].CreatedAt = connect.CreatedAt
+	}
+	return domain.State{
+		Connects: domainConnects,
+	}
+}
+
+// func domainToState() {
+
+// }
+
+// type Contact struct {
+// 	UserID  uint64
+// 	Status  string
+// 	Event   string
+// 	Name    string
+// 	Surname string
+// 	Email   string
+// }
+
 // func domainToProvider(provider domain.Provider) models.Provider {
 // 	return models.Provider{
 // 		ID:     provider.ID(),
