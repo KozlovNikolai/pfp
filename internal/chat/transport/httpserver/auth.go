@@ -2,6 +2,7 @@
 package httpserver
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/KozlovNikolai/pfp/internal/chat/domain"
@@ -52,19 +53,30 @@ func (h HTTPServer) SignUp(c *gin.Context) {
 		return
 	}
 	var chats []ChatResponse
-	chat, err := h.chatService.GetChatByNameAndType(c, "common chat", "system")
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"failure get common system chat id": err.Error()})
-		return
-	}
-	// log.Printf("chat response: %+v", chat)
-	chatsDomain, err := h.chatService.AddUserToChat(c, createdUser.ID(), chat.ID())
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"failure add user to system chat": err.Error()})
-		return
-	}
-	for _, chatDomain := range chatsDomain {
-		chats = append(chats, toResponseChat(chatDomain))
+	if !(createdUser.Login() == "root@admin.ru" && createdUser.Account() == "system") {
+
+		chat, err := h.chatService.GetChatByNameAndType(c, "common chat", "system")
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"failure get common system chat id": err.Error()})
+			return
+		}
+		// log.Printf("chat response: %+v", chat)
+		err = h.chatService.AddUserToChat(c, createdUser.ID(), chat.ID())
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"failure add user to system chat": err.Error()})
+			return
+		}
+		chatsDomain, err := h.chatService.GetChatsByUser(c, createdUser.ID())
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		chatsResponse := make([]ChatResponse, len(chatsDomain))
+		for i, chatDomain := range chatsDomain {
+			chatsResponse[i] = toResponseChat(chatDomain)
+		}
 	}
 
 	response := toResponseUser(createdUser)
@@ -145,6 +157,7 @@ func (h HTTPServer) LoginUserByTokenSputnik(c *gin.Context) {
 	}
 	// log.Printf("isNew: %v", isNew)
 	var chats []ChatResponse
+	log.Printf("is New: %v", isNew)
 	if isNew {
 		chat, err := h.chatService.GetChatByNameAndType(c, "common chat", "system")
 		if err != nil {
@@ -152,9 +165,15 @@ func (h HTTPServer) LoginUserByTokenSputnik(c *gin.Context) {
 			return
 		}
 		// log.Printf("chat response: %+v", chat)
-		chatsDomain, err := h.chatService.AddUserToChat(c, registeredUser.ID(), chat.ID())
+		err = h.chatService.AddUserToChat(c, registeredUser.ID(), chat.ID())
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"failure add user to system chat": err.Error()})
+			return
+		}
+		chatsDomain, err := h.chatService.GetChatsByUser(c, registeredUser.ID())
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 		for _, chatDomain := range chatsDomain {

@@ -28,9 +28,10 @@ type IStateRepository interface {
 
 type IChatRepository interface {
 	CreateChat(context.Context, domain.Chat) (domain.Chat, error)
-	AddUserToChat(context.Context, int, int) ([]domain.Chat, error)
+	AddUserToChat(ctx context.Context, userID int, chatID int) error
 	GetChatByNameAndType(context.Context, string, string) (domain.Chat, error)
 	GetChatsByUser(ctx context.Context, userID int) ([]domain.Chat, error)
+	GetUsersByChatID(ctx context.Context, chatID int) ([]int, error)
 }
 
 type IMessageRepository interface {

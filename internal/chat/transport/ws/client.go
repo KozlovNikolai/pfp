@@ -4,48 +4,63 @@ package ws
 import (
 	"log"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
 
 // Subscriber ...
 type Subscriber struct {
-	Conn    *websocket.Conn
-	Message chan *Message
-	ID      int `json:"id"`
-	//ChatID   int    `json:"chat_id"`
-	Username string `json:"username"`
+	Conn     *websocket.Conn
+	Message  chan *MessageOne
+	ID       int       `json:"id"`
+	Pubsub   uuid.UUID `json:"pubsub"`
+	Username string    `json:"username"`
 }
 
 // Message ...
 type Message struct {
-	Content  string `json:"content"`
-	ChatID   int    `json:"chat_id"`
-	Username string `json:"username"`
+	Content     string `json:"content"`
+	ChatID      int    `json:"chat_id"`
+	Sender      int    `json:"sender_id"`
+	ChatMembers []int  `json:"chat_members"`
+}
+type MessageOne struct {
+	Content string `json:"content"`
+	ChatID  int    `json:"chat_id"`
+	Sender  int    `json:"sender_id"`
 }
 
-func (c *Subscriber) writeMessage() {
+func toMsgOne(msg Message) *MessageOne {
+	return &MessageOne{
+		Content: msg.Content,
+		ChatID:  msg.ChatID,
+		Sender:  msg.Sender,
+	}
+}
+
+func (ss *Subscriber) writeMessage() {
 	defer func() {
-		c.Conn.Close()
+		ss.Conn.Close()
 	}()
 	for {
-		m, ok := <-c.Message
+		m, ok := <-ss.Message
 		if !ok {
 			return
 		}
-		err := c.Conn.WriteJSON(m)
+		err := ss.Conn.WriteJSON(m)
 		if err != nil {
 			log.Printf("error: %v", err)
 		}
 	}
 }
 
-func (c *Subscriber) readMessage(hub *Hub) {
+func (ss *Subscriber) readMessage(hub *Hub) {
 	defer func() {
-		hub.Unregister <- c
-		c.Conn.Close()
+		hub.Unregister <- ss
+		ss.Conn.Close()
 	}()
 	for {
-		_, message, err := c.Conn.ReadMessage()
+		_, message, err := ss.Conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(
 				err,
@@ -58,8 +73,7 @@ func (c *Subscriber) readMessage(hub *Hub) {
 		}
 		msg := &Message{
 			Content: string(message),
-			//ChatID:   c.ChatID,
-			Username: c.Username,
+			Sender:  ss.ID,
 		}
 		hub.Broadcast <- msg
 	}

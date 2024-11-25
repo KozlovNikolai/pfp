@@ -1,5 +1,7 @@
 package httpserver
 
+import "github.com/KozlovNikolai/pfp/internal/chat/transport/ws"
+
 // HTTPServer is a HTTP server for ports
 type HTTPServer struct {
 	userService  IUserService
@@ -7,6 +9,7 @@ type HTTPServer struct {
 	stateService IStateService
 	chatService  IChatService
 	msgService   IMessageService
+	wsHandler    *ws.Handler
 }
 
 // NewHTTPServer creates a new HTTP server for ports
@@ -16,6 +19,7 @@ func NewHTTPServer(
 	tokenService ITokenService,
 	stateService IStateService,
 	msgService IMessageService,
+	wsHandler *ws.Handler,
 ) HTTPServer {
 	return HTTPServer{
 		userService:  userService,
@@ -23,5 +27,6 @@ func NewHTTPServer(
 		stateService: stateService,
 		chatService:  chatService,
 		msgService:   msgService,
+		wsHandler:    wsHandler,
 	}
 }

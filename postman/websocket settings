@@ -1,4 +1,4 @@
-wss://localhost:8443/auth/ws/joinChat/1?userID=1&username=user1
+wss://localhost:8443/auth/subscribe/{{pubsub}}
 Headers:
 Authorization - {{token}}
 

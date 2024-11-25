@@ -1,11 +1,138 @@
 {
 	"info": {
-		"_postman_id": "f2e784ae-4435-4890-ad1b-21b5c5052e0a",
+		"_postman_id": "4b8205cd-4f9e-4b92-bdc1-cac89b03efe0",
 		"name": "pfp",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "35109601"
 	},
 	"item": [
+		{
+			"name": "Admin",
+			"item": [
+				{
+					"name": "signup admin",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"account\":\"system\",\n  \"login\": \"root@admin.ru\",\n  \"password\": \"123456\",\n  \"name\":\"admin\",\n  \"surname\":\"root\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:8443/signup",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "8443",
+							"path": [
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "signin admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);",
+									"postman.setEnvironmentVariable(\"token\", jsonData.token);",
+									"postman.setEnvironmentVariable(\"pubsub\", jsonData.pubsub);",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"account\":\"system\",\n  \"login\": \"root@admin.ru\",\n  \"password\": \"123456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:8443/signin",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "8443",
+							"path": [
+								"signin"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create system chat",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\":\"common chat\",\n    \"chat_type\":\"system\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:8443/auth/createChat",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "8443",
+							"path": [
+								"auth",
+								"createChat"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
 		{
 			"name": "signup",
 			"request": {
@@ -13,7 +140,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"account\":\"email\",\n  \"login\": \"cmd@cmd.bk\",\n  \"password\": \"123456\"\n}",
+					"raw": "{\n  \"account\":\"email\",\n  \"login\": \"cmd@cmd.ru\",\n  \"password\": \"123456\",\n  \"name\":\"\",\n  \"surname\":\"\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -42,7 +169,9 @@
 					"script": {
 						"exec": [
 							"var jsonData = JSON.parse(responseBody);",
-							"postman.setEnvironmentVariable(\"token\", jsonData.token);"
+							"postman.setEnvironmentVariable(\"token\", jsonData.token);",
+							"postman.setEnvironmentVariable(\"pubsub\", jsonData.pubsub);",
+							""
 						],
 						"type": "text/javascript",
 						"packages": {}
@@ -54,7 +183,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"account\":\"email\",\n  \"login\": \"cmd@cmd.bk\",\n  \"password\": \"123456\"\n}",
+					"raw": "{\n  \"account\":\"email\",\n  \"login\": \"cmd@cmd.ru\",\n  \"password\": \"123456\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -134,7 +263,9 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							""
+							"var jsonData = JSON.parse(responseBody);",
+							"postman.setEnvironmentVariable(\"token\", jsonData.token);",
+							"postman.setEnvironmentVariable(\"pubsub\", jsonData.pubsub);"
 						],
 						"type": "text/javascript",
 						"packages": {}
@@ -187,7 +318,9 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							""
+							"var jsonData = JSON.parse(responseBody);",
+							"postman.setEnvironmentVariable(\"token\", jsonData.token);",
+							"postman.setEnvironmentVariable(\"pubsub\", jsonData.pubsub);"
 						],
 						"type": "text/javascript",
 						"packages": {}
@@ -234,7 +367,7 @@
 			"response": []
 		},
 		{
-			"name": "get rooms",
+			"name": "get chats",
 			"event": [
 				{
 					"listen": "test",
@@ -261,7 +394,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "https://localhost:8443/auth/ws/getRooms",
+					"raw": "https://localhost:8443/auth/getChats",
 					"protocol": "https",
 					"host": [
 						"localhost"
@@ -269,8 +402,160 @@
 					"port": "8443",
 					"path": [
 						"auth",
-						"ws",
-						"getRooms"
+						"getChats"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "send msg",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"chat_id\":1,\n    \"msg_type\":\"nop\",\n    \"text\":\"fourth message\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:8443/auth/sendmsg",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "8443",
+					"path": [
+						"auth",
+						"sendmsg"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get msgs",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"chat_id\":1,\n    \"msg_type\":\"nop\",\n    \"limit\":2,\n    \"offset\":2\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:8443/auth/getmsgs",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "8443",
+					"path": [
+						"auth",
+						"getmsgs"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add user to chat",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"chat_id\":2,\n    \"user_id\":7\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:8443/auth/addToChat",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "8443",
+					"path": [
+						"auth",
+						"addToChat"
 					]
 				}
 			},
@@ -304,7 +589,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "https://localhost:8443/auth/ws/getClients/1",
+					"raw": "https://localhost:8443/auth/getClients/1",
 					"protocol": "https",
 					"host": [
 						"localhost"
@@ -312,7 +597,6 @@
 					"port": "8443",
 					"path": [
 						"auth",
-						"ws",
 						"getClients",
 						"1"
 					]
@@ -349,7 +633,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"id\":\"1\",\n    \"name\":\"room1\"\n}",
+					"raw": "{\n    \"id\":\"1\",\n    \"name\":\"chat1\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -357,7 +641,7 @@
 					}
 				},
 				"url": {
-					"raw": "https://localhost:8443/auth/ws/createRoom",
+					"raw": "https://localhost:8443/auth/createChat",
 					"protocol": "https",
 					"host": [
 						"localhost"
@@ -365,8 +649,58 @@
 					"port": "8443",
 					"path": [
 						"auth",
-						"ws",
-						"createRoom"
+						"createChat"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create any chat",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\":\"chat1\",\n    \"chat_type\":\"system\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:8443/auth/createChat",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "8443",
+					"path": [
+						"auth",
+						"createChat"
 					]
 				}
 			},

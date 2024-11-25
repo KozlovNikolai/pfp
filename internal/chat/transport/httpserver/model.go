@@ -93,3 +93,17 @@ func (c *GetMessagesRequest) Validate() error {
 	validate := validator.New(validator.WithRequiredStructEnabled())
 	return validate.Struct(c)
 }
+
+type AddToChatRequest struct {
+	ChatID int `json:"chat_id" db:"chat_id" validate:"gt=0,required"`
+	UserID int `json:"user_id" db:"user_id" validate:"gt=0,required"`
+}
+
+func (a *AddToChatRequest) Validate() error {
+	validate := validator.New(validator.WithRequiredStructEnabled())
+	return validate.Struct(a)
+}
+
+type AddToChatResponse struct {
+	Status string `json:"status"`
+}

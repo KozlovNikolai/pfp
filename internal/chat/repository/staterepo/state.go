@@ -2,6 +2,7 @@ package staterepo
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"time"
 
@@ -70,8 +71,11 @@ func (s *StateRepo) DeleteConnFromState(ctx context.Context, userID int, pubsub 
 		return domain.State{}, false
 	}
 	for i, connect := range state.Connects {
+		fmt.Printf("i: %d, connect.Pubsub: %v, pubsub: %v\n", i, connect.Pubsub, pubsub)
 		if connect.Pubsub == pubsub {
+			fmt.Printf("len(state.Connects): %d\n", len(state.Connects))
 			state.Connects[i] = state.Connects[len(state.Connects)-1]
+
 			state.Connects = state.Connects[:len(state.Connects)-1]
 			if len(state.Connects) == 0 {
 				delete(s.db.states, userID)
