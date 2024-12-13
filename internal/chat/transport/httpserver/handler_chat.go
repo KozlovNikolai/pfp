@@ -95,5 +95,5 @@ func (h HTTPServer) GetChatsByUser(c *gin.Context) {
 	for i, chatDomain := range chatsDomain {
 		chatsResponse[i] = toResponseChat(chatDomain)
 	}
-	c.JSON(http.StatusCreated, chatsResponse)
+	c.JSON(http.StatusOK, chatsResponse)
 }

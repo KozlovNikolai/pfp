@@ -207,5 +207,6 @@ func (h HTTPServer) LoginUserByTokenSputnik(c *gin.Context) {
 
 // SignOut ...
 func (h HTTPServer) SignOut(c *gin.Context) {
-	_ = c
+	// _ = c
+	c.JSON(http.StatusOK, gin.H{"status": "disconnected"})
 }

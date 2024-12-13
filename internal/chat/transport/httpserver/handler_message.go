@@ -84,5 +84,5 @@ func (h HTTPServer) GetMessages(c *gin.Context) {
 	for i, msgDomain := range msgsDomain {
 		msgsResponse[i] = toResponseMessage(msgDomain)
 	}
-	c.JSON(http.StatusCreated, msgsResponse)
+	c.JSON(http.StatusOK, msgsResponse)
 }

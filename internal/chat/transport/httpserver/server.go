@@ -173,6 +173,10 @@ func (s *Router) Run() {
 		err != http.ErrServerClosed {
 		s.logger.Fatal(fmt.Sprintf("Could not listen on %s", config.Cfg.Address), zap.Error(err))
 	}
+	// if err := server.ListenAndServe(); err != nil &&
+	// 	err != http.ErrServerClosed {
+	// 	s.logger.Fatal(fmt.Sprintf("Could not listen on %s", config.Cfg.Address), zap.Error(err))
+	// }
 	<-stopped
 
 	log.Printf("Bye!")

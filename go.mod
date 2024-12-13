@@ -5,7 +5,6 @@ go 1.22.5
 require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-playground/validator/v10 v10.22.1
-	github.com/gofrs/uuid v4.0.0+incompatible
 	github.com/gorilla/websocket v1.5.3
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/stretchr/testify v1.9.0
