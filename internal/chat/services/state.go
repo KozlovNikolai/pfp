@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"log"
 
 	"github.com/KozlovNikolai/pfp/internal/chat/domain"
 	"github.com/google/uuid"
@@ -10,29 +11,50 @@ import (
 
 // UserService is a User service
 type StateService struct {
-	repo IStateRepository
+	repoState IStateRepository
+	repoUser  IUserRepository
 }
 
 // DeleteConnFromState implements ws.IStateService.
 func (s StateService) DeleteConnFromState(ctx context.Context, userID int, pubsub uuid.UUID) (domain.State, bool) {
-	return s.repo.DeleteConnFromState(ctx, userID, pubsub)
+	return s.repoState.DeleteConnFromState(ctx, userID, pubsub)
 }
 
 // GetState implements ws.IStateService.
 func (s StateService) GetState(ctx context.Context, userID int) (domain.State, bool) {
-	return s.repo.GetState(ctx, userID)
+	return s.repoState.GetState(ctx, userID)
+}
+
+// user,state, index of connect, ifExists
+func (s StateService) GetStateByPubsub(ctx context.Context, pubsub uuid.UUID) (domain.User, domain.State, int, bool) {
+	userID, state, indexConn, ok := s.repoState.GetStateByPubsub(ctx, pubsub)
+	user, err := s.repoUser.GetUserByID(ctx, userID)
+	if err != nil {
+		log.Printf("service GetStateByPubsub GetUserByID - failure")
+		return domain.User{}, domain.State{}, 0, false
+	}
+	return user, state, indexConn, ok
 }
 
 // SetState implements ws.IStateService.
 func (s StateService) SetState(ctx context.Context, userID int, pubsub uuid.UUID, conn *websocket.Conn) domain.State {
-	return s.repo.SetState(ctx, userID, pubsub, conn)
+	return s.repoState.SetState(ctx, userID, pubsub, conn)
+}
+
+func (s StateService) SetConnIntoState(ctx context.Context, userID int, pubsub uuid.UUID, conn *websocket.Conn, indexConn int) bool {
+	return s.repoState.SetConnIntoState(ctx, userID, pubsub, conn, indexConn)
 }
 
 // NewUserService creates a new User service
-func NewStateService(repo IStateRepository) StateService {
+func NewStateService(repoState IStateRepository, repoUser IUserRepository) StateService {
 	return StateService{
-		repo: repo,
+		repoState: repoState,
+		repoUser:  repoUser,
 	}
+}
+
+func (s StateService) GetAllStates(ctx context.Context) []domain.State {
+	return s.repoState.GetAllStates(ctx)
 }
 
 // // GetUserByID ...

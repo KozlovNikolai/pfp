@@ -36,8 +36,8 @@ func (m *MsgRepo) SaveMsg(ctx context.Context, msg domain.Message) error {
 	}
 	defer func() {
 		err := tx.Rollback(ctx)
-		if err != nil {
-			log.Printf("error:%v", err)
+		if err != nil && err.Error() != "tx is closed" {
+			log.Printf("save message rollback error:%v", err)
 		}
 	}()
 	// Сохранение сообщения
@@ -82,8 +82,8 @@ func (m *MsgRepo) GetMessagesByChatID(ctx context.Context, chatID, limit, offset
 	}
 	defer func() {
 		err := tx.Rollback(ctx)
-		if err != nil {
-			log.Printf("error:%v", err)
+		if err != nil && err.Error() != "tx is closed" {
+			log.Printf("get message by chat id rollback error:%v", err)
 		}
 	}()
 

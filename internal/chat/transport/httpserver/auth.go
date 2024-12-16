@@ -9,6 +9,7 @@ import (
 	"github.com/KozlovNikolai/pfp/internal/chat/transport/httpserver/middlewares"
 	"github.com/KozlovNikolai/pfp/internal/pkg/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 const (
@@ -118,6 +119,12 @@ func (h HTTPServer) SignIn(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error-generated-pubsub": err.Error()})
 		return
 	}
+
+	h.stateService.SetState(c, user.ID(), pubsub, nil)
+	state, ok := h.stateService.GetState(c, user.ID())
+	log.Printf("user ID: %d, state: %+v\n", user.ID(), state)
+	log.Printf("ok: %+v\n", ok)
+
 	var chats []ChatResponse
 	chatsDomain, err := h.chatService.GetChatsByUser(c, user.ID())
 	if err != nil {
@@ -201,12 +208,41 @@ func (h HTTPServer) LoginUserByTokenSputnik(c *gin.Context) {
 		return
 	}
 
+	h.stateService.SetState(c, registeredUser.ID(), pubsub, nil)
+	state, ok := h.stateService.GetState(c, registeredUser.ID())
+	log.Printf("user ID: %d, state: %+v\n", registeredUser.ID(), state)
+	log.Printf("ok: %+v\n", ok)
+
 	response := toResponseUser(registeredUser)
 	c.JSON(http.StatusOK, gin.H{"pubsub": pubsub, "token": token, "user": response, "chats": chats})
 }
 
 // SignOut ...
 func (h HTTPServer) SignOut(c *gin.Context) {
-	// _ = c
+	pubsub, err := uuid.Parse(c.Param("pubsub"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+
+	userCtx, err := utils.GetDataFromContext[domain.User](c, "user")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": domain.ErrNoUserInContext.Error()})
+		return
+	}
+
+	isError := false
+	state, ok := h.stateService.DeleteConnFromState(c, userCtx.ID(), pubsub)
+	if !ok {
+		isError = true
+		log.Printf("DeleteConnFromState - failure")
+	}
+	ok = h.wsHandler.Unsubscribe(pubsub)
+	if !ok {
+		isError = true
+		log.Printf("Unsubscribe - failure")
+	}
+	if isError {
+		c.JSON(http.StatusOK, gin.H{"status": "connection not found", "state": toResponseState(state)})
+	}
 	c.JSON(http.StatusOK, gin.H{"status": "disconnected"})
 }

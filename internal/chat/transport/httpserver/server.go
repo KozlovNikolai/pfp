@@ -64,7 +64,7 @@ func NewRouter() *Router {
 
 	// создаем сервисы
 	chatService := services.NewChatService(chatRepo)
-	stateService := services.NewStateService(stateRepo)
+	stateService := services.NewStateService(stateRepo, userRepo)
 	userService := services.NewUserService(userRepo)
 	msgService := services.NewMessageService(msgRepo)
 	tokenService := services.NewTokenService(
@@ -114,11 +114,14 @@ func NewRouter() *Router {
 	open.POST("signup", httpServer.SignUp)
 	open.POST("signin", httpServer.SignIn)
 	//open.GET("signout", httpServer.SignOut)
+	// websocket routes
+	open.GET("/subscribe/:pubsub", wsHandler.Subscribe)
 
 	// доступ для админов
 	admin := server.router.Group("/admin/")
 	admin.Use(httpServer.CheckAdmin())
 	admin.GET("users", httpServer.GetUsers)
+	admin.GET("states", httpServer.GetStates)
 
 	// доступ для авторизации по токену спутника
 	authSputnik := server.router.Group("/sputnik/")
@@ -129,15 +132,12 @@ func NewRouter() *Router {
 	authorized := server.router.Group("/auth/")
 	authorized.Use(httpServer.CheckAuthorizedUser())
 	authorized.GET("user", httpServer.GetUser)
-	authorized.GET("signout", httpServer.SignOut)
+	authorized.GET("signout/:pubsub", httpServer.SignOut)
 	authorized.POST("sendmsg", httpServer.SendMessage)
 	authorized.POST("getmsgs", httpServer.GetMessages)
 	authorized.GET("getChats", httpServer.GetChatsByUser)
 	authorized.POST("/createChat", httpServer.CreateChat)
 	authorized.POST("/addToChat", httpServer.AddToChat)
-
-	// websocket routes
-	authorized.GET("/subscribe/:pubsub", wsHandler.Subscribe)
 
 	return server
 }
@@ -169,14 +169,14 @@ func (s *Router) Run() {
 		}
 		close(stopped)
 	}()
-	if err := server.ListenAndServeTLS(config.CertFile, config.KeyFile); err != nil &&
-		err != http.ErrServerClosed {
-		s.logger.Fatal(fmt.Sprintf("Could not listen on %s", config.Cfg.Address), zap.Error(err))
-	}
-	// if err := server.ListenAndServe(); err != nil &&
+	// if err := server.ListenAndServeTLS(config.CertFile, config.KeyFile); err != nil &&
 	// 	err != http.ErrServerClosed {
 	// 	s.logger.Fatal(fmt.Sprintf("Could not listen on %s", config.Cfg.Address), zap.Error(err))
 	// }
+	if err := server.ListenAndServe(); err != nil &&
+		err != http.ErrServerClosed {
+		s.logger.Fatal(fmt.Sprintf("Could not listen on %s", config.Cfg.Address), zap.Error(err))
+	}
 	<-stopped
 
 	log.Printf("Bye!")

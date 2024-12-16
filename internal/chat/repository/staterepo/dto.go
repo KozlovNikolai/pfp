@@ -25,6 +25,7 @@ func stateToDomain(state models.State) domain.State {
 		domainConnects[i].CreatedAt = connect.CreatedAt
 	}
 	return domain.State{
+		UserID:   state.UserID,
 		Connects: domainConnects,
 	}
 }

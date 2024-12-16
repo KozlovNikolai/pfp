@@ -6,6 +6,7 @@ import (
 )
 
 type State struct {
+	UserID   int
 	Connects []Connect `json:"connects" db:"connects"`
 	// Contacts []Contact `json:"contacts" db:"contacts"`
 	// Chats    []Chat    `json:"chats" db:"chats"`

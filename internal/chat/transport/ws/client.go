@@ -49,7 +49,7 @@ func (ss *Subscriber) writeMessage() {
 		}
 		err := ss.Conn.WriteJSON(m)
 		if err != nil {
-			log.Printf("error: %v", err)
+			log.Printf("write message error: %v", err)
 		}
 	}
 }
@@ -67,7 +67,7 @@ func (ss *Subscriber) readMessage(hub *Hub) {
 				websocket.CloseGoingAway,
 				websocket.CloseAbnormalClosure,
 			) {
-				log.Printf("error: %v", err)
+				log.Printf("read message error: %v", err)
 			}
 			break
 		}

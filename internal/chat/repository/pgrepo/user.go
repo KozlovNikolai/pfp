@@ -42,8 +42,8 @@ func (u *UserRepo) CreateUser(ctx context.Context, user domain.User) (domain.Use
 	}
 	defer func() {
 		err := tx.Rollback(ctx)
-		if err != nil {
-			log.Printf("error:%v", err)
+		if err != nil && err.Error() != "tx is closed" {
+			log.Printf("create user rollback error:%v", err)
 		}
 	}()
 	// Вставка данных о пользователе и получение ID
@@ -142,8 +142,8 @@ func (u *UserRepo) DeleteUser(ctx context.Context, id int) error {
 	}
 	defer func() {
 		err := tx.Rollback(ctx)
-		if err != nil {
-			log.Printf("error:%v", err)
+		if err != nil && err.Error() != "tx is closed" {
+			log.Printf("delete user rollback error:%v", err)
 		}
 	}()
 	// Проверяем, что пользователь не связан ни с одним заказом.
@@ -303,8 +303,8 @@ func (u *UserRepo) UpdateUser(ctx context.Context, user domain.User) (domain.Use
 	}
 	defer func() {
 		err := tx.Rollback(ctx)
-		if err != nil {
-			log.Printf("error:%v", err)
+		if err != nil && err.Error() != "tx is closed" {
+			log.Printf("update user rollback error:%v", err)
 		}
 	}()
 	// SQL-запрос на обновление данных Поставщика

@@ -24,6 +24,9 @@ type IStateRepository interface {
 	SetState(ctx context.Context, userID int, pubsub uuid.UUID, conn *websocket.Conn) domain.State
 	GetState(ctx context.Context, userID int) (domain.State, bool)
 	DeleteConnFromState(ctx context.Context, userID int, pubsub uuid.UUID) (domain.State, bool)
+	GetStateByPubsub(ctx context.Context, pubsub uuid.UUID) (int, domain.State, int, bool) //userID,state, index of connect, ifExists
+	SetConnIntoState(ctx context.Context, userID int, pubsub uuid.UUID, conn *websocket.Conn, indexConn int) bool
+	GetAllStates(ctx context.Context) []domain.State
 }
 
 type IChatRepository interface {

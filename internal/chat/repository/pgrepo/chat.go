@@ -40,8 +40,8 @@ func (c *ChatRepo) CreateChat(ctx context.Context, chat domain.Chat) (domain.Cha
 	}
 	defer func() {
 		err := tx.Rollback(ctx)
-		if err != nil {
-			log.Printf("error:%v", err)
+		if err != nil && err.Error() != "tx is closed" {
+			log.Printf("create chat rollback error:%v", err)
 		}
 	}()
 	// Вставка данных о чате и получение ID
@@ -92,8 +92,8 @@ func (c *ChatRepo) AddUserToChat(ctx context.Context, userID int, chatID int) er
 	}
 	defer func() {
 		err := tx.Rollback(ctx)
-		if err != nil {
-			log.Printf("error:%v", err)
+		if err != nil && err.Error() != "tx is closed" {
+			log.Printf("add user to chat rollback error:%v", err)
 		}
 	}()
 	// Вставка данных о чате и получение ID
@@ -132,8 +132,8 @@ func (c *ChatRepo) GetChatsByUser(ctx context.Context, userID int) ([]domain.Cha
 	}
 	defer func() {
 		err := tx.Rollback(ctx)
-		if err != nil {
-			log.Printf("error:%v", err)
+		if err != nil && err.Error() != "tx is closed" {
+			log.Printf("get chats by user rollback error:%v", err)
 		}
 	}()
 
@@ -198,8 +198,8 @@ func (c *ChatRepo) GetChatByNameAndType(ctx context.Context, name string, chatTy
 	}
 	defer func() {
 		err := tx.Rollback(ctx)
-		if err != nil {
-			log.Printf("error:%v", err)
+		if err != nil && err.Error() != "tx is closed" {
+			log.Printf("get chats by name and type rollback error:%v", err)
 		}
 	}()
 
@@ -241,8 +241,8 @@ func (c *ChatRepo) GetUsersByChatID(ctx context.Context, chatID int) ([]int, err
 	}
 	defer func() {
 		err := tx.Rollback(ctx)
-		if err != nil {
-			log.Printf("error:%v", err)
+		if err != nil && err.Error() != "tx is closed" {
+			log.Printf("get user by chat id rollback error:%v", err)
 		}
 	}()
 

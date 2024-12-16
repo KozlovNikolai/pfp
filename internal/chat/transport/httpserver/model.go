@@ -2,6 +2,7 @@ package httpserver
 
 import (
 	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 )
 
 // UserRequest is ...
@@ -106,4 +107,15 @@ func (a *AddToChatRequest) Validate() error {
 
 type AddToChatResponse struct {
 	Status string `json:"status"`
+}
+
+type StateResponse struct {
+	UserID   int       `json:"user_id"`
+	Connects []Connect `json:"connects"`
+}
+
+type Connect struct {
+	Conn      bool      `json:"conn"`
+	Pubsub    uuid.UUID `json:"pubsub"`
+	CreatedAt int64     `json:"created_at"`
 }

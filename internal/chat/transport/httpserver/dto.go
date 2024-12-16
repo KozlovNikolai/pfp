@@ -104,3 +104,20 @@ func toResponseMessage(msg domain.Message) MessageResponse {
 		UpdatedAt: msg.UpdatedAt(),
 	}
 }
+
+func toResponseState(state domain.State) StateResponse {
+	var resp StateResponse
+	resp.UserID = state.UserID
+	resp.Connects = make([]Connect, len(state.Connects))
+	for index, connect := range state.Connects {
+		resp.Connects[index].Pubsub = connect.Pubsub
+		resp.Connects[index].CreatedAt = connect.CreatedAt
+		if connect.Conn == nil {
+			resp.Connects[index].Conn = false
+		} else {
+			resp.Connects[index].Conn = true
+		}
+
+	}
+	return resp
+}
