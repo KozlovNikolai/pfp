@@ -67,8 +67,8 @@
 							}
 						},
 						"url": {
-							"raw": "https://localhost:8443/signin",
-							"protocol": "https",
+							"raw": "http://localhost:8443/signin",
+							"protocol": "http",
 							"host": [
 								"localhost"
 							],
@@ -130,6 +130,122 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "get states",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\":\"common chat\",\n    \"chat_type\":\"system\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8443/admin/states?limit=10&offset=0",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8443",
+							"path": [
+								"admin",
+								"states"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "offset",
+									"value": "0"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get users",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8443/admin/users?limit=10&offset=0",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8443",
+							"path": [
+								"admin",
+								"users"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "offset",
+									"value": "0"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -148,8 +264,8 @@
 					}
 				},
 				"url": {
-					"raw": "https://localhost:8443/signup",
-					"protocol": "https",
+					"raw": "http://localhost:8443/signup",
+					"protocol": "http",
 					"host": [
 						"localhost"
 					],
@@ -191,8 +307,8 @@
 					}
 				},
 				"url": {
-					"raw": "https://localhost:8443/signin",
-					"protocol": "https",
+					"raw": "http://localhost:8443/signin",
+					"protocol": "http",
 					"host": [
 						"localhost"
 					],
@@ -205,7 +321,7 @@
 			"response": []
 		},
 		{
-			"name": "get users",
+			"name": "signout",
 			"event": [
 				{
 					"listen": "test",
@@ -232,25 +348,16 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "https://localhost:8443/admin/users?limit=10&offset=0",
-					"protocol": "https",
+					"raw": "http://localhost:8443/auth/signout/{{pubsub}}",
+					"protocol": "http",
 					"host": [
 						"localhost"
 					],
 					"port": "8443",
 					"path": [
-						"admin",
-						"users"
-					],
-					"query": [
-						{
-							"key": "limit",
-							"value": "10"
-						},
-						{
-							"key": "offset",
-							"value": "0"
-						}
+						"auth",
+						"signout",
+						"{{pubsub}}"
 					]
 				}
 			},
@@ -278,7 +385,7 @@
 					"bearer": [
 						{
 							"key": "token",
-							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNSwiZXhwIjoxNzM0MjcxMTk5LCJqdGkiOiIwYTY0MmFiMy04Y2Y5LTRiNDMtOGU1ZS02MzU1YzBjYjVjZDUifQ.pbmltS3fVEGh7uAnbsA4_TsdwJccp5Oi2IIlQhOyCbs",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNSwiZXhwIjoxNzM2OTM5NzY5LCJqdGkiOiI0NTU4MTZiNS1lMjUxLTRhMDAtYjFjNC1hNjdiNWZlZWQ4NzUifQ.MoN05bewy4AEmPn_NDNx-0jt2c9mQYZw5MC-oCOdAt0",
 							"type": "string"
 						}
 					]
@@ -297,8 +404,8 @@
 					}
 				],
 				"url": {
-					"raw": "https://localhost:8443/sputnik/login",
-					"protocol": "https",
+					"raw": "http://localhost:8443/sputnik/login",
+					"protocol": "http",
 					"host": [
 						"localhost"
 					],
@@ -333,7 +440,7 @@
 					"bearer": [
 						{
 							"key": "token",
-							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJleHAiOjE3MzM5MDI2NTgsImp0aSI6ImU3YTM2YjU2LWI4NDMtNGVmNi1hMGI3LThlMjQzZmQxZWZhYSJ9.MArF0EBOZ0L2pWqkWErqX7t-XNG8tZ5OMr7Q19AcUQ4",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJleHAiOjE3MzY2NjcwMjEsImp0aSI6ImFjM2U2ZTQ0LWE0OGUtNDg3Ny1hMGQ1LTY1MTMyOTQwMjIzMSJ9.D1PcxCOH2i5GrgCq189cs19XZtF4NN5Q4NI8VO-Yd2A",
 							"type": "string"
 						}
 					]
@@ -352,8 +459,8 @@
 					}
 				],
 				"url": {
-					"raw": "https://localhost:8443/sputnik/login",
-					"protocol": "https",
+					"raw": "http://localhost:8443/sputnik/login",
+					"protocol": "http",
 					"host": [
 						"localhost"
 					],
@@ -394,8 +501,8 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "https://localhost:8443/auth/getChats",
-					"protocol": "https",
+					"raw": "http://localhost:8443/auth/getChats",
+					"protocol": "http",
 					"host": [
 						"localhost"
 					],
@@ -445,8 +552,8 @@
 					}
 				},
 				"url": {
-					"raw": "https://localhost:8443/auth/sendmsg",
-					"protocol": "https",
+					"raw": "http://localhost:8443/auth/sendmsg",
+					"protocol": "http",
 					"host": [
 						"localhost"
 					],
@@ -488,7 +595,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"chat_id\":1,\n    \"msg_type\":\"nop\",\n    \"limit\":2,\n    \"offset\":2\n}",
+					"raw": "{\n    \"chat_id\":1,\n    \"msg_type\":\"nop\",\n    \"limit\":20,\n    \"offset\":0\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -496,8 +603,8 @@
 					}
 				},
 				"url": {
-					"raw": "https://localhost:8443/auth/getmsgs",
-					"protocol": "https",
+					"raw": "http://localhost:8443/auth/getmsgs",
+					"protocol": "http",
 					"host": [
 						"localhost"
 					],
@@ -547,8 +654,8 @@
 					}
 				},
 				"url": {
-					"raw": "https://localhost:8443/auth/addToChat",
-					"protocol": "https",
+					"raw": "http://localhost:8443/auth/addToChat",
+					"protocol": "http",
 					"host": [
 						"localhost"
 					],
@@ -562,7 +669,7 @@
 			"response": []
 		},
 		{
-			"name": "get clients",
+			"name": "enter to chat",
 			"event": [
 				{
 					"listen": "test",
@@ -589,16 +696,22 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "https://localhost:8443/auth/getClients/1",
-					"protocol": "https",
+					"raw": "http://localhost:8443/auth/enter/{{pubsub}}?chat_id=1",
+					"protocol": "http",
 					"host": [
 						"localhost"
 					],
 					"port": "8443",
 					"path": [
 						"auth",
-						"getClients",
-						"1"
+						"enter",
+						"{{pubsub}}"
+					],
+					"query": [
+						{
+							"key": "chat_id",
+							"value": "1"
+						}
 					]
 				}
 			},
@@ -641,8 +754,8 @@
 					}
 				},
 				"url": {
-					"raw": "https://localhost:8443/auth/createChat",
-					"protocol": "https",
+					"raw": "http://localhost:8443/auth/createChat",
+					"protocol": "http",
 					"host": [
 						"localhost"
 					],
@@ -692,8 +805,8 @@
 					}
 				},
 				"url": {
-					"raw": "https://localhost:8443/auth/createChat",
-					"protocol": "https",
+					"raw": "http://localhost:8443/auth/createChat",
+					"protocol": "http",
 					"host": [
 						"localhost"
 					],

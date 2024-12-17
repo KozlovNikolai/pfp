@@ -27,6 +27,7 @@ type IStateRepository interface {
 	GetStateByPubsub(ctx context.Context, pubsub uuid.UUID) (int, domain.State, int, bool) //userID,state, index of connect, ifExists
 	SetConnIntoState(ctx context.Context, userID int, pubsub uuid.UUID, conn *websocket.Conn, indexConn int) bool
 	GetAllStates(ctx context.Context) []domain.State
+	SetCurrentChat(ctx context.Context, userID int, pubsub uuid.UUID, chatID int) bool
 }
 
 type IChatRepository interface {
@@ -34,7 +35,9 @@ type IChatRepository interface {
 	AddUserToChat(ctx context.Context, userID int, chatID int) error
 	GetChatByNameAndType(context.Context, string, string) (domain.Chat, error)
 	GetChatsByUser(ctx context.Context, userID int) ([]domain.Chat, error)
-	GetUsersByChatID(ctx context.Context, chatID int) ([]int, error)
+	GetUserIDsByChatID(ctx context.Context, chatID int) ([]int, error)
+	IsChatMember(ctx context.Context, userID int, chatID int) bool
+	GetUsersByChatID(ctx context.Context, chatID int) ([]domain.User, error)
 }
 
 type IMessageRepository interface {

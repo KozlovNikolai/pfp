@@ -33,6 +33,7 @@ type UserResponse struct {
 	UserType  string `json:"type" db:"type"`
 	CreatedAt int64  `json:"created_at" db:"created_at"`
 	UpdatedAt int64  `json:"updated_at" db:"updated_at"`
+	Status    string `json:"status"`
 }
 
 type ChatCreateRequest struct {
@@ -115,7 +116,8 @@ type StateResponse struct {
 }
 
 type Connect struct {
-	Conn      bool      `json:"conn"`
-	Pubsub    uuid.UUID `json:"pubsub"`
-	CreatedAt int64     `json:"created_at"`
+	Conn        bool      `json:"conn"`
+	Pubsub      uuid.UUID `json:"pubsub"`
+	CreatedAt   int64     `json:"created_at"`
+	CurrentChat int       `json:"current_chat"`
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/KozlovNikolai/pfp/internal/chat/domain"
 	"github.com/KozlovNikolai/pfp/internal/chat/repository/models"
 	"github.com/KozlovNikolai/pfp/internal/pkg/pg"
+	"github.com/jackc/pgx/v4"
 )
 
 // UserRepo ...
@@ -233,7 +234,7 @@ func (c *ChatRepo) GetChatByNameAndType(ctx context.Context, name string, chatTy
 	// fmt.Printf("domainChat: %v\n", domainChat)
 	return chatToDomain(chat), nil
 }
-func (c *ChatRepo) GetUsersByChatID(ctx context.Context, chatID int) ([]int, error) {
+func (c *ChatRepo) GetUserIDsByChatID(ctx context.Context, chatID int) ([]int, error) {
 	// Начинаем транзакцию
 	tx, err := c.db.RO.Begin(ctx)
 	if err != nil {
@@ -242,7 +243,7 @@ func (c *ChatRepo) GetUsersByChatID(ctx context.Context, chatID int) ([]int, err
 	defer func() {
 		err := tx.Rollback(ctx)
 		if err != nil && err.Error() != "tx is closed" {
-			log.Printf("get user by chat id rollback error:%v", err)
+			log.Printf("get user ids by chat id rollback error:%v", err)
 		}
 	}()
 
@@ -284,4 +285,113 @@ func (c *ChatRepo) GetUsersByChatID(ctx context.Context, chatID int) ([]int, err
 	// domainChat := chatToDomain(insertedChat)
 	// fmt.Printf("domainChat: %v\n", domainChat)
 	return usersID, nil
+}
+
+func (c *ChatRepo) IsChatMember(ctx context.Context, userID int, chatID int) bool {
+	// Начинаем транзакцию
+	tx, err := c.db.RO.Begin(ctx)
+	if err != nil {
+		log.Print(constants.FailedToBeginTransaction, err.Error())
+		return false
+	}
+	defer func() {
+		err := tx.Rollback(ctx)
+		if err != nil && err.Error() != "tx is closed" {
+			log.Printf("is chat member rollback error:%s", err.Error())
+		}
+	}()
+
+	// SQL-запрос на получение чата по имени и типу
+	query := `
+		SELECT id
+		FROM chat_members
+		WHERE (user_id=$1 AND chat_id=$2)
+	`
+	// Выполняем запрос и сканируем результат в структуру
+	var recordID int
+	// Выполняем запрос и сканируем результат в структуру User
+	err = c.db.RO.QueryRow(ctx, query, userID, chatID).Scan(
+		&recordID,
+	)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			log.Printf("not found user:%d in chat:%d", userID, chatID)
+			return false
+		}
+		log.Printf("the search for a user:%d in the chat:%d failed: %s", userID, chatID, err.Error())
+		return false
+	}
+
+	// Фиксация транзакции
+	if err := tx.Commit(ctx); err != nil {
+		log.Print(constants.FailedToBeginTransaction, err.Error())
+		return false
+	}
+
+	return true
+}
+
+func (c *ChatRepo) GetUsersByChatID(ctx context.Context, chatID int) ([]domain.User, error) {
+	// Начинаем транзакцию
+	tx, err := c.db.RO.Begin(ctx)
+	if err != nil {
+		return nil, fmt.Errorf(constants.FailedToBeginTransaction, err)
+	}
+	defer func() {
+		err := tx.Rollback(ctx)
+		if err != nil && err.Error() != "tx is closed" {
+			log.Printf("get users by chat id rollback error:%v", err)
+		}
+	}()
+
+	// SQL-запрос на получение чатов по userID
+	query := `
+		SELECT u.id,  u.user_ext_id, u.login, u.password, u.account, u.token, u.name, u.surname, u.email, u.user_type, u.created_at, u.updated_at
+		FROM chat_members cm
+		JOIN users u ON cm.user_id = u.id
+		WHERE (cm.chat_id=$1)
+	`
+	rows, err := c.db.RO.Query(ctx, query, chatID)
+	if err != nil {
+		return nil, fmt.Errorf("failed get users by chat_id: %d: %w", chatID, err)
+	}
+	// Фиксация транзакции
+	if err := tx.Commit(ctx); err != nil {
+		return nil, fmt.Errorf(constants.FailedToBeginTransaction, err)
+	}
+	defer rows.Close()
+	// Заполняем массив пользователей
+	var users []models.User
+	for rows.Next() {
+		var user models.User
+		err := rows.Scan(
+			&user.ID,
+			&user.UserExtID,
+			&user.Login,
+			&user.Password,
+			&user.Account,
+			&user.Token,
+			&user.Name,
+			&user.Surname,
+			&user.Email,
+			&user.UserType,
+			&user.CreatedAt,
+			&user.UpdatedAt)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan row: %w", err)
+		}
+		users = append(users, user)
+	}
+
+	// Проверка на ошибки, возникшие при итерации по строкам
+	if rows.Err() != nil {
+		return nil, fmt.Errorf("error occurred during row iteration: %w", rows.Err())
+	}
+	// мапим модель в домен
+	domainUsers := make([]domain.User, len(users))
+	for i, user := range users {
+		domainUser := userToDomain(user)
+		domainUsers[i] = domainUser
+	}
+	return domainUsers, nil
 }

@@ -38,7 +38,7 @@ func (h HTTPServer) SendMessage(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	usersID, err := h.chatService.GetUsersByChatID(c, msgRequest.ChatID)
+	usersID, err := h.chatService.GetUserIDsByChatID(c, msgRequest.ChatID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

@@ -61,7 +61,14 @@ func (h HTTPServer) GetUser(c *gin.Context) {
 			)
 			return
 		}
-		response := toResponseUser(domainUser)
+
+		_, ok := h.stateService.GetState(c, domainUser.ID())
+		status := "offline"
+		if ok {
+			status = "online"
+		}
+
+		response := toResponseUser(domainUser, status)
 		c.JSON(http.StatusOK, response)
 		return
 	}
@@ -90,7 +97,12 @@ func (h HTTPServer) GetUser(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{errorGetUsers: err.Error()})
 			return
 		}
-		response := toResponseUser(user)
+		_, ok := h.stateService.GetState(c, user.ID())
+		status := "offline"
+		if ok {
+			status = "online"
+		}
+		response := toResponseUser(user, status)
 		c.JSON(http.StatusOK, response)
 		return
 	}
@@ -159,7 +171,12 @@ func (h HTTPServer) GetUsers(c *gin.Context) {
 
 	response := make([]UserResponse, 0, len(users))
 	for _, user := range users {
-		response = append(response, toResponseUser(user))
+		_, ok := h.stateService.GetState(c, user.ID())
+		status := "offline"
+		if ok {
+			status = "online"
+		}
+		response = append(response, toResponseUser(user, status))
 	}
 
 	c.JSON(http.StatusOK, response)

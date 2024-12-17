@@ -127,3 +127,22 @@ func (s *StateRepo) GetAllStates(ctx context.Context) []domain.State {
 	}
 	return states
 }
+
+func (s *StateRepo) SetCurrentChat(ctx context.Context, userID int, pubsub uuid.UUID, chatID int) bool {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	state, ok := s.db.states[userID]
+	if !ok {
+		return false
+	}
+	st := state
+
+	for index, connect := range st.Connects {
+		if connect.Pubsub == pubsub {
+			st.Connects[index].CurrentChat = chatID
+			s.db.states[userID] = st
+			return true
+		}
+	}
+	return false
+}

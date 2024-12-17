@@ -7,15 +7,16 @@ import (
 
 type State struct {
 	UserID   int
-	Connects []Connect `json:"connects" db:"connects"`
+	Connects []Connect `json:"connects"`
 	// Contacts []Contact `json:"contacts" db:"contacts"`
 	// Chats    []Chat    `json:"chats" db:"chats"`
 }
 
 type Connect struct {
-	Conn      *websocket.Conn
-	Pubsub    uuid.UUID `json:"pubsub" db:"pubsub"`
-	CreatedAt int64     `json:"created_at" db:"created_at"`
+	Conn        *websocket.Conn
+	Pubsub      uuid.UUID `json:"pubsub"`
+	CreatedAt   int64     `json:"created_at"`
+	CurrentChat int       `json:"current_chat"`
 }
 
 // type Contact struct {

@@ -67,6 +67,25 @@ func (m *MsgRepo) SaveMsg(ctx context.Context, msg domain.Message) error {
 	if err != nil {
 		return fmt.Errorf("failed to insert Message: %w", err)
 	}
+
+	//*******************************************************
+	// Обновление номера последнего сообщения в чате
+	query := `
+UPDATE chats
+SET last_message_id = $1
+WHERE id = $2
+RETURNING last_message_id
+`
+	var lastMsgId int
+
+	// Выполняем запрос и сканируем обновленный результат в структуру User
+	err = tx.QueryRow(ctx, query,
+		insertedMsg.Id, insertedMsg.ChatID).
+		Scan(&lastMsgId)
+	if err != nil {
+		return fmt.Errorf("failed to insert Message: %w", err)
+	}
+	//*******************************************************
 	// Фиксация транзакции
 	if err := tx.Commit(ctx); err != nil {
 		return fmt.Errorf(constants.FailedToBeginTransaction, err)

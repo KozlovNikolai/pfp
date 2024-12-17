@@ -22,6 +22,7 @@ type IStateService interface {
 	GetStateByPubsub(ctx context.Context, pubsub uuid.UUID) (domain.User, domain.State, int, bool) //user,state, index of connect, ifExists
 	DeleteConnFromState(ctx context.Context, userID int, pubsub uuid.UUID) (domain.State, bool)
 	GetAllStates(ctx context.Context) []domain.State
+	SetCurrentChat(ctx context.Context, userID int, pubsub uuid.UUID, chatID int) bool
 }
 
 type IUserService interface {
@@ -40,7 +41,9 @@ type IChatService interface {
 	AddUserToChat(ctx context.Context, userID int, chatID int) error
 	GetChatByNameAndType(context.Context, string, string) (domain.Chat, error)
 	GetChatsByUser(ctx context.Context, userID int) ([]domain.Chat, error)
-	GetUsersByChatID(ctx context.Context, chatID int) ([]int, error)
+	GetUserIDsByChatID(ctx context.Context, chatID int) ([]int, error)
+	IsChatMember(ctx context.Context, userID int, chatID int) bool
+	GetUsersByChatID(ctx context.Context, chatID int) ([]domain.User, error)
 }
 
 type IMessageService interface {

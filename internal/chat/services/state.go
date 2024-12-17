@@ -57,6 +57,10 @@ func (s StateService) GetAllStates(ctx context.Context) []domain.State {
 	return s.repoState.GetAllStates(ctx)
 }
 
+func (s StateService) SetCurrentChat(ctx context.Context, userID int, pubsub uuid.UUID, chatID int) bool {
+	return s.repoState.SetCurrentChat(ctx, userID, pubsub, chatID)
+}
+
 // // GetUserByID ...
 // func (s UserService) GetUserByID(ctx context.Context, id int) (domain.User, error) {
 // 	return s.repo.GetUserByID(ctx, id)

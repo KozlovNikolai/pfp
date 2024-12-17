@@ -26,7 +26,7 @@ func toDomainUser(user UserRequest) domain.User {
 
 // #########################################################
 
-func toResponseUser(user domain.User) UserResponse {
+func toResponseUser(user domain.User, status string) UserResponse {
 	return UserResponse{
 		ID:        user.ID(),
 		UserExtID: user.UserExtID(),
@@ -40,6 +40,7 @@ func toResponseUser(user domain.User) UserResponse {
 		UserType:  user.UserType(),
 		CreatedAt: user.CreatedAt(),
 		UpdatedAt: user.UpdatedAt(),
+		Status:    status,
 	}
 }
 
@@ -112,6 +113,7 @@ func toResponseState(state domain.State) StateResponse {
 	for index, connect := range state.Connects {
 		resp.Connects[index].Pubsub = connect.Pubsub
 		resp.Connects[index].CreatedAt = connect.CreatedAt
+		resp.Connects[index].CurrentChat = connect.CurrentChat
 		if connect.Conn == nil {
 			resp.Connects[index].Conn = false
 		} else {

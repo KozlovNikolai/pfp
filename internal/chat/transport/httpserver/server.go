@@ -113,7 +113,6 @@ func NewRouter() *Router {
 	open := server.router.Group("/")
 	open.POST("signup", httpServer.SignUp)
 	open.POST("signin", httpServer.SignIn)
-	//open.GET("signout", httpServer.SignOut)
 	// websocket routes
 	open.GET("/subscribe/:pubsub", wsHandler.Subscribe)
 
@@ -136,8 +135,9 @@ func NewRouter() *Router {
 	authorized.POST("sendmsg", httpServer.SendMessage)
 	authorized.POST("getmsgs", httpServer.GetMessages)
 	authorized.GET("getChats", httpServer.GetChatsByUser)
-	authorized.POST("/createChat", httpServer.CreateChat)
-	authorized.POST("/addToChat", httpServer.AddToChat)
+	authorized.POST("createChat", httpServer.CreateChat)
+	authorized.POST("addToChat", httpServer.AddToChat)
+	authorized.GET("enter/:pubsub", httpServer.EnterToChat)
 
 	return server
 }

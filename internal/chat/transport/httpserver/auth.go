@@ -80,7 +80,13 @@ func (h HTTPServer) SignUp(c *gin.Context) {
 		}
 	}
 
-	response := toResponseUser(createdUser)
+	_, ok := h.stateService.GetState(c, createdUser.ID())
+	status := "offline"
+	if ok {
+		status = "online"
+	}
+
+	response := toResponseUser(createdUser, status)
 	// c.JSON(http.StatusCreated, response, chats)
 	c.JSON(http.StatusCreated, gin.H{"user": response, "chats": chats})
 }
@@ -121,6 +127,11 @@ func (h HTTPServer) SignIn(c *gin.Context) {
 	}
 
 	h.stateService.SetState(c, user.ID(), pubsub, nil)
+	chatID := 0
+	ok := h.stateService.SetCurrentChat(c, user.ID(), pubsub, chatID)
+	if !ok {
+		log.Printf("Не удалось установить текущий чат")
+	}
 	state, ok := h.stateService.GetState(c, user.ID())
 	log.Printf("user ID: %d, state: %+v\n", user.ID(), state)
 	log.Printf("ok: %+v\n", ok)
@@ -135,7 +146,13 @@ func (h HTTPServer) SignIn(c *gin.Context) {
 		chats = append(chats, toResponseChat(chatDomain))
 	}
 
-	c.JSON(http.StatusOK, gin.H{"pubsub": pubsub, "token": token, "user": toResponseUser(user), "chats": chats})
+	_, ok = h.stateService.GetState(c, user.ID())
+	status := "offline"
+	if ok {
+		status = "online"
+	}
+
+	c.JSON(http.StatusOK, gin.H{"pubsub": pubsub, "token": token, "user": toResponseUser(user, status), "chats": chats})
 }
 
 // LoginUserByTokenSputnik is ...
@@ -209,11 +226,22 @@ func (h HTTPServer) LoginUserByTokenSputnik(c *gin.Context) {
 	}
 
 	h.stateService.SetState(c, registeredUser.ID(), pubsub, nil)
+	chatID := 0
+	ok := h.stateService.SetCurrentChat(c, registeredUser.ID(), pubsub, chatID)
+	if !ok {
+		log.Printf("Не удалось установить текущий чат")
+	}
 	state, ok := h.stateService.GetState(c, registeredUser.ID())
 	log.Printf("user ID: %d, state: %+v\n", registeredUser.ID(), state)
 	log.Printf("ok: %+v\n", ok)
 
-	response := toResponseUser(registeredUser)
+	_, ok = h.stateService.GetState(c, registeredUser.ID())
+	status := "offline"
+	if ok {
+		status = "online"
+	}
+
+	response := toResponseUser(registeredUser, status)
 	c.JSON(http.StatusOK, gin.H{"pubsub": pubsub, "token": token, "user": response, "chats": chats})
 }
 
