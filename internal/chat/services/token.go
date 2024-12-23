@@ -97,7 +97,7 @@ func (s TokenService) GetUser(ctx context.Context, token string) (domain.User, e
 func userClaimsToDomainUser(claims UserClaims) domain.User {
 	return domain.NewUser(domain.NewUserData{
 		ID:       claims.AuthID,
-		Account:  claims.AuthAccount,
+		Profile:  claims.AuthAccount,
 		Login:    claims.AuthLogin,
 		UserType: claims.AuthUserType,
 	})
@@ -107,7 +107,7 @@ func (s TokenService) GenerateTokenForRegisteredUsers(ctx context.Context, user 
 
 	payload := UserClaims{
 		AuthID:       user.ID(),
-		AuthAccount:  user.Account(),
+		AuthAccount:  user.Profile(),
 		AuthLogin:    user.Login(),
 		AuthUserType: user.UserType(),
 		StandardClaims: jwt.StandardClaims{

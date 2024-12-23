@@ -39,7 +39,7 @@ func NewRouter() *Router {
 	if err != nil {
 		panic(err)
 	}
-
+	var accountRepo services.IAccountRepository
 	var userRepo services.IUserRepository
 	var chatRepo services.IChatRepository
 	var msgRepo services.IMessageRepository
@@ -50,6 +50,7 @@ func NewRouter() *Router {
 		if err != nil {
 			logger.Fatal("pg.Dial failed: %w", zap.Error(err))
 		}
+		accountRepo = pgrepo.NewAccountRepo(pgDB)
 		userRepo = pgrepo.NewUserRepo(pgDB)
 		chatRepo = pgrepo.NewChatRepo(pgDB)
 		msgRepo = pgrepo.NewMsgRepo(pgDB)
@@ -65,6 +66,7 @@ func NewRouter() *Router {
 	// создаем сервисы
 	chatService := services.NewChatService(chatRepo)
 	stateService := services.NewStateService(stateRepo, userRepo)
+	accountService := services.NewAccountService(accountRepo)
 	userService := services.NewUserService(userRepo)
 	msgService := services.NewMessageService(msgRepo)
 	tokenService := services.NewTokenService(
@@ -78,6 +80,7 @@ func NewRouter() *Router {
 	wsHandler := ws.NewHandler(hub) // создаем websocket handler
 
 	httpServer := NewHTTPServer(
+		accountService,
 		userService,
 		chatService,
 		tokenService,

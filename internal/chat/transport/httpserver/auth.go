@@ -2,9 +2,11 @@
 package httpserver
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
+	"github.com/KozlovNikolai/pfp/internal/chat/constants"
 	"github.com/KozlovNikolai/pfp/internal/chat/domain"
 	"github.com/KozlovNikolai/pfp/internal/chat/transport/httpserver/middlewares"
 	"github.com/KozlovNikolai/pfp/internal/pkg/utils"
@@ -28,6 +30,7 @@ const (
 // @failure				500 {string} string "error-to-create-domain-user"
 // @Router				/signup [post]
 func (h HTTPServer) SignUp(c *gin.Context) {
+	// var accountRequest AccountRequest
 	var userRequest UserRequest
 	var err error
 	if err = c.ShouldBindJSON(&userRequest); err != nil {
@@ -47,22 +50,39 @@ func (h HTTPServer) SignUp(c *gin.Context) {
 	// }
 
 	domainUser := toDomainUser(userRequest)
+	domainAccount := toDomainAccount(AccountRequest{
+		Name: domainUser.Name() + " " + domainUser.Surname(),
+	})
+	createdAccount, err := h.accountService.CreateAccount(c, domainAccount)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	log.Printf("Account created, id: %d, name: %s", createdAccount.ID(), createdAccount.Name())
 
 	createdUser, err := h.userService.CreateUser(c, domainUser)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error service User": err.Error()})
 		return
 	}
-	var chats []ChatResponse
-	if !(createdUser.Login() == "root@admin.ru" && createdUser.Account() == "system") {
 
-		chat, err := h.chatService.GetChatByNameAndType(c, "common chat", "system")
+	err = h.accountService.NewUserToNewAccount(c, createdUser.ID(), createdAccount.ID())
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	log.Printf("User id: %d binded to Account id: %d", createdUser.ID(), createdAccount.ID())
+
+	var chats []ChatResponse
+	if !(createdUser.Login() == constants.AdminEmaleLogin && createdUser.Profile() == constants.SystemProfile) {
+
+		chat, err := h.chatService.GetChatByNameAndType(c, constants.SystemChatName, constants.SystemChatType)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"failure get common system chat id": err.Error()})
 			return
 		}
 		// log.Printf("chat response: %+v", chat)
-		err = h.chatService.AddUserToChat(c, createdUser.ID(), chat.ID())
+		err = h.chatService.AddUserToChat(c, createdUser.ID(), chat.ID(), constants.RegularRole)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"failure add user to system chat": err.Error()})
 			return
@@ -114,7 +134,7 @@ func (h HTTPServer) SignIn(c *gin.Context) {
 		return
 	}
 
-	user, token, err := h.tokenService.GenerateToken(c, userRequest.Account, userRequest.Login, userRequest.Password)
+	user, token, err := h.tokenService.GenerateToken(c, userRequest.Profile, userRequest.Login, userRequest.Password)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error-generated-token": err.Error()})
 		return
@@ -127,13 +147,24 @@ func (h HTTPServer) SignIn(c *gin.Context) {
 	}
 
 	h.stateService.SetState(c, user.ID(), pubsub, nil)
-	chatID := 0
-	ok := h.stateService.SetCurrentChat(c, user.ID(), pubsub, chatID)
-	if !ok {
-		log.Printf("Не удалось установить текущий чат")
+
+	if !(user.Login() == constants.AdminEmaleLogin && user.Profile() == constants.SystemProfile) {
+		chat, err := h.chatService.GetChatByNameAndType(c, constants.SystemChatName, constants.SystemChatType)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"failure get common system chat id": err.Error()})
+			return
+		}
+		ok := h.stateService.SetCurrentChat(c, user.ID(), pubsub, chat.ID())
+		if !ok {
+			log.Printf("Не удалось установить текущий чат")
+		}
 	}
+
 	state, ok := h.stateService.GetState(c, user.ID())
-	log.Printf("user ID: %d, state: %+v\n", user.ID(), state)
+	log.Printf("user ID: %d\n", user.ID())
+	for _, v := range state.Connects {
+		fmt.Printf("pubsub: %v, chat: %d\n", v.Pubsub, v.CurrentChat)
+	}
 	log.Printf("ok: %+v\n", ok)
 
 	var chats []ChatResponse
@@ -183,13 +214,37 @@ func (h HTTPServer) LoginUserByTokenSputnik(c *gin.Context) {
 	var chats []ChatResponse
 	log.Printf("is New: %v", isNew)
 	if isNew {
-		chat, err := h.chatService.GetChatByNameAndType(c, "common chat", "system")
+
+		domainAccount := toDomainAccount(AccountRequest{
+			Name: domainUser.Name() + " " + domainUser.Surname(),
+		})
+		createdAccount, err := h.accountService.CreateAccount(c, domainAccount)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		log.Printf("Account created, id: %d, name: %s", createdAccount.ID(), createdAccount.Name())
+
+		// createdUser, err := h.userService.CreateUser(c, domainUser)
+		// if err != nil {
+		// 	c.JSON(http.StatusInternalServerError, gin.H{"error service User": err.Error()})
+		// 	return
+		// }
+
+		err = h.accountService.NewUserToNewAccount(c, registeredUser.ID(), createdAccount.ID())
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		log.Printf("User id: %d binded to Account id: %d", registeredUser.ID(), createdAccount.ID())
+
+		chat, err := h.chatService.GetChatByNameAndType(c, constants.SystemChatName, constants.SystemChatType)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"failure get common system chat id": err.Error()})
 			return
 		}
 		// log.Printf("chat response: %+v", chat)
-		err = h.chatService.AddUserToChat(c, registeredUser.ID(), chat.ID())
+		err = h.chatService.AddUserToChat(c, registeredUser.ID(), chat.ID(), constants.RegularRole)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"failure add user to system chat": err.Error()})
 			return
@@ -226,8 +281,12 @@ func (h HTTPServer) LoginUserByTokenSputnik(c *gin.Context) {
 	}
 
 	h.stateService.SetState(c, registeredUser.ID(), pubsub, nil)
-	chatID := 0
-	ok := h.stateService.SetCurrentChat(c, registeredUser.ID(), pubsub, chatID)
+	sysChat, err := h.chatService.GetChatByNameAndType(c, constants.SystemChatName, constants.SystemChatType)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	ok := h.stateService.SetCurrentChat(c, registeredUser.ID(), pubsub, sysChat.ID())
 	if !ok {
 		log.Printf("Не удалось установить текущий чат")
 	}

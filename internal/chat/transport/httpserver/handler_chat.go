@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/KozlovNikolai/pfp/internal/chat/constants"
 	"github.com/KozlovNikolai/pfp/internal/chat/domain"
 	"github.com/KozlovNikolai/pfp/internal/pkg/utils"
 	"github.com/gin-gonic/gin"
@@ -38,6 +39,11 @@ func (h HTTPServer) CreateChat(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error service User": err.Error()})
 		return
 	}
+	err = h.chatService.AddUserToChat(c, userCtx.ID(), createdChat.ID(), constants.AdminRole)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error service User": err.Error()})
+		return
+	}
 	response := toResponseChat(createdChat)
 	c.JSON(http.StatusCreated, response)
 }
@@ -61,7 +67,7 @@ func (h HTTPServer) AddToChat(c *gin.Context) {
 		return
 	}
 
-	err = h.chatService.AddUserToChat(c, addToChatRequest.UserID, addToChatRequest.ChatID)
+	err = h.chatService.AddUserToChat(c, addToChatRequest.UserID, addToChatRequest.ChatID, addToChatRequest.Role)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error service User": err.Error()})
 		return
@@ -149,3 +155,21 @@ func (h HTTPServer) EnterToChat(c *gin.Context) {
 
 	c.JSON(http.StatusOK, response)
 }
+
+// func (h HTTPServer) GetChatByName(c *gin.Context, name string) {
+// 	userCtx, err := utils.GetDataFromContext[domain.User](c, "user")
+// 	if err != nil {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": domain.ErrNoUserInContext.Error()})
+// 		return
+// 	}
+// 	_ = userCtx
+// 	// chatsDomain, err := h.chatService.GetChatsByUser(c, userCtx.ID())
+// 	chatDomain, err := h.chatService.GetChatByName(c, name)
+
+// 	if err != nil {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+// 		return
+// 	}
+// 	chatsResponse := toResponseChat(chatDomain)
+// 	c.JSON(http.StatusOK, chatsResponse)
+// }

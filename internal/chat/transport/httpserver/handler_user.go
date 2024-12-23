@@ -28,7 +28,7 @@ const (
 // @Router			/auth/user [get]
 func (h HTTPServer) GetUser(c *gin.Context) {
 	var userRequest UserRequest
-	accountQuery := c.Query("account")
+	profileQuery := c.Query("profile")
 	idQuery := c.Query("id")
 	loginQuery := c.Query("login")
 
@@ -48,7 +48,7 @@ func (h HTTPServer) GetUser(c *gin.Context) {
 			return
 		}
 
-		domainUser, err := h.userService.GetUserByLogin(c, accountQuery, loginQuery)
+		domainUser, err := h.userService.GetUserByLogin(c, profileQuery, loginQuery)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{errorGetUsers: err.Error()})
 			return

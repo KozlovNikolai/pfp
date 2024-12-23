@@ -18,6 +18,10 @@ ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "messages"
 ADD FOREIGN KEY("chat_id") REFERENCES "chats"("id")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+-- ALTER TABLE "chats"
+-- ADD FOREIGN KEY("last_message_id") REFERENCES "messages"("id")
+-- ON UPDATE NO ACTION ON DELETE NO ACTION;
 -- +goose StatementEnd
 
 -- +goose Down

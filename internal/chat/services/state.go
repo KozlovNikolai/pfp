@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"log"
+	"time"
 
 	"github.com/KozlovNikolai/pfp/internal/chat/domain"
 	"github.com/google/uuid"
@@ -38,10 +39,39 @@ func (s StateService) GetStateByPubsub(ctx context.Context, pubsub uuid.UUID) (d
 
 // SetState implements ws.IStateService.
 func (s StateService) SetState(ctx context.Context, userID int, pubsub uuid.UUID, conn *websocket.Conn) domain.State {
-	return s.repoState.SetState(ctx, userID, pubsub, conn)
+	cancelChannel := make(chan struct{})
+	go func() {
+		timer := time.NewTimer(5 * time.Second)
+		select {
+		case <-timer.C: // Таймер завершился
+			_, ok := s.DeleteConnFromState(ctx, userID, pubsub)
+			if ok {
+				log.Printf("Запись об устройстве в стейте удалена по таймауту из-за отсутствия соединения")
+			} else {
+				log.Printf("Удаление записи об устройстве в стейте по таймауту произошло с ошибкой")
+			}
+		case <-cancelChannel: // Таймер был отменён
+			timer.Stop()
+			// fmt.Println("Timer canceled")
+		}
+	}()
+
+	state := s.repoState.SetState(ctx, userID, pubsub, conn, cancelChannel)
+
+	return state
 }
 
 func (s StateService) SetConnIntoState(ctx context.Context, userID int, pubsub uuid.UUID, conn *websocket.Conn, indexConn int) bool {
+	state, ok := s.GetState(ctx, userID)
+	if !ok {
+		return false
+	}
+	for _, connection := range state.Connects {
+		if connection.Pubsub == pubsub {
+			close(connection.CanselCannel)
+			break
+		}
+	}
 	return s.repoState.SetConnIntoState(ctx, userID, pubsub, conn, indexConn)
 }
 

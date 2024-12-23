@@ -5,11 +5,10 @@ import "time"
 // User is a domain User
 type User struct {
 	id        int
-	userExtID string
+	userExtID int
 	login     string
 	password  string
-	account   string
-	token     string
+	profile   string
 	name      string
 	surname   string
 	email     string
@@ -21,11 +20,10 @@ type User struct {
 // NewUserData is a domain User
 type NewUserData struct {
 	ID        int    `json:"id" db:"id"`
-	UserExtID string `json:"user_ext_id" db:"user_ext_id"`
+	UserExtID int    `json:"user_ext_id" db:"user_ext_id"`
 	Login     string `json:"login" db:"login"`
 	Password  string `json:"password" db:"password"`
-	Account   string `json:"account" db:"account"`
-	Token     string `json:"token" db:"token"`
+	Profile   string `json:"profile" db:"profile"`
 	Name      string `json:"name" db:"name"`
 	Surname   string `json:"surname" db:"surname"`
 	Email     string `json:"email" db:"email"`
@@ -42,8 +40,7 @@ func NewUser(data NewUserData) User {
 		userExtID: data.UserExtID,
 		login:     data.Login,
 		password:  data.Password,
-		account:   data.Account,
-		token:     data.Token,
+		profile:   data.Profile,
 		name:      data.Name,
 		surname:   data.Surname,
 		email:     data.Email,
@@ -59,7 +56,7 @@ func (u User) ID() int {
 }
 
 // Login ...
-func (u User) UserExtID() string {
+func (u User) UserExtID() int {
 	return u.userExtID
 }
 
@@ -69,11 +66,8 @@ func (u User) Login() string {
 func (u User) Password() string {
 	return u.password
 }
-func (u User) Account() string {
-	return u.account
-}
-func (u User) Token() string {
-	return u.token
+func (u User) Profile() string {
+	return u.profile
 }
 
 // Password ...

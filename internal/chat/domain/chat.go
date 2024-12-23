@@ -5,7 +5,7 @@ import "time"
 type Chat struct {
 	id            int
 	name          string
-	ownerID       int
+	accountID     int
 	chatType      string
 	lastChatMsgID uint64
 	// contacts      []Contact
@@ -16,7 +16,7 @@ type Chat struct {
 type NewChatData struct {
 	ID            int
 	Name          string
-	OwnerID       int
+	AccountID     int
 	ChatType      string
 	LastChatMsgID uint64
 	// Contacts      []Contact
@@ -27,7 +27,7 @@ func NewChat(data NewChatData) Chat {
 	return Chat{
 		id:            data.ID,
 		name:          data.Name,
-		ownerID:       data.OwnerID,
+		accountID:     data.AccountID,
 		chatType:      data.ChatType,
 		lastChatMsgID: data.LastChatMsgID,
 		// contacts:      data.Contacts,
@@ -44,8 +44,8 @@ func (c Chat) Name() string {
 	return c.name
 }
 
-func (c Chat) OwnerID() int {
-	return c.ownerID
+func (c Chat) AccountID() int {
+	return c.accountID
 }
 func (c Chat) ChatType() string {
 	return c.chatType

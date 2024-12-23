@@ -2,11 +2,10 @@
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS "users"(
     "id"  serial NOT NULL PRIMARY KEY,
-    "user_ext_id" TEXT not NULL,
+    "user_ext_id" INTEGER not NULL,
     "login" text not NULL,
     "password" TEXT,
-    "account" text not NULL,
-    "token" TEXT,
+    "profile" TEXT not NULL,
     "name" TEXT,
     "surname" TEXT,
     "email" TEXT NOT NULL,
@@ -22,7 +21,7 @@ CREATE TABLE IF NOT EXISTS "users"(
 -- ON "users" ("login", "account");
 
 CREATE unique INDEX "users_login_account_user_ext_id_index"
-ON "users" ("login", "account", "user_ext_id");
+ON "users" ("login", "profile", "user_ext_id");
 -- +goose StatementEnd
 
 -- +goose Down

@@ -22,8 +22,8 @@ func NewChatService(repo IChatRepository) ChatService {
 func (c ChatService) CreateChat(ctx context.Context, chat domain.Chat) (domain.Chat, error) {
 	return c.repo.CreateChat(ctx, chat)
 }
-func (c ChatService) AddUserToChat(ctx context.Context, userID int, chatID int) error {
-	return c.repo.AddUserToChat(ctx, userID, chatID)
+func (c ChatService) AddUserToChat(ctx context.Context, userID int, chatID int, role string) error {
+	return c.repo.AddUserToChat(ctx, userID, chatID, role)
 }
 func (c ChatService) GetChatByNameAndType(ctx context.Context, name string, chatType string) (domain.Chat, error) {
 	return c.repo.GetChatByNameAndType(ctx, name, chatType)

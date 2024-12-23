@@ -30,7 +30,7 @@ type IUserService interface {
 	RegisterUser(context.Context, domain.User) (domain.User, bool, error)
 	GetUsers(context.Context, domain.User, int, int) ([]domain.User, error)
 	GetUserByID(context.Context, int) (domain.User, error)
-	GetUserByExtID(context.Context, string, string) (domain.User, error)
+	GetUserByExtID(context.Context, string, int) (domain.User, error)
 	GetUserByLogin(context.Context, string, string) (domain.User, error)
 	UpdateUser(context.Context, domain.User) (domain.User, error)
 	DeleteUser(context.Context, int) error
@@ -38,8 +38,8 @@ type IUserService interface {
 
 type IChatService interface {
 	CreateChat(context.Context, domain.Chat) (domain.Chat, error)
-	AddUserToChat(ctx context.Context, userID int, chatID int) error
-	GetChatByNameAndType(context.Context, string, string) (domain.Chat, error)
+	AddUserToChat(ctx context.Context, userID int, chatID int, role string) error
+	GetChatByNameAndType(ctx context.Context, name, chatType string) (domain.Chat, error)
 	GetChatsByUser(ctx context.Context, userID int) ([]domain.Chat, error)
 	GetUserIDsByChatID(ctx context.Context, chatID int) ([]int, error)
 	IsChatMember(ctx context.Context, userID int, chatID int) bool
@@ -49,4 +49,16 @@ type IChatService interface {
 type IMessageService interface {
 	SaveMsg(ctx context.Context, msg domain.Message) error
 	GetMessagesByChatID(ctx context.Context, chatID, limit, offset int) ([]domain.Message, error)
+}
+
+type IAccountService interface {
+	CreateAccount(context.Context, domain.Account) (domain.Account, error)
+	NewUserToNewAccount(ctx context.Context, userID int, accountID int) error
+	AddUserToAccount(ctx context.Context, userID int, accountID int, inviterID int, role string) error
+	// GetUsers(context.Context, domain.User, int, int) ([]domain.User, error)
+	// GetUserByID(context.Context, int) (domain.User, error)
+	// GetUserByExtID(context.Context, string, string) (domain.User, error)
+	// GetUserByLogin(context.Context, string, string) (domain.User, error)
+	// UpdateUser(context.Context, domain.User) (domain.User, error)
+	// DeleteUser(context.Context, int) error
 }

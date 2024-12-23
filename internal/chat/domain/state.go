@@ -13,10 +13,11 @@ type State struct {
 }
 
 type Connect struct {
-	Conn        *websocket.Conn
-	Pubsub      uuid.UUID `json:"pubsub"`
-	CreatedAt   int64     `json:"created_at"`
-	CurrentChat int       `json:"current_chat"`
+	Conn         *websocket.Conn
+	Pubsub       uuid.UUID     `json:"pubsub"`
+	CreatedAt    int64         `json:"created_at"`
+	CurrentChat  int           `json:"current_chat"`
+	CanselCannel chan struct{} `json:"-"`
 }
 
 // type Contact struct {

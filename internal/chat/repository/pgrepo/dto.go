@@ -11,8 +11,7 @@ func domainToUser(user domain.User) models.User {
 		UserExtID: user.UserExtID(),
 		Login:     user.Login(),
 		Password:  user.Password(),
-		Account:   user.Account(),
-		Token:     user.Token(),
+		Profile:   user.Profile(),
 		Name:      user.Name(),
 		Surname:   user.Surname(),
 		Email:     user.Email(),
@@ -28,8 +27,7 @@ func userToDomain(user models.User) domain.User {
 		UserExtID: user.UserExtID,
 		Login:     user.Login,
 		Password:  user.Password,
-		Account:   user.Account,
-		Token:     user.Token,
+		Profile:   user.Profile,
 		Name:      user.Name,
 		Surname:   user.Surname,
 		Email:     user.Email,
@@ -39,11 +37,29 @@ func userToDomain(user models.User) domain.User {
 	})
 }
 
+func domainToAccount(account domain.Account) models.Account {
+	return models.Account{
+		ID:        account.ID(),
+		Name:      account.Name(),
+		CreatedAt: account.CreatedAt(),
+		UpdatedAt: account.UpdatedAt(),
+	}
+}
+
+func accountToDomain(account models.Account) domain.Account {
+	return domain.NewAccount(domain.NewAccountData{
+		ID:        account.ID,
+		Name:      account.Name,
+		CreatedAt: account.CreatedAt,
+		UpdatedAt: account.UpdatedAt,
+	})
+}
+
 func domainToChat(chat domain.Chat) models.Chat {
 	return models.Chat{
 		Id:            chat.ID(),
 		Name:          chat.Name(),
-		OwnerID:       chat.OwnerID(),
+		AccountID:     chat.AccountID(),
 		ChatType:      chat.ChatType(),
 		LastChatMsgID: chat.LastMsgID(),
 		CreatedAt:     chat.CreatedAt(),
@@ -55,7 +71,7 @@ func chatToDomain(chat models.Chat) domain.Chat {
 	return domain.NewChat(domain.NewChatData{
 		ID:            chat.Id,
 		Name:          chat.Name,
-		OwnerID:       chat.OwnerID,
+		AccountID:     chat.AccountID,
 		ChatType:      chat.ChatType,
 		LastChatMsgID: chat.LastChatMsgID,
 	})

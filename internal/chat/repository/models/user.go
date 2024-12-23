@@ -3,11 +3,10 @@ package models
 
 type User struct {
 	ID        int
-	UserExtID string
+	UserExtID int
 	Login     string
 	Password  string
-	Account   string
-	Token     string
+	Profile   string
 	Name      string
 	Surname   string
 	Email     string

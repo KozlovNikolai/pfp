@@ -49,11 +49,11 @@ func (c *ChatRepo) CreateChat(ctx context.Context, chat domain.Chat) (domain.Cha
 	err = tx.QueryRow(
 		ctx,
 		`
-			INSERT INTO chats (name, owner_id, chat_type, last_message_id, created_at, updated_at)
+			INSERT INTO chats (account_id, name,  chat_type, last_message_id, created_at, updated_at)
 			VALUES ($1, $2, $3, $4, $5, $6)
-			RETURNING id,name, owner_id, chat_type, last_message_id, created_at, updated_at`,
+			RETURNING id,account_id, name, chat_type, last_message_id, created_at, updated_at`,
+		dbChat.AccountID,
 		dbChat.Name,
-		dbChat.OwnerID,
 		dbChat.ChatType,
 		dbChat.LastChatMsgID,
 		dbChat.CreatedAt,
@@ -61,8 +61,8 @@ func (c *ChatRepo) CreateChat(ctx context.Context, chat domain.Chat) (domain.Cha
 	).
 		Scan(
 			&insertedChat.Id,
+			&insertedChat.AccountID,
 			&insertedChat.Name,
-			&insertedChat.OwnerID,
 			&insertedChat.ChatType,
 			&insertedChat.LastChatMsgID,
 			&insertedChat.CreatedAt,
@@ -80,9 +80,8 @@ func (c *ChatRepo) CreateChat(ctx context.Context, chat domain.Chat) (domain.Cha
 	return domainChat, nil
 }
 
-func (c *ChatRepo) AddUserToChat(ctx context.Context, userID int, chatID int) error {
+func (c *ChatRepo) AddUserToChat(ctx context.Context, userID int, chatID int, role string) error {
 	createdAt := time.Now().Unix()
-	role := ""
 	lastReadMsgID := 0
 	notifications := true
 	var insertedRecordID int
@@ -140,7 +139,7 @@ func (c *ChatRepo) GetChatsByUser(ctx context.Context, userID int) ([]domain.Cha
 
 	// SQL-запрос на получение чатов по userID
 	query := `
-		SELECT c.id,  c.name, c.owner_id, c.chat_type, c.last_message_id, c.created_at, c.updated_at
+		SELECT c.id,  c.name, c.account_id, c.chat_type, c.last_message_id, c.created_at, c.updated_at
 		FROM chat_members cm
 		JOIN chats c ON cm.chat_id = c.id
 		WHERE (cm.user_id=$1)
@@ -162,7 +161,7 @@ func (c *ChatRepo) GetChatsByUser(ctx context.Context, userID int) ([]domain.Cha
 		if err := rows.Scan(
 			&chat.Id,
 			&chat.Name,
-			&chat.OwnerID,
+			&chat.AccountID,
 			&chat.ChatType,
 			&chat.LastChatMsgID,
 			&chat.CreatedAt,
@@ -191,49 +190,49 @@ func (c *ChatRepo) GetChatsByUser(ctx context.Context, userID int) ([]domain.Cha
 	return domainChats, nil
 }
 
-func (c *ChatRepo) GetChatByNameAndType(ctx context.Context, name string, chatType string) (domain.Chat, error) {
-	// Начинаем транзакцию
-	tx, err := c.db.RO.Begin(ctx)
-	if err != nil {
-		return domain.Chat{}, fmt.Errorf(constants.FailedToBeginTransaction, err)
-	}
-	defer func() {
-		err := tx.Rollback(ctx)
-		if err != nil && err.Error() != "tx is closed" {
-			log.Printf("get chats by name and type rollback error:%v", err)
-		}
-	}()
+// func (c *ChatRepo) GetChatByNameAndType(ctx context.Context, name string, chatType string) (domain.Chat, error) {
+// 	// Начинаем транзакцию
+// 	tx, err := c.db.RO.Begin(ctx)
+// 	if err != nil {
+// 		return domain.Chat{}, fmt.Errorf(constants.FailedToBeginTransaction, err)
+// 	}
+// 	defer func() {
+// 		err := tx.Rollback(ctx)
+// 		if err != nil && err.Error() != "tx is closed" {
+// 			log.Printf("get chats by name and type rollback error:%v", err)
+// 		}
+// 	}()
 
-	// SQL-запрос на получение чата по имени и типу
-	query := `
-		SELECT *
-		FROM chats
-		WHERE (name=$1 AND chat_type=$2)
-	`
-	// Выполняем запрос и сканируем результат в структуру
-	var chat models.Chat
-	// Выполняем запрос и сканируем результат в структуру User
-	err = c.db.RO.QueryRow(ctx, query, name, chatType).Scan(
-		&chat.Id,
-		&chat.OwnerID,
-		&chat.Name,
-		&chat.ChatType,
-		&chat.LastChatMsgID,
-		&chat.CreatedAt,
-		&chat.UpdatedAt,
-	)
-	if err != nil {
-		return domain.Chat{}, fmt.Errorf("failed get chat by name: %s and type: %s: %w", name, chatType, err)
-	}
-	// Фиксация транзакции
-	if err := tx.Commit(ctx); err != nil {
-		return domain.Chat{}, fmt.Errorf(constants.FailedToBeginTransaction, err)
-	}
-	// fmt.Printf("insertedChat: %v\n", insertedChat)
-	// domainChat := chatToDomain(insertedChat)
-	// fmt.Printf("domainChat: %v\n", domainChat)
-	return chatToDomain(chat), nil
-}
+//		// SQL-запрос на получение чата по имени и типу
+//		query := `
+//			SELECT *
+//			FROM chats
+//			WHERE (name=$1 AND chat_type=$2)
+//		`
+//		// Выполняем запрос и сканируем результат в структуру
+//		var chat models.Chat
+//		// Выполняем запрос и сканируем результат в структуру User
+//		err = c.db.RO.QueryRow(ctx, query, name, chatType).Scan(
+//			&chat.Id,
+//			&chat.AccountID,
+//			&chat.Name,
+//			&chat.ChatType,
+//			&chat.LastChatMsgID,
+//			&chat.CreatedAt,
+//			&chat.UpdatedAt,
+//		)
+//		if err != nil {
+//			return domain.Chat{}, fmt.Errorf("failed get chat by name: %s and type: %s: %w", name, chatType, err)
+//		}
+//		// Фиксация транзакции
+//		if err := tx.Commit(ctx); err != nil {
+//			return domain.Chat{}, fmt.Errorf(constants.FailedToBeginTransaction, err)
+//		}
+//		// fmt.Printf("insertedChat: %v\n", insertedChat)
+//		// domainChat := chatToDomain(insertedChat)
+//		// fmt.Printf("domainChat: %v\n", domainChat)
+//		return chatToDomain(chat), nil
+//	}
 func (c *ChatRepo) GetUserIDsByChatID(ctx context.Context, chatID int) ([]int, error) {
 	// Начинаем транзакцию
 	tx, err := c.db.RO.Begin(ctx)
@@ -346,7 +345,7 @@ func (c *ChatRepo) GetUsersByChatID(ctx context.Context, chatID int) ([]domain.U
 
 	// SQL-запрос на получение чатов по userID
 	query := `
-		SELECT u.id,  u.user_ext_id, u.login, u.password, u.account, u.token, u.name, u.surname, u.email, u.user_type, u.created_at, u.updated_at
+		SELECT u.id,  u.user_ext_id, u.login, u.password, u.profile, u.name, u.surname, u.email, u.user_type, u.created_at, u.updated_at
 		FROM chat_members cm
 		JOIN users u ON cm.user_id = u.id
 		WHERE (cm.chat_id=$1)
@@ -369,8 +368,7 @@ func (c *ChatRepo) GetUsersByChatID(ctx context.Context, chatID int) ([]domain.U
 			&user.UserExtID,
 			&user.Login,
 			&user.Password,
-			&user.Account,
-			&user.Token,
+			&user.Profile,
 			&user.Name,
 			&user.Surname,
 			&user.Email,
@@ -394,4 +392,50 @@ func (c *ChatRepo) GetUsersByChatID(ctx context.Context, chatID int) ([]domain.U
 		domainUsers[i] = domainUser
 	}
 	return domainUsers, nil
+}
+
+func (c *ChatRepo) GetChatByNameAndType(ctx context.Context, name, chatType string) (domain.Chat, error) {
+	var query string
+	if name == "" && chatType != "" {
+		name = "%"
+		query = `
+		SELECT *
+		FROM chats
+		WHERE (name LIKE $1 AND chat_type = $2)
+	`
+	} else if name != "" && chatType == "" {
+		chatType = "%"
+		query = `
+		SELECT *
+		FROM chats
+		WHERE (name = $1 AND chat_type LIKE $2)
+	`
+	} else if name != "" && chatType != "" {
+		query = `
+		SELECT *
+		FROM chats
+		WHERE (name = $1 AND chat_type = $2)
+	`
+	} else {
+		return domain.Chat{}, fmt.Errorf("%w: chat name and/or chat type", domain.ErrRequired)
+	}
+
+	var chat models.Chat
+	// Выполняем запрос и сканируем результат в структуру Chat
+	err := c.db.RO.QueryRow(ctx, query, name, chatType).Scan(
+		&chat.Id,
+		&chat.AccountID,
+		&chat.Name,
+		&chat.ChatType,
+		&chat.LastChatMsgID,
+		&chat.CreatedAt,
+		&chat.UpdatedAt,
+	)
+	if err != nil {
+		return domain.Chat{}, fmt.Errorf("failed to get Chat by name: %s, type: %s, error: %w", name, chatType, err)
+	}
+
+	domainChat := chatToDomain(chat)
+
+	return domainChat, nil
 }

@@ -2,19 +2,26 @@
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS "contacts"(
     "id"  serial NOT NULL PRIMARY KEY,
+    "account_id" INTEGER NOT NULL,
     "user_id" INTEGER NOT NULL,
-    "chat_id" INTEGER NOT NULL,
-    "created_at" INTEGER NOT NULL,
-    "updated_at" INTEGER NOT NULL
+    "name" TEXT,
+    "surname" TEXT,
+    "phone" TEXT,
+    "email" TEXT
 );
+
+CREATE unique INDEX "contacts_account_id_user_id_index"
+ON "contacts" ("account_id", "user_id");
 
 ALTER TABLE "contacts"
 ADD FOREIGN KEY("user_id") REFERENCES "users"("id")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
 
 ALTER TABLE "contacts"
-ADD FOREIGN KEY("chat_id") REFERENCES "chats"("id")
+ADD FOREIGN KEY("account_id") REFERENCES "accounts"("id")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+
 -- +goose StatementEnd
 
 -- +goose Down

@@ -28,10 +28,10 @@ func NewUserRepo(db *pg.DB) *UserRepo {
 func (u *UserRepo) CreateUser(ctx context.Context, user domain.User) (domain.User, error) {
 	dbUser := domainToUser(user)
 
-	dbUser.Login = dbUser.Email
-	dbUser.CreatedAt = time.Now().Unix()
-	dbUser.UpdatedAt = dbUser.CreatedAt
-	dbUser.UserType = constants.User_type
+	// dbUser.Login = dbUser.Email
+	// dbUser.CreatedAt = time.Now().Unix()
+	// dbUser.UpdatedAt = dbUser.CreatedAt
+	// dbUser.UserType = constants.User_type
 
 	var insertedUser models.User
 
@@ -50,14 +50,13 @@ func (u *UserRepo) CreateUser(ctx context.Context, user domain.User) (domain.Use
 	err = tx.QueryRow(
 		ctx,
 		`
-			INSERT INTO users (user_ext_id, login, password, account, token, name, surname, email, user_type, created_at, updated_at)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-			RETURNING id,user_ext_id, login, password, account, token, name, surname, email, user_type, created_at, updated_at`,
+			INSERT INTO users (user_ext_id, login, password, profile,  name, surname, email, user_type, created_at, updated_at)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+			RETURNING id,user_ext_id, login, password, profile,  name, surname, email, user_type, created_at, updated_at`,
 		dbUser.UserExtID,
 		dbUser.Login,
 		dbUser.Password,
-		dbUser.Account,
-		dbUser.Token,
+		dbUser.Profile,
 		dbUser.Name,
 		dbUser.Surname,
 		dbUser.Email,
@@ -70,8 +69,7 @@ func (u *UserRepo) CreateUser(ctx context.Context, user domain.User) (domain.Use
 			&insertedUser.UserExtID,
 			&insertedUser.Login,
 			&insertedUser.Password,
-			&insertedUser.Account,
-			&insertedUser.Token,
+			&insertedUser.Profile,
 			&insertedUser.Name,
 			&insertedUser.Surname,
 			&insertedUser.Email,
@@ -92,28 +90,27 @@ func (u *UserRepo) CreateUser(ctx context.Context, user domain.User) (domain.Use
 }
 
 // GetUserByExtID implements services.IUserRepository.
-func (u *UserRepo) GetUserByExtID(ctx context.Context, account, extID string) (domain.User, error) {
-	if extID == "" {
+func (u *UserRepo) GetUserByExtID(ctx context.Context, profile string, extID int) (domain.User, error) {
+	if extID == 0 {
 		return domain.User{}, fmt.Errorf("%w: ext ID", domain.ErrRequired)
 	}
-	if account == "" {
-		return domain.User{}, fmt.Errorf("%w: account", domain.ErrRequired)
+	if profile == "" {
+		return domain.User{}, fmt.Errorf("%w: profile", domain.ErrRequired)
 	}
 	// SQL-запрос на получение данных Пользователя по extID
 	query := `
 		SELECT *
 		FROM users
-		WHERE (account=$1 AND user_ext_id=$2)
+		WHERE (profile=$1 AND user_ext_id=$2)
 	`
 	var user models.User
 	// Выполняем запрос и сканируем результат в структуру User
-	err := u.db.RO.QueryRow(ctx, query, account, extID).Scan(
+	err := u.db.RO.QueryRow(ctx, query, profile, extID).Scan(
 		&user.ID,
 		&user.UserExtID,
 		&user.Login,
 		&user.Password,
-		&user.Account,
-		&user.Token,
+		&user.Profile,
 		&user.Name,
 		&user.Surname,
 		&user.Email,
@@ -122,7 +119,7 @@ func (u *UserRepo) GetUserByExtID(ctx context.Context, account, extID string) (d
 		&user.UpdatedAt,
 	)
 	if err != nil {
-		return domain.User{}, fmt.Errorf("failed to get User by extId: %s: %w", extID, err)
+		return domain.User{}, fmt.Errorf("failed to get User by extId: %d: %w", extID, err)
 	}
 
 	domainUser := userToDomain(user)
@@ -173,16 +170,16 @@ func (u *UserRepo) DeleteUser(ctx context.Context, id int) error {
 }
 
 // GetUsers implements service.IUserRepository.
-func (u *UserRepo) GetUsers(ctx context.Context, account string, limit, offset int) ([]domain.User, error) {
+func (u *UserRepo) GetUsers(ctx context.Context, profile string, limit, offset int) ([]domain.User, error) {
 	query := `
 		SELECT *
 		FROM users
-		WHERE account=$1
+		WHERE profile=$1
 		ORDER BY id
 		LIMIT $2 OFFSET $3
 	`
 	// Запрос
-	rows, err := u.db.RO.Query(ctx, query, account, limit, offset)
+	rows, err := u.db.RO.Query(ctx, query, profile, limit, offset)
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute query: %w", err)
 	}
@@ -196,8 +193,7 @@ func (u *UserRepo) GetUsers(ctx context.Context, account string, limit, offset i
 			&user.UserExtID,
 			&user.Login,
 			&user.Password,
-			&user.Account,
-			&user.Token,
+			&user.Profile,
 			&user.Name,
 			&user.Surname,
 			&user.Email,
@@ -238,8 +234,7 @@ func (u *UserRepo) GetUserByID(ctx context.Context, id int) (domain.User, error)
 		&user.UserExtID,
 		&user.Login,
 		&user.Password,
-		&user.Account,
-		&user.Token,
+		&user.Profile,
 		&user.Name,
 		&user.Surname,
 		&user.Email,
@@ -256,7 +251,7 @@ func (u *UserRepo) GetUserByID(ctx context.Context, id int) (domain.User, error)
 }
 
 // GetUserByLogin implements service.IUserRepository.
-func (u *UserRepo) GetUserByLogin(ctx context.Context, account, login string) (domain.User, error) {
+func (u *UserRepo) GetUserByLogin(ctx context.Context, profile, login string) (domain.User, error) {
 	if login == "" {
 		return domain.User{}, fmt.Errorf("%w: login", domain.ErrRequired)
 	}
@@ -265,17 +260,16 @@ func (u *UserRepo) GetUserByLogin(ctx context.Context, account, login string) (d
 	query := `
 		SELECT *
 		FROM users
-		WHERE (account = $1 AND login = $2)
+		WHERE (profile = $1 AND login = $2)
 	`
 	var user models.User
 	// Выполняем запрос и сканируем результат в структуру User
-	err := u.db.RO.QueryRow(ctx, query, account, login).Scan(
+	err := u.db.RO.QueryRow(ctx, query, profile, login).Scan(
 		&user.ID,
 		&user.UserExtID,
 		&user.Login,
 		&user.Password,
-		&user.Account,
-		&user.Token,
+		&user.Profile,
 		&user.Name,
 		&user.Surname,
 		&user.Email,
@@ -284,7 +278,7 @@ func (u *UserRepo) GetUserByLogin(ctx context.Context, account, login string) (d
 		&user.UpdatedAt,
 	)
 	if err != nil {
-		return domain.User{}, fmt.Errorf("failed to get User by account: %s, login: %s, error: %w", account, login, err)
+		return domain.User{}, fmt.Errorf("failed to get User by profile: %s, login: %s, error: %w", profile, login, err)
 	}
 
 	domainUser := userToDomain(user)
@@ -310,21 +304,20 @@ func (u *UserRepo) UpdateUser(ctx context.Context, user domain.User) (domain.Use
 	// SQL-запрос на обновление данных Поставщика
 	query := `
 		UPDATE users
-		SET user_ext_id = $1, login = $2, account = $3, token = $4, name = $5, surname = $6, email = $7, user_type = $8, updated_at = $9
-		WHERE id = $10
+		SET user_ext_id = $1, login = $2, profile = $3,  name = $4, surname = $5, email = $6, user_type = $7, updated_at = $8
+		WHERE id = $9
 		RETURNING id, login, password, role, token
 	`
 	var updatedUser models.User
 
 	// Выполняем запрос и сканируем обновленный результат в структуру User
 	err = tx.QueryRow(ctx, query,
-		dbUser.UserExtID, dbUser.Login, dbUser.Account, dbUser.Token, dbUser.Name, dbUser.Surname, dbUser.Email, dbUser.UserType, dbUser.UpdatedAt).
+		dbUser.UserExtID, dbUser.Login, dbUser.Profile, dbUser.Name, dbUser.Surname, dbUser.Email, dbUser.UserType, dbUser.UpdatedAt).
 		Scan(&updatedUser.ID,
 			&updatedUser.UserExtID,
 			&updatedUser.Login,
 			&updatedUser.Password,
-			&updatedUser.Account,
-			&updatedUser.Token,
+			&updatedUser.Profile,
 			&updatedUser.Name,
 			&updatedUser.Surname,
 			&updatedUser.Email,

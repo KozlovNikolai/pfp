@@ -24,6 +24,7 @@ func stateToDomain(state models.State) domain.State {
 		domainConnects[i].Pubsub = connect.Pubsub
 		domainConnects[i].CreatedAt = connect.CreatedAt
 		domainConnects[i].CurrentChat = connect.CurrentChat
+		domainConnects[i].CanselCannel = connect.CanselCannel
 	}
 	return domain.State{
 		UserID:   state.UserID,

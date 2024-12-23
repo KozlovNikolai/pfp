@@ -7,7 +7,7 @@ import (
 
 // UserRequest is ...
 type UserRequest struct {
-	Account  string `json:"account" db:"account" example:"email" validate:"required"`
+	Profile  string `json:"profile" db:"profile" example:"email" validate:"required"`
 	Login    string `json:"login"    db:"login"    example:"cmd@cmd.ru" validate:"required,email"`
 	Password string `json:"password" db:"password" example:"123456"     validate:"required,min=6,max=32"`
 	Name     string `json:"name" db:"name" example:"Ivan"`
@@ -22,11 +22,10 @@ func (u *UserRequest) Validate() error {
 
 type UserResponse struct {
 	ID        int    `json:"id" db:"id"`
-	UserExtID string `json:"user_ext_id" db:"user_ext_id"`
+	UserExtID int    `json:"user_ext_id" db:"user_ext_id"`
 	Login     string `json:"login" db:"login"`
 	// Password  string `json:"password" db:"password"`
-	Account   string `json:"account" db:"account"`
-	Token     string `json:"token" db:"token"`
+	Profile   string `json:"profile" db:"profile"`
 	Name      string `json:"name" db:"name"`
 	Surname   string `json:"surname" db:"surname"`
 	Email     string `json:"email" db:"email"`
@@ -35,6 +34,41 @@ type UserResponse struct {
 	UpdatedAt int64  `json:"updated_at" db:"updated_at"`
 	Status    string `json:"status"`
 }
+
+// UserRequest is ...
+type AccountRequest struct {
+	ID   int    `json:"id" db:"id" example:"1"`
+	Name string `json:"name" db:"name" example:"MyAccount"`
+}
+
+// Validate ...
+func (a *AccountRequest) Validate() error {
+	validate := validator.New(validator.WithRequiredStructEnabled())
+	return validate.Struct(a)
+}
+
+type AccountResponse struct {
+	ID        int    `json:"id" db:"id"`
+	Name      string `json:"name" db:"name"`
+	CreatedAt int64  `json:"created_at" db:"created_at"`
+	UpdatedAt int64  `json:"updated_at" db:"updated_at"`
+}
+
+// // UserRequest is ...
+// type AccountCreateRequest struct {
+// 	Name string `json:"name" db:"name" example:"MyAccount" validate:"required"`
+// }
+
+// // Validate ...
+// func (a *AccountCreateRequest) Validate() error {
+// 	validate := validator.New(validator.WithRequiredStructEnabled())
+// 	return validate.Struct(a)
+// }
+
+// type AccountCreateResponse struct {
+// 	ID   int    `json:"id" db:"id"`
+// 	Name string `json:"name" db:"name"`
+// }
 
 type ChatCreateRequest struct {
 	OwnerID  int
@@ -50,7 +84,7 @@ func (c *ChatCreateRequest) Validate() error {
 type ChatResponse struct {
 	Id            int    `json:"id"`
 	Name          string `json:"name"`
-	OwnerID       int    `json:"owner_id"`
+	AccountID     int    `json:"account_id"`
 	ChatType      string `json:"chat_type"`
 	LastChatMsgID uint64 `json:"last_message_id"`
 	// Contacts      []domain.Contact `json:"contacts"`
@@ -97,8 +131,9 @@ func (c *GetMessagesRequest) Validate() error {
 }
 
 type AddToChatRequest struct {
-	ChatID int `json:"chat_id" db:"chat_id" validate:"gt=0,required"`
-	UserID int `json:"user_id" db:"user_id" validate:"gt=0,required"`
+	ChatID int    `json:"chat_id" db:"chat_id" validate:"gt=0,required"`
+	UserID int    `json:"user_id" db:"user_id" validate:"gt=0,required"`
+	Role   string `json:"role" db:"role" validate:"required"`
 }
 
 func (a *AddToChatRequest) Validate() error {

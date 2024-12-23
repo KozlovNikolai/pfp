@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/KozlovNikolai/pfp/internal/chat/constants"
 	"github.com/KozlovNikolai/pfp/internal/chat/domain"
 	"github.com/KozlovNikolai/pfp/internal/pkg/utils"
 )
@@ -26,7 +27,7 @@ func NewUserService(repo IUserRepository) UserService {
 func (s UserService) CreateUser(ctx context.Context, user domain.User) (domain.User, error) {
 	creatingTime := time.Now().Unix()
 
-	userDb, err := s.GetUserByLogin(ctx, user.Account(), user.Login())
+	userDb, err := s.GetUserByLogin(ctx, user.Profile(), user.Login())
 	if err != nil {
 		if strings.HasSuffix(err.Error(), "no rows in result set") {
 			password, err := utils.HashPassword(user.Password())
@@ -38,8 +39,7 @@ func (s UserService) CreateUser(ctx context.Context, user domain.User) (domain.U
 				UserExtID: user.UserExtID(),
 				Login:     user.Login(),
 				Password:  password,
-				Account:   user.Account(),
-				Token:     user.Token(),
+				Profile:   user.Profile(),
 				Name:      user.Name(),
 				Surname:   user.Surname(),
 				Email:     user.Email(),
@@ -47,11 +47,18 @@ func (s UserService) CreateUser(ctx context.Context, user domain.User) (domain.U
 				CreatedAt: creatingTime,
 				UpdatedAt: creatingTime,
 			}
+			newUser.Login = newUser.Email
+
+			//	fmt.Printf("Login: %s, Profile: %s, Role: %s\n", newUser.Login, newUser.Profile, newUser.UserType)
+			if newUser.Login == constants.AdminEmaleLogin && newUser.Profile == constants.SystemProfile {
+				newUser.UserType = constants.UserTypeAdmin
+			}
+			//	fmt.Printf("Login: %s, Profile: %s, Role: %s\n", newUser.Login, newUser.Profile, newUser.UserType)
 			creatingUser := domain.NewUser(newUser)
 			return s.repo.CreateUser(ctx, creatingUser)
 		}
 	}
-	return domain.User{}, fmt.Errorf("user with account: %s and login: %s already exists", userDb.Account(), userDb.Login())
+	return domain.User{}, fmt.Errorf("user with profile: %s and login: %s already exists", userDb.Profile(), userDb.Login())
 }
 
 // // GetUserByID ...
@@ -60,18 +67,18 @@ func (s UserService) GetUserByID(ctx context.Context, id int) (domain.User, erro
 }
 
 // GetUserByID ...
-func (s UserService) GetUserByExtID(ctx context.Context, account, extId string) (domain.User, error) {
+func (s UserService) GetUserByExtID(ctx context.Context, account string, extId int) (domain.User, error) {
 	return s.repo.GetUserByExtID(ctx, account, extId)
 }
 
 // GetUserByLogin ...
-func (s UserService) GetUserByLogin(ctx context.Context, account, login string) (domain.User, error) {
-	return s.repo.GetUserByLogin(ctx, account, login)
+func (s UserService) GetUserByLogin(ctx context.Context, profile, login string) (domain.User, error) {
+	return s.repo.GetUserByLogin(ctx, profile, login)
 }
 
 // RegisterUser ...
 func (s UserService) RegisterUser(ctx context.Context, user domain.User) (domain.User, bool, error) {
-	userDb, err := s.GetUserByExtID(ctx, user.Account(), user.UserExtID())
+	userDb, err := s.GetUserByExtID(ctx, user.Profile(), user.UserExtID())
 
 	if err != nil {
 		if strings.HasSuffix(err.Error(), "no rows in result set") {
@@ -96,7 +103,7 @@ func (s UserService) DeleteUser(ctx context.Context, id int) error {
 
 // GetUsers ...
 func (s UserService) GetUsers(ctx context.Context, user domain.User, limit, offset int) ([]domain.User, error) {
-	account := user.Account()
+	account := user.Profile()
 	// fmt.Println(account, limit, offset)
 	return s.repo.GetUsers(ctx, account, limit, offset)
 }

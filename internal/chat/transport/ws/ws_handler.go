@@ -104,7 +104,7 @@ func (h *Handler) Subscribe(c *gin.Context) {
 	// chatID = chatid
 	name := user.Name()
 	surname := user.Surname()
-	account := user.Account()
+	account := user.Profile()
 	fmt.Printf("\nclientID: %d, login: %s, pubsub: %s\n", clientID, login, pubsub)
 	fmt.Printf("name:%s, surname %s, account: %s\nIs connected!\n", name, surname, account)
 

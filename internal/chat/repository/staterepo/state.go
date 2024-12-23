@@ -24,15 +24,16 @@ func NewStateRepo(db *stateStore) *StateRepo {
 }
 
 // SetState implements services.IStateRepository.
-func (s *StateRepo) SetState(ctx context.Context, userID int, pubsub uuid.UUID, conn *websocket.Conn) domain.State {
+func (s *StateRepo) SetState(ctx context.Context, userID int, pubsub uuid.UUID, conn *websocket.Conn, canselChannel chan struct{}) domain.State {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	state, ok := s.db.states[userID]
 	if ok {
 		state.Connects = append(state.Connects, models.Connect{
-			Conn:      conn,
-			Pubsub:    pubsub,
-			CreatedAt: time.Now().Unix(),
+			Conn:         conn,
+			Pubsub:       pubsub,
+			CreatedAt:    time.Now().Unix(),
+			CanselCannel: canselChannel,
 		})
 		s.db.states[userID] = state
 		return stateToDomain(state)
@@ -41,9 +42,10 @@ func (s *StateRepo) SetState(ctx context.Context, userID int, pubsub uuid.UUID, 
 			UserID: userID,
 			Connects: []models.Connect{
 				{
-					Conn:      conn,
-					Pubsub:    pubsub,
-					CreatedAt: time.Now().Unix(),
+					Conn:         conn,
+					Pubsub:       pubsub,
+					CreatedAt:    time.Now().Unix(),
+					CanselCannel: canselChannel,
 				},
 			},
 		}

@@ -21,6 +21,10 @@ ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "chat_members"
 ADD FOREIGN KEY("chat_id") REFERENCES "chats"("id")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+-- ALTER TABLE "chat_members"
+-- ADD FOREIGN KEY("last_read_msg_id") REFERENCES "messages"("id")
+-- ON UPDATE NO ACTION ON DELETE NO ACTION;
 -- +goose StatementEnd
 
 -- +goose Down

@@ -1,8 +1,6 @@
 package httpserver
 
 import (
-	"strconv"
-
 	"github.com/KozlovNikolai/pfp/internal/chat/constants"
 	"github.com/KozlovNikolai/pfp/internal/chat/domain"
 	"github.com/KozlovNikolai/pfp/internal/chat/transport/httpserver/middlewares"
@@ -10,15 +8,22 @@ import (
 
 func toDomainUser(user UserRequest) domain.User {
 	return domain.NewUser(domain.NewUserData{
-		UserExtID: "0",
+		UserExtID: 0,
 		Login:     user.Login,
 		Password:  user.Password,
-		Account:   user.Account,
-		Token:     "",
+		Profile:   user.Profile,
 		Name:      user.Name,
 		Surname:   user.Surname,
 		Email:     user.Login,
 		UserType:  "regular",
+		CreatedAt: 0,
+		UpdatedAt: 0,
+	})
+}
+
+func toDomainAccount(account AccountRequest) domain.Account {
+	return domain.NewAccount(domain.NewAccountData{
+		Name:      account.Name,
 		CreatedAt: 0,
 		UpdatedAt: 0,
 	})
@@ -32,8 +37,7 @@ func toResponseUser(user domain.User, status string) UserResponse {
 		UserExtID: user.UserExtID(),
 		Login:     user.Login(),
 		// Password:  user.Password(),
-		Account:   user.Account(),
-		Token:     user.Token(),
+		Profile:   user.Profile(),
 		Name:      user.Name(),
 		Surname:   user.Surname(),
 		Email:     user.Email(),
@@ -44,13 +48,21 @@ func toResponseUser(user domain.User, status string) UserResponse {
 	}
 }
 
+func toResponseAccount(account domain.Account) AccountResponse {
+	return AccountResponse{
+		ID:        account.ID(),
+		Name:      account.Name(),
+		CreatedAt: account.CreatedAt(),
+		UpdatedAt: account.UpdatedAt(),
+	}
+}
+
 func toDomainUserFromUserSputnik(user middlewares.ReceiveUserSputnik) domain.User {
 	return domain.NewUser(domain.NewUserData{
-		UserExtID: strconv.Itoa(user.Payload.UserID),
+		UserExtID: user.Payload.UserID,
 		Login:     user.Payload.Email,
 		Password:  "",
-		Account:   constants.Account_name_magnum,
-		Token:     "",
+		Profile:   constants.Account_name_magnum,
 		Name:      user.Payload.Name,
 		Surname:   user.Payload.Surname,
 		Email:     user.Payload.Email,
@@ -62,7 +74,7 @@ func toDomainUserFromUserSputnik(user middlewares.ReceiveUserSputnik) domain.Use
 
 func toDomainChat(chat ChatCreateRequest) domain.Chat {
 	return domain.NewChat(domain.NewChatData{
-		OwnerID:       chat.OwnerID,
+		AccountID:     chat.OwnerID,
 		Name:          chat.Name,
 		ChatType:      chat.ChatType,
 		LastChatMsgID: 0,
@@ -73,7 +85,7 @@ func toResponseChat(chat domain.Chat) ChatResponse {
 	return ChatResponse{
 		Id:            chat.ID(),
 		Name:          chat.Name(),
-		OwnerID:       chat.OwnerID(),
+		AccountID:     chat.AccountID(),
 		ChatType:      chat.ChatType(),
 		LastChatMsgID: chat.LastMsgID(),
 		// Contacts:      chat.Contacts(),

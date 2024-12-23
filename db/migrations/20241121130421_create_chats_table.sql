@@ -2,8 +2,8 @@
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS "chats"(
     "id"  serial NOT NULL PRIMARY KEY,
-    "owner_id" INTEGER NOT NULL,
-    "name" TEXT,
+    "account_id" INTEGER NOT NULL,
+    "name" TEXT NOT NULL,
     "chat_type" TEXT NOT NULL,
     "last_message_id" INTEGER,
     "created_at" INTEGER NOT NULL,
@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS "chats"(
 );
 
 ALTER TABLE "chats"
-ADD FOREIGN KEY("owner_id") REFERENCES "users"("id")
+ADD FOREIGN KEY("account_id") REFERENCES "accounts"("id")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
 
 CREATE unique INDEX "chats_name_chat_type_index"
