@@ -16,7 +16,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"account\":\"system\",\n  \"login\": \"root@admin.ru\",\n  \"password\": \"123456\",\n  \"name\":\"admin\",\n  \"surname\":\"root\"\n}",
+							"raw": "{\n  \"profile\":\"system\",\n  \"login\": \"root@admin.ru\",\n  \"password\": \"123456\",\n  \"name\":\"admin\",\n  \"surname\":\"root\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -24,8 +24,8 @@
 							}
 						},
 						"url": {
-							"raw": "https://localhost:8443/signup",
-							"protocol": "https",
+							"raw": "http://localhost:8443/signup",
+							"protocol": "http",
 							"host": [
 								"localhost"
 							],
@@ -59,7 +59,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"account\":\"system\",\n  \"login\": \"root@admin.ru\",\n  \"password\": \"123456\"\n}",
+							"raw": "{\n  \"profile\":\"system\",\n  \"login\": \"root@admin.ru\",\n  \"password\": \"123456\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -117,8 +117,8 @@
 							}
 						},
 						"url": {
-							"raw": "https://localhost:8443/auth/createChat",
-							"protocol": "https",
+							"raw": "http://localhost:8443/auth/createChat",
+							"protocol": "http",
 							"host": [
 								"localhost"
 							],
@@ -256,7 +256,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"account\":\"email\",\n  \"login\": \"cmd@cmd.ru\",\n  \"password\": \"123456\",\n  \"name\":\"\",\n  \"surname\":\"\"\n}",
+					"raw": "{\n  \"profile\":\"email\",\n  \"login\": \"cmd@cmd.ru\",\n  \"password\": \"123456\",\n  \"name\":\"Donald\",\n  \"surname\":\"Trump\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -299,7 +299,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"account\":\"email\",\n  \"login\": \"cmd@cmd.ru\",\n  \"password\": \"123456\"\n}",
+					"raw": "{\n  \"profile\":\"email\",\n  \"login\": \"cmd@cmd.ru\",\n  \"password\": \"123456\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -646,7 +646,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"chat_id\":2,\n    \"user_id\":7\n}",
+					"raw": "{\n    \"chat_id\":1,\n    \"user_id\":1\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -797,7 +797,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"name\":\"chat1\",\n    \"chat_type\":\"system\"\n}",
+					"raw": "{\n    \"name\":\"My mega chat\",\n    \"chat_type\":\"regular\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
