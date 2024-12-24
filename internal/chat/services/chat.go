@@ -34,8 +34,8 @@ func (c ChatService) GetChatsByUser(ctx context.Context, userID int) ([]domain.C
 func (c ChatService) GetUserIDsByChatID(ctx context.Context, chatID int) ([]int, error) {
 	return c.repo.GetUserIDsByChatID(ctx, chatID)
 }
-func (c ChatService) IsChatMember(ctx context.Context, userID int, chatID int) bool {
-	return c.repo.IsChatMember(ctx, userID, chatID)
+func (c ChatService) GetChatMember(ctx context.Context, userID int, chatID int) (domain.ChatMember, bool) {
+	return c.repo.GetChatMember(ctx, userID, chatID)
 }
 func (c ChatService) GetUsersByChatID(ctx context.Context, chatID int) ([]domain.User, error) {
 	return c.repo.GetUsersByChatID(ctx, chatID)

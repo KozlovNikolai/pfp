@@ -36,7 +36,7 @@ type IChatRepository interface {
 	GetChatByNameAndType(ctx context.Context, name, chatType string) (domain.Chat, error)
 	GetChatsByUser(ctx context.Context, userID int) ([]domain.Chat, error)
 	GetUserIDsByChatID(ctx context.Context, chatID int) ([]int, error)
-	IsChatMember(ctx context.Context, userID int, chatID int) bool
+	GetChatMember(ctx context.Context, userID int, chatID int) (domain.ChatMember, bool)
 	GetUsersByChatID(ctx context.Context, chatID int) ([]domain.User, error)
 }
 

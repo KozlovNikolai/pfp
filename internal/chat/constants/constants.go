@@ -8,10 +8,10 @@ const (
 	User_type     = "regular"
 	UserTypeAdmin = "admin"
 
-	SystemChatName = "common chat"
-	SystemChatType = "system"
-	AdminRole      = "Admin"
-	RegularRole    = "Regular"
+	SystemChatName  = "common chat"
+	SystemChatType  = "system"
+	ChatRoleAdmin   = "Admin"
+	ChatRoleRegular = "Regular"
 
 	AdminEmaleLogin = "root@admin.ru"
 	SystemProfile   = "system"

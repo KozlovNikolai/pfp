@@ -39,7 +39,7 @@ func (h HTTPServer) CreateChat(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error service User": err.Error()})
 		return
 	}
-	err = h.chatService.AddUserToChat(c, userCtx.ID(), createdChat.ID(), constants.AdminRole)
+	err = h.chatService.AddUserToChat(c, userCtx.ID(), createdChat.ID(), constants.ChatRoleAdmin)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error service User": err.Error()})
 		return
@@ -64,6 +64,17 @@ func (h HTTPServer) AddToChat(c *gin.Context) {
 
 	if err = addToChatRequest.Validate(); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{invaldRequest: err.Error()})
+		return
+	}
+
+	chatMember, ok := h.chatService.GetChatMember(c, userCtx.ID(), addToChatRequest.ChatID)
+	if !ok && userCtx.UserType() != constants.UserTypeAdmin {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Forbidden. The adder is not a member of the chat room."})
+		return
+	}
+
+	if chatMember.Role() != constants.ChatRoleAdmin && userCtx.UserType() != constants.UserTypeAdmin {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Forbidden. The adder is not a admin of the chat room."})
 		return
 	}
 
@@ -123,8 +134,8 @@ func (h HTTPServer) EnterToChat(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
 
-	isChatMember := h.chatService.IsChatMember(c, userCtx.ID(), chatID)
-	if !isChatMember {
+	_, ok := h.chatService.GetChatMember(c, userCtx.ID(), chatID)
+	if !ok {
 		ok := h.stateService.SetCurrentChat(c, userCtx.ID(), pubsub, 0)
 		if !ok {
 			log.Print("SetCurrentChat is fault")
@@ -133,7 +144,7 @@ func (h HTTPServer) EnterToChat(c *gin.Context) {
 		return
 	}
 
-	ok := h.stateService.SetCurrentChat(c, userCtx.ID(), pubsub, chatID)
+	ok = h.stateService.SetCurrentChat(c, userCtx.ID(), pubsub, chatID)
 	if !ok {
 		log.Print("SetCurrentChat is fault")
 	}

@@ -286,12 +286,12 @@ func (c *ChatRepo) GetUserIDsByChatID(ctx context.Context, chatID int) ([]int, e
 	return usersID, nil
 }
 
-func (c *ChatRepo) IsChatMember(ctx context.Context, userID int, chatID int) bool {
+func (c *ChatRepo) GetChatMember(ctx context.Context, userID int, chatID int) (domain.ChatMember, bool) {
 	// Начинаем транзакцию
 	tx, err := c.db.RO.Begin(ctx)
 	if err != nil {
 		log.Print(constants.FailedToBeginTransaction, err.Error())
-		return false
+		return domain.ChatMember{}, false
 	}
 	defer func() {
 		err := tx.Rollback(ctx)
@@ -302,32 +302,39 @@ func (c *ChatRepo) IsChatMember(ctx context.Context, userID int, chatID int) boo
 
 	// SQL-запрос на получение чата по имени и типу
 	query := `
-		SELECT id
+		SELECT *
 		FROM chat_members
 		WHERE (user_id=$1 AND chat_id=$2)
 	`
 	// Выполняем запрос и сканируем результат в структуру
-	var recordID int
+	var chatMember models.ChatMember
 	// Выполняем запрос и сканируем результат в структуру User
 	err = c.db.RO.QueryRow(ctx, query, userID, chatID).Scan(
-		&recordID,
+		&chatMember.Id,
+		&chatMember.ChatID,
+		&chatMember.UserID,
+		&chatMember.Role,
+		&chatMember.LastReadMsgID,
+		&chatMember.Notifications,
+		&chatMember.CreatedAt,
+		&chatMember.UpdatedAt,
 	)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			log.Printf("not found user:%d in chat:%d", userID, chatID)
-			return false
+			return domain.ChatMember{}, false
 		}
 		log.Printf("the search for a user:%d in the chat:%d failed: %s", userID, chatID, err.Error())
-		return false
+		return domain.ChatMember{}, false
 	}
 
 	// Фиксация транзакции
 	if err := tx.Commit(ctx); err != nil {
 		log.Print(constants.FailedToBeginTransaction, err.Error())
-		return false
+		return domain.ChatMember{}, false
 	}
 
-	return true
+	return chatMemberToDomain(chatMember), true
 }
 
 func (c *ChatRepo) GetUsersByChatID(ctx context.Context, chatID int) ([]domain.User, error) {

@@ -57,7 +57,7 @@ func (a AccountService) AddUserToAccount(ctx context.Context, userID int, accoun
 }
 
 func (a AccountService) NewUserToNewAccount(ctx context.Context, userID int, accountID int) error {
-	return a.repo.AddUserToAccount(ctx, userID, accountID, userID, constants.AdminRole)
+	return a.repo.AddUserToAccount(ctx, userID, accountID, userID, constants.ChatRoleAdmin)
 }
 
 // // // GetUserByID ...

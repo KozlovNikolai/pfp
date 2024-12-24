@@ -82,7 +82,7 @@ func (h HTTPServer) SignUp(c *gin.Context) {
 			return
 		}
 		// log.Printf("chat response: %+v", chat)
-		err = h.chatService.AddUserToChat(c, createdUser.ID(), chat.ID(), constants.RegularRole)
+		err = h.chatService.AddUserToChat(c, createdUser.ID(), chat.ID(), constants.ChatRoleRegular)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"failure add user to system chat": err.Error()})
 			return
@@ -244,7 +244,7 @@ func (h HTTPServer) LoginUserByTokenSputnik(c *gin.Context) {
 			return
 		}
 		// log.Printf("chat response: %+v", chat)
-		err = h.chatService.AddUserToChat(c, registeredUser.ID(), chat.ID(), constants.RegularRole)
+		err = h.chatService.AddUserToChat(c, registeredUser.ID(), chat.ID(), constants.ChatRoleRegular)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"failure add user to system chat": err.Error()})
 			return
