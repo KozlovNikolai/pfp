@@ -147,7 +147,7 @@ func (h HTTPServer) SignIn(c *gin.Context) {
 	}
 
 	h.stateService.SetState(c, user.ID(), pubsub, nil)
-
+	var currentChatID int
 	if !(user.Login() == constants.AdminEmaleLogin && user.Profile() == constants.SystemProfile) {
 		chat, err := h.chatService.GetChatByNameAndType(c, constants.SystemChatName, constants.SystemChatType)
 		if err != nil {
@@ -158,6 +158,7 @@ func (h HTTPServer) SignIn(c *gin.Context) {
 		if !ok {
 			log.Printf("Не удалось установить текущий чат")
 		}
+		currentChatID = chat.ID()
 	}
 
 	state, ok := h.stateService.GetState(c, user.ID())
@@ -183,7 +184,13 @@ func (h HTTPServer) SignIn(c *gin.Context) {
 		status = "online"
 	}
 
-	c.JSON(http.StatusOK, gin.H{"pubsub": pubsub, "token": token, "user": toResponseUser(user, status), "chats": chats})
+	c.JSON(http.StatusOK, gin.H{
+		"pubsub":          pubsub,
+		"token":           token,
+		"user":            toResponseUser(user, status),
+		"chats":           chats,
+		"current_chat_id": currentChatID,
+	})
 }
 
 // LoginUserByTokenSputnik is ...

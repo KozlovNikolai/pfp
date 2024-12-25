@@ -158,6 +158,76 @@ func (m *MsgRepo) GetMessagesByChatID(ctx context.Context, chatID, limit, offset
 	return domainMsgs, nil
 }
 
+func (m *MsgRepo) GetChatMessages(ctx context.Context, chatID, initialMsgID, before, after int) ([]domain.Message, error) {
+	// Начинаем транзакцию
+	tx, err := m.db.RO.Begin(ctx)
+	if err != nil {
+		return nil, fmt.Errorf(constants.FailedToBeginTransaction, err)
+	}
+	defer func() {
+		err := tx.Rollback(ctx)
+		if err != nil && err.Error() != "tx is closed" {
+			log.Printf("get chat messages rollback error:%v", err)
+		}
+	}()
+
+	query := `
+		(SELECT * FROM messages
+		WHERE chat_id = $1 AND is_deleted = FALSE AND id < $2
+		ORDER BY id DESC
+		LIMIT $3)		
+		UNION ALL 
+		(SELECT * FROM messages
+		WHERE chat_id = $1 AND is_deleted = FALSE AND id >= $2
+		ORDER BY id ASC
+		LIMIT $4)
+		ORDER BY id ASC
+`
+
+	rows, err := m.db.RO.Query(ctx, query, chatID, initialMsgID, before, after)
+	if err != nil {
+		return nil, fmt.Errorf("failed get messages by chat_id: %d: %w", chatID, err)
+	}
+	// log.Printf("SQL-запрос на получение сообщений по chatID: %d", chatID)
+	// Фиксация транзакции
+	if err := tx.Commit(ctx); err != nil {
+		return nil, fmt.Errorf(constants.FailedToBeginTransaction, err)
+	}
+	// log.Println("Заполняем массив")
+	// заполняем массив
+	var msgs []models.Message
+	for rows.Next() {
+		var msg models.Message
+		if err := rows.Scan(
+			&msg.Id,
+			&msg.SenderID,
+			&msg.ChatID,
+			&msg.MsgType,
+			&msg.Text,
+			&msg.IsDeleted,
+			&msg.CreatedAt,
+			&msg.UpdatedAt,
+		); err != nil {
+			return nil, fmt.Errorf("error scanning user ID: %w", err)
+		}
+		msgs = append(msgs, msg)
+	}
+	// log.Println("проверка на ошибки итерации")
+	// Проверка на ошибки, возникшие при итерации по строкам
+	if rows.Err() != nil {
+		return nil, fmt.Errorf("error occurred during row iteration: %w", rows.Err())
+	}
+	// log.Println("мапим модель в домен")
+
+	// мапим модель в домен
+	domainMsgs := make([]domain.Message, len(msgs))
+	for i, msg := range msgs {
+		domainMsg := messageToDomain(msg)
+		domainMsgs[i] = domainMsg
+	}
+	return domainMsgs, nil
+}
+
 // // GetUserByExtID implements services.IUserRepository.
 // func (m *MsgRepo) GetUserByExtID(ctx context.Context, account, extID string) (domain.User, error) {
 // 	if extID == "" {

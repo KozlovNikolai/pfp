@@ -86,3 +86,50 @@ func (h HTTPServer) GetMessages(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, msgsResponse)
 }
+
+func (h HTTPServer) GetChatMessages(c *gin.Context) {
+	var msgsRequest GetChatMessagesRequest
+	var err error
+	if err = c.ShouldBindJSON(&msgsRequest); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"invalid-json": err.Error()})
+		return
+	}
+
+	if err = msgsRequest.Validate(); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{invaldRequest: err.Error()})
+		return
+	}
+	userCtx, err := utils.GetDataFromContext[domain.User](c, "user")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": domain.ErrNoUserInContext.Error()})
+		return
+	}
+	_ = userCtx
+	// msgsRequest.UserID = userCtx.ID()
+
+	// msgsDomain, err := h.msgService.GetMessagesByChatID(
+	// 	c,
+	// 	msgsRequest.ChatID,
+	// 	msgsRequest.Limit,
+	// 	msgsRequest.Offset,
+	// )
+
+	msgsDomain, err := h.msgService.GetChatMessages(
+		c,
+		msgsRequest.ChatID,
+		msgsRequest.InitialMsgID,
+		msgsRequest.Before,
+		msgsRequest.After,
+	)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	msgsResponse := make([]MessageResponse, len(msgsDomain))
+	for i, msgDomain := range msgsDomain {
+		msgsResponse[i] = toResponseMessage(msgDomain)
+	}
+	c.JSON(http.StatusOK, msgsResponse)
+}

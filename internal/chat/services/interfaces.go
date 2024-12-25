@@ -43,6 +43,7 @@ type IChatRepository interface {
 type IMessageRepository interface {
 	SaveMsg(ctx context.Context, msg domain.Message) error
 	GetMessagesByChatID(ctx context.Context, chatID, limit, offset int) ([]domain.Message, error)
+	GetChatMessages(ctx context.Context, chatID, initialMsgID, before, after int) ([]domain.Message, error)
 }
 
 type IAccountRepository interface {

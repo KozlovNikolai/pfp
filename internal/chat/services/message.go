@@ -24,3 +24,7 @@ func (m MessageService) SaveMsg(ctx context.Context, msg domain.Message) error {
 func (m MessageService) GetMessagesByChatID(ctx context.Context, chatID, limit, offset int) ([]domain.Message, error) {
 	return m.repo.GetMessagesByChatID(ctx, chatID, limit, offset)
 }
+
+func (m MessageService) GetChatMessages(ctx context.Context, chatID, initialMsgID, before, after int) ([]domain.Message, error) {
+	return m.repo.GetChatMessages(ctx, chatID, initialMsgID, before, after)
+}

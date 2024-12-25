@@ -137,6 +137,7 @@ func NewRouter() *Router {
 	authorized.GET("signout/:pubsub", httpServer.SignOut)
 	authorized.POST("sendmsg", httpServer.SendMessage)
 	authorized.POST("getmsgs", httpServer.GetMessages)
+	authorized.POST("getchatmsgs", httpServer.GetChatMessages)
 	authorized.GET("getChats", httpServer.GetChatsByUser)
 	authorized.POST("createChat", httpServer.CreateChat)
 	authorized.POST("addToChat", httpServer.AddToChat)

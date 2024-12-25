@@ -130,6 +130,18 @@ func (c *GetMessagesRequest) Validate() error {
 	return validate.Struct(c)
 }
 
+type GetChatMessagesRequest struct {
+	ChatID       int `json:"chat_id" validate:"required"`
+	InitialMsgID int `json:"initial_msg_id" validate:"gte=0,required"`
+	Before       int `json:"before" validate:"gte=0"`
+	After        int `json:"after" validate:"gte=0"`
+}
+
+func (c *GetChatMessagesRequest) Validate() error {
+	validate := validator.New(validator.WithRequiredStructEnabled())
+	return validate.Struct(c)
+}
+
 type AddToChatRequest struct {
 	ChatID int    `json:"chat_id" db:"chat_id" validate:"gt=0,required"`
 	UserID int    `json:"user_id" db:"user_id" validate:"gt=0,required"`
