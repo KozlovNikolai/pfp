@@ -101,9 +101,9 @@ func NewRouter() *Router {
 
 	// CORS
 	server.router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"*", "https://localhost:8443", "https://127.0.0.1:8443"},
-		AllowMethods:     []string{"GET", "POST"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "POST", "OPTIONS"},
+		AllowHeaders:     []string{"*", "Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length", "X-Request-ID"},
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
@@ -142,7 +142,7 @@ func NewRouter() *Router {
 	authorized.POST("createChat", httpServer.CreateChat)
 	authorized.POST("addToChat", httpServer.AddToChat)
 	authorized.GET("enter/:pubsub", httpServer.EnterToChat)
-
+	authorized.GET("usersByChat", httpServer.GetUsersByChatID)
 	return server
 }
 

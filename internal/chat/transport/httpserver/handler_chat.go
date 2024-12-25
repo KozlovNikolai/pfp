@@ -167,6 +167,42 @@ func (h HTTPServer) EnterToChat(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
+func (h HTTPServer) GetUsersByChatID(c *gin.Context) {
+	userCtx, err := utils.GetDataFromContext[domain.User](c, "user")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": domain.ErrNoUserInContext.Error()})
+		return
+	}
+
+	chatID, err := strconv.Atoi(c.Query("chat_id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+
+	_, ok := h.chatService.GetChatMember(c, userCtx.ID(), chatID)
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "not member chat " + strconv.Itoa(chatID)})
+		return
+	}
+
+	users, err := h.chatService.GetUsersByChatID(c, chatID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	response := make([]UserResponse, 0, len(users))
+	for _, user := range users {
+		_, ok := h.stateService.GetState(c, user.ID())
+		status := "offline"
+		if ok {
+			status = "online"
+		}
+		response = append(response, toResponseUser(user, status))
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
 // func (h HTTPServer) GetChatByName(c *gin.Context, name string) {
 // 	userCtx, err := utils.GetDataFromContext[domain.User](c, "user")
 // 	if err != nil {
