@@ -22,12 +22,14 @@ type Message struct {
 	Content     string `json:"content"`
 	ChatID      int    `json:"chat_id"`
 	Sender      int    `json:"sender_id"`
+	Action      string `json:"action"`
 	ChatMembers []int  `json:"chat_members"`
 }
 type MessageOne struct {
 	Content string `json:"content"`
 	ChatID  int    `json:"chat_id"`
 	Sender  int    `json:"sender_id"`
+	Action  string `json:"action"`
 }
 
 func toMsgOne(msg Message) *MessageOne {
@@ -35,6 +37,7 @@ func toMsgOne(msg Message) *MessageOne {
 		Content: msg.Content,
 		ChatID:  msg.ChatID,
 		Sender:  msg.Sender,
+		Action:  msg.Action,
 	}
 }
 

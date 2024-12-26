@@ -36,12 +36,13 @@ var upgrade = websocket.Upgrader{
 	},
 }
 
-func (h *Handler) Broadcast(content string, chatID int, senderID int, chatMembers []int) {
+func (h *Handler) Broadcast(content string, action string, chatID int, senderID int, chatMembers []int) {
 
 	msg := &Message{
 		Content:     content,
 		ChatID:      chatID,
 		Sender:      senderID,
+		Action:      action,
 		ChatMembers: chatMembers,
 	}
 

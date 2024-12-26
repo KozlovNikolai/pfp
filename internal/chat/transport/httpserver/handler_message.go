@@ -17,7 +17,7 @@ func (h HTTPServer) SendMessage(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"invalid-json": err.Error()})
 		return
 	}
-
+	fmt.Printf("\nGetChatMsgs: %+v\n\n", msgRequest)
 	if err = msgRequest.Validate(); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{invaldRequest: err.Error()})
 		return
@@ -44,7 +44,8 @@ func (h HTTPServer) SendMessage(c *gin.Context) {
 		return
 	}
 	content := fmt.Sprintf("check msgs in chatID: %d", msgRequest.ChatID)
-	h.wsHandler.Broadcast(content, msgRequest.ChatID, msgRequest.SenderID, usersID)
+	action := "new-message"
+	h.wsHandler.Broadcast(content, action, msgRequest.ChatID, msgRequest.SenderID, usersID)
 	c.JSON(http.StatusCreated, "message sent")
 }
 
@@ -94,6 +95,8 @@ func (h HTTPServer) GetChatMessages(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"invalid-json": err.Error()})
 		return
 	}
+
+	fmt.Printf("\nGetChatMsgs: %+v\n\n", msgsRequest)
 
 	if err = msgsRequest.Validate(); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{invaldRequest: err.Error()})

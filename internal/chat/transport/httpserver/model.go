@@ -93,12 +93,12 @@ type ChatResponse struct {
 }
 
 type SendMessageRequest struct {
-	SenderID  int
+	SenderID  int    `json:"-"`
 	ChatID    int    `json:"chat_id" db:"chat_id" validate:"required"`
 	MsgType   string `json:"msg_type" db:"msg_type" validate:"required"`
 	Text      string `json:"text" db:"text" validate:"required"`
-	CreatedAt int64
-	UpdatedAt int64
+	CreatedAt int64  `json:"-"`
+	UpdatedAt int64  `json:"-"`
 }
 
 func (c *SendMessageRequest) Validate() error {
@@ -107,14 +107,14 @@ func (c *SendMessageRequest) Validate() error {
 }
 
 type MessageResponse struct {
-	Id        int
-	SenderID  int
-	ChatID    int
-	MsgType   string
-	Text      string
-	IsDeleted bool
-	CreatedAt int64
-	UpdatedAt int64
+	Id        int    `json:"id"`
+	SenderID  int    `json:"sender_id"`
+	ChatID    int    `json:"chat_id"`
+	MsgType   string `json:"msg_type"`
+	Text      string `json:"text"`
+	IsDeleted bool   `json:"is_deleted"`
+	CreatedAt int64  `json:"created_at"`
+	UpdatedAt int64  `json:"updated_at"`
 }
 
 type GetMessagesRequest struct {
@@ -132,7 +132,7 @@ func (c *GetMessagesRequest) Validate() error {
 
 type GetChatMessagesRequest struct {
 	ChatID       int `json:"chat_id" validate:"required"`
-	InitialMsgID int `json:"initial_msg_id" validate:"gte=0,required"`
+	InitialMsgID int `json:"initial_msg_id" validate:"gte=0"`
 	Before       int `json:"before" validate:"gte=0"`
 	After        int `json:"after" validate:"gte=0"`
 }
