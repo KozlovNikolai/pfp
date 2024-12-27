@@ -107,3 +107,7 @@ func (s UserService) GetUsers(ctx context.Context, user domain.User, limit, offs
 	// fmt.Println(account, limit, offset)
 	return s.repo.GetUsers(ctx, account, limit, offset)
 }
+
+func (u UserService) AddContact(ctx context.Context, user domain.User, userID int) error {
+	return u.repo.AddContact(ctx, user, userID)
+}

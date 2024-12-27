@@ -181,3 +181,43 @@ func (h HTTPServer) GetUsers(c *gin.Context) {
 
 	c.JSON(http.StatusOK, response)
 }
+
+// GetUsers is ...
+// GetUsersTags 		godoc
+// @Summary			Получить список всех пользователей.
+// @Description		Return users list.
+// @Tags			User
+// @Security		BearerAuth
+// @Param        	limit  query   string  true  "limit records on page" example(10) default(10)
+// @Param       	offset  query   string  true  "start of record output" example(0) default(0)
+// @Produce      	json
+// @Success			200 {object} []UserResponse
+// @failure			404 {string} err.Error()
+// @Router			/admin/users [get]
+func (h HTTPServer) AddContact(c *gin.Context) {
+	var addContactRequest AddContactRequest
+
+	if err := c.ShouldBindJSON(&addContactRequest); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"invalid-json": err.Error()})
+		return
+	}
+
+	if err := addContactRequest.Validate(); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{invaldRequest: err.Error()})
+		return
+	}
+
+	userCtx, err := utils.GetDataFromContext[domain.User](c, "user")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": domain.ErrNoUserInContext.Error()})
+		return
+	}
+
+	err := h.userService.AddContact(c, userCtx, addContactRequest.UserID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error add contact": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": "contact added"})
+}

@@ -18,6 +18,7 @@ type IUserRepository interface {
 	GetUserByLogin(context.Context, string, string) (domain.User, error)
 	UpdateUser(context.Context, domain.User) (domain.User, error)
 	DeleteUser(context.Context, int) error
+	AddContact(ctx context.Context, user domain.User, userID int) error
 }
 
 type IStateRepository interface {

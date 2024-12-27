@@ -94,9 +94,9 @@ type ChatResponse struct {
 
 type SendMessageRequest struct {
 	SenderID  int    `json:"-"`
-	ChatID    int    `json:"chat_id" db:"chat_id" validate:"required"`
-	MsgType   string `json:"msg_type" db:"msg_type" validate:"required"`
-	Text      string `json:"text" db:"text" validate:"required"`
+	ChatID    int    `json:"chat_id"  validate:"required"`
+	MsgType   string `json:"msg_type"  validate:"required"`
+	Text      string `json:"text" validate:"required"`
 	CreatedAt int64  `json:"-"`
 	UpdatedAt int64  `json:"-"`
 }
@@ -104,6 +104,15 @@ type SendMessageRequest struct {
 func (c *SendMessageRequest) Validate() error {
 	validate := validator.New(validator.WithRequiredStructEnabled())
 	return validate.Struct(c)
+}
+
+type AddContactRequest struct {
+	UserID int `json:"user_id" validate:"required"`
+}
+
+func (ac *AddContactRequest) Validate() error {
+	validate := validator.New(validator.WithRequiredStructEnabled())
+	return validate.Struct(ac)
 }
 
 type MessageResponse struct {

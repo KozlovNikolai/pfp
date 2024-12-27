@@ -336,3 +336,7 @@ func (u *UserRepo) UpdateUser(ctx context.Context, user domain.User) (domain.Use
 
 	return domainUser, nil
 }
+
+func (u *UserRepo) AddContact(ctx context.Context, user domain.User, userID int) error {
+	return nil
+}
