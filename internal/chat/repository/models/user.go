@@ -14,3 +14,13 @@ type User struct {
 	CreatedAt int64
 	UpdatedAt int64
 }
+
+type Contact struct {
+	Id        int
+	AccountID int
+	UserID    int
+	Name      string
+	Surname   string
+	Phone     string
+	Email     string
+}

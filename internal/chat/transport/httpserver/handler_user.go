@@ -213,7 +213,7 @@ func (h HTTPServer) AddContact(c *gin.Context) {
 		return
 	}
 
-	err := h.userService.AddContact(c, userCtx, addContactRequest.UserID)
+	err = h.userService.AddContact(c, userCtx, addContactRequest.UserID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error add contact": err.Error()})
 		return

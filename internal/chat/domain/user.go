@@ -99,3 +99,65 @@ func (u User) CreatedAt() int64 {
 func (u User) UpdatedAt() int64 {
 	return u.updatedAt
 }
+
+// User is a domain User
+type Contact struct {
+	id        int
+	accountID int
+	userID    int
+	name      string
+	surname   string
+	phone     string
+	email     string
+}
+
+// NewUserData is a domain User
+type NewContactData struct {
+	Id        int    `json:"id" db:"id"`
+	AccountID int    `json:"account_id" db:"account_id"`
+	UserID    int    `json:"user_id" db:"user_id"`
+	Name      string `json:"name" db:"name"`
+	Surname   string `json:"surname" db:"surname"`
+	Phone     string `json:"phone" db:"phone"`
+	Email     string `json:"email" db:"email"`
+}
+
+// NewUser ...
+func NewContact(data NewContactData) Contact {
+	return Contact{
+		id:        data.Id,
+		accountID: data.AccountID,
+		userID:    data.UserID,
+		name:      data.Name,
+		surname:   data.Surname,
+		phone:     data.Phone,
+		email:     data.Email,
+	}
+}
+
+// ID ...
+func (c Contact) ID() int {
+	return c.id
+}
+
+// Login ...
+func (c Contact) AccountID() int {
+	return c.accountID
+}
+func (c Contact) UserID() int {
+	return c.userID
+}
+func (c Contact) Name() string {
+	return c.name
+}
+func (c Contact) Surname() string {
+	return c.surname
+}
+
+// Password ...
+func (c Contact) Phone() string {
+	return c.phone
+}
+func (c Contact) Email() string {
+	return c.email
+}

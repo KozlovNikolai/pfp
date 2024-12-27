@@ -128,3 +128,27 @@ func chatMemberToDomain(chatMember models.ChatMember) domain.ChatMember {
 		UpdatedAt:     chatMember.UpdatedAt,
 	})
 }
+
+func domainToContact(contact domain.Contact) models.Contact {
+	return models.Contact{
+		Id:        contact.ID(),
+		AccountID: contact.AccountID(),
+		UserID:    contact.UserID(),
+		Name:      contact.Name(),
+		Surname:   contact.Surname(),
+		Phone:     contact.Phone(),
+		Email:     contact.Email(),
+	}
+}
+
+func contactToDomain(contact models.Contact) domain.Contact {
+	return domain.NewContact(domain.NewContactData{
+		Id:        contact.Id,
+		AccountID: contact.AccountID,
+		UserID:    contact.UserID,
+		Name:      contact.Name,
+		Surname:   contact.Surname,
+		Phone:     contact.Phone,
+		Email:     contact.Email,
+	})
+}

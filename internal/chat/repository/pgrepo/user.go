@@ -337,6 +337,48 @@ func (u *UserRepo) UpdateUser(ctx context.Context, user domain.User) (domain.Use
 	return domainUser, nil
 }
 
-func (u *UserRepo) AddContact(ctx context.Context, user domain.User, userID int) error {
+func (u *UserRepo) AddContact(ctx context.Context, user domain.User, userID int) (domain.Contact, error) {
+	// получаем данные пользователя
+	user, err := u.GetUserByID(ctx, userID)
+	if err != nil {
+		return domain.Contact{}, fmt.Errorf("failed get user for adding to contact: %w", err)
+	}
+
+	// Начинаем транзакцию
+	tx, err := u.db.WR.Begin(ctx)
+	if err != nil {
+		return domain.Contact{}, fmt.Errorf(constants.FailedToBeginTransaction, err)
+	}
+	defer func() {
+		err := tx.Rollback(ctx)
+		if err != nil && err.Error() != "tx is closed" {
+			log.Printf("add contact rollback error:%v", err)
+		}
+	}()
+
+	var id models.Contact
+	// Вставка данных и получение контакта
+	err = tx.QueryRow(
+		ctx,
+		`	INSERT INTO contacts (account_id, user_id, name, surname, phone, email)
+			VALUES ($1, $2, $3, $4, $5, $6)
+			RETURNING id`,
+		accountID,
+		userID,
+		role,
+		inviterID,
+		createdAt,
+		updatedAt,
+	).
+		Scan(
+			&id)
+	if err != nil {
+		return fmt.Errorf("failed to bind User to Account: %w", err)
+	}
+	// Фиксация транзакции
+	if err := tx.Commit(ctx); err != nil {
+		return fmt.Errorf(constants.FailedToBeginTransaction, err)
+	}
+
 	return nil
 }

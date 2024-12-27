@@ -140,6 +140,7 @@ func NewRouter() *Router {
 	authorized.POST("getchatmsgs", httpServer.GetChatMessages)
 	authorized.GET("getChats", httpServer.GetChatsByUser)
 	authorized.POST("createChat", httpServer.CreateChat)
+	authorized.POST("addContact", httpServer.AddContact)
 	authorized.POST("addToChat", httpServer.AddToChat)
 	authorized.GET("enter/:pubsub", httpServer.EnterToChat)
 	authorized.GET("usersByChat", httpServer.GetUsersByChatID)
