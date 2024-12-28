@@ -299,7 +299,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"profile\":\"email\",\n  \"login\": \"cmd@cmd.ru\",\n  \"password\": \"123456\"\n}",
+					"raw": "{\n  \"profile\":\"email\",\n  \"login\": \"cmd@cmd.us\",\n  \"password\": \"123456\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -516,6 +516,48 @@
 			"response": []
 		},
 		{
+			"name": "get contacts",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8443/auth/getContacts",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8443",
+					"path": [
+						"auth",
+						"getContacts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "send msg",
 			"event": [
 				{
@@ -544,7 +586,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"chat_id\":1,\n    \"msg_type\":\"nop\",\n    \"text\":\"fourth message\"\n}",
+					"raw": "{\n    \"chat_id\":2,\n    \"msg_type\":\"nop\",\n    \"text\":\"fourth message\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -618,6 +660,57 @@
 			"response": []
 		},
 		{
+			"name": "get chat msgs",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"chat_id\":1,\n    \"initial_msg_id\":14,\n    \"before\":3,\n    \"after\":3\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8443/auth/getchatmsgs",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8443",
+					"path": [
+						"auth",
+						"getchatmsgs"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "add user to chat",
 			"event": [
 				{
@@ -646,7 +739,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"chat_id\":1,\n    \"user_id\":1\n}",
+					"raw": "{\n    \"chat_id\":2,\n    \"user_id\":4,\n    \"role\":\"Regular\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -663,6 +756,57 @@
 					"path": [
 						"auth",
 						"addToChat"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add contact to account",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"user_id\":2,\n    \"role\":\"Contact\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8443/auth/addContactToAccount",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8443",
+					"path": [
+						"auth",
+						"addContactToAccount"
 					]
 				}
 			},
@@ -814,6 +958,57 @@
 					"path": [
 						"auth",
 						"createChat"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create private chat",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"user_two_id\":2\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8443/auth/createPrivateChat",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8443",
+					"path": [
+						"auth",
+						"createPrivateChat"
 					]
 				}
 			},
