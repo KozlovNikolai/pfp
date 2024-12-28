@@ -92,7 +92,6 @@ func (c *ChatCreateRequest) Validate() error {
 }
 
 type PrivatChatCreateRequest struct {
-	UserOneID int `json:"user_one_id"  validate:"required"`
 	UserTwoID int `json:"user_two_id"  validate:"required"`
 }
 

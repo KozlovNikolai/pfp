@@ -60,18 +60,20 @@ func (h HTTPServer) CreatePrivateChat(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{invaldRequest: err.Error()})
 		return
 	}
-	userOne := privateChatCreateRequest.UserOneID
-	userTwo := privateChatCreateRequest.UserTwoID
-
 	userCtx, err := utils.GetDataFromContext[domain.User](c, "user")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": domain.ErrNoUserInContext.Error()})
 		return
 	}
-	if userCtx.ID() != userOne {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "The id of the creator is not equal to the id of the chat member."})
+	userOne := userCtx.ID()
+	userTwo := privateChatCreateRequest.UserTwoID
+
+	_, err = h.userService.GetUserByID(c, userTwo)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"adding user not found": err.Error()})
 		return
 	}
+
 	var chatCreateRequest ChatCreateRequest
 	chatCreateRequest.ChatType = constants.PrivateChatType
 
