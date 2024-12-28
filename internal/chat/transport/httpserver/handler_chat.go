@@ -48,6 +48,56 @@ func (h HTTPServer) CreateChat(c *gin.Context) {
 	c.JSON(http.StatusCreated, response)
 }
 
+func (h HTTPServer) CreatePrivateChat(c *gin.Context) {
+	var privateChatCreateRequest PrivatChatCreateRequest
+	var err error
+	if err = c.ShouldBindJSON(&privateChatCreateRequest); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"invalid-json": err.Error()})
+		return
+	}
+
+	if err = privateChatCreateRequest.Validate(); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{invaldRequest: err.Error()})
+		return
+	}
+	userOne := privateChatCreateRequest.UserOneID
+	userTwo := privateChatCreateRequest.UserTwoID
+
+	userCtx, err := utils.GetDataFromContext[domain.User](c, "user")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": domain.ErrNoUserInContext.Error()})
+		return
+	}
+	if userCtx.ID() != userOne {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "The id of the creator is not equal to the id of the chat member."})
+		return
+	}
+	var chatCreateRequest ChatCreateRequest
+	chatCreateRequest.ChatType = constants.PrivateChatType
+
+	if userOne < userTwo {
+		chatCreateRequest.Name = "p" + strconv.Itoa(userOne) + "_" + strconv.Itoa(userTwo)
+	} else {
+		chatCreateRequest.Name = "p" + strconv.Itoa(userTwo) + "_" + strconv.Itoa(userOne)
+	}
+	chatCreateRequest.OwnerID = userOne
+
+	domainChat := toDomainChat(chatCreateRequest)
+	// fmt.Printf("\nchatDomain: %+v\n\n", domainChat)
+	createdChat, err := h.chatService.CreateChat(c, domainChat)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error service User": err.Error()})
+		return
+	}
+	err = h.chatService.AddUserToChat(c, userCtx.ID(), createdChat.ID(), constants.ChatRoleAdmin)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error service User": err.Error()})
+		return
+	}
+	response := toResponseChat(createdChat)
+	c.JSON(http.StatusCreated, response)
+}
+
 func (h HTTPServer) AddToChat(c *gin.Context) {
 	userCtx, err := utils.GetDataFromContext[domain.User](c, "user")
 	if err != nil {

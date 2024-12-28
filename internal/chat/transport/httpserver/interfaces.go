@@ -57,10 +57,6 @@ type IAccountService interface {
 	CreateAccount(context.Context, domain.Account) (domain.Account, error)
 	NewUserToNewAccount(ctx context.Context, userID int, accountID int) error
 	AddUserToAccount(ctx context.Context, userID int, accountID int, inviterID int, role string) error
-	// GetUsers(context.Context, domain.User, int, int) ([]domain.User, error)
-	// GetUserByID(context.Context, int) (domain.User, error)
-	// GetUserByExtID(context.Context, string, string) (domain.User, error)
-	// GetUserByLogin(context.Context, string, string) (domain.User, error)
-	// UpdateUser(context.Context, domain.User) (domain.User, error)
-	// DeleteUser(context.Context, int) error
+	GetAccountByUserID(ctx context.Context, userID int) (int, error)
+	GetContactsByAccount(ctx context.Context, accID int) ([]int, error)
 }

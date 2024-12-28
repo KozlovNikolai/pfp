@@ -37,12 +37,22 @@ type UserResponse struct {
 
 // UserRequest is ...
 type AccountRequest struct {
-	ID   int    `json:"id" db:"id" example:"1"`
-	Name string `json:"name" db:"name" example:"MyAccount"`
+	ID   int    `json:"id" db:"id"`
+	Name string `json:"name" db:"name" validate:"required"`
 }
 
 // Validate ...
 func (a *AccountRequest) Validate() error {
+	validate := validator.New(validator.WithRequiredStructEnabled())
+	return validate.Struct(a)
+}
+
+type AddContactToAccount struct {
+	UserID int    `json:"user_id" validate:"required"`
+	Role   string `json:"role" validate:"required"`
+}
+
+func (a *AddContactToAccount) Validate() error {
 	validate := validator.New(validator.WithRequiredStructEnabled())
 	return validate.Struct(a)
 }
@@ -77,6 +87,16 @@ type ChatCreateRequest struct {
 }
 
 func (c *ChatCreateRequest) Validate() error {
+	validate := validator.New(validator.WithRequiredStructEnabled())
+	return validate.Struct(c)
+}
+
+type PrivatChatCreateRequest struct {
+	UserOneID int `json:"user_one_id"  validate:"required"`
+	UserTwoID int `json:"user_two_id"  validate:"required"`
+}
+
+func (c *PrivatChatCreateRequest) Validate() error {
 	validate := validator.New(validator.WithRequiredStructEnabled())
 	return validate.Struct(c)
 }

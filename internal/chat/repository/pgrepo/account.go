@@ -116,6 +116,56 @@ func (a *AccountRepo) AddUserToAccount(ctx context.Context, userID int, accountI
 	return nil
 }
 
+func (a *AccountRepo) GetAccountByUserID(ctx context.Context, userID int) (int, error) {
+	// SQL-запрос на получение данных Пользователя по ID
+	query := `
+		SELECT account_id
+		FROM account_user
+		WHERE (user_id = $1 AND role = $2)
+	`
+	var accID int
+	// Выполняем запрос и сканируем результат в структуру User
+	err := a.db.RO.QueryRow(ctx, query, userID, constants.AccountRoleOwner).Scan(
+		&accID,
+	)
+	if err != nil {
+		return 0, fmt.Errorf("failed to get Accaunt ID by User id Where role is OWNER: %w", err)
+	}
+
+	return accID, nil
+}
+
+func (a *AccountRepo) GetContactsByAccount(ctx context.Context, accID int) ([]int, error) {
+	query := `
+	SELECT user_id
+	FROM account_user
+	WHERE (account_id=$1 AND role=$2)
+`
+	// Запрос
+	rows, err := a.db.RO.Query(ctx, query, accID, constants.AccountRoleContact)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute query: %w", err)
+	}
+	defer rows.Close()
+	// Заполняем массив идентификаторов пользователей
+	var userIDs []int
+	for rows.Next() {
+		var userID int
+		err := rows.Scan(
+			&userID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan row: %w", err)
+		}
+		userIDs = append(userIDs, userID)
+	}
+
+	// Проверка на ошибки, возникшие при итерации по строкам
+	if rows.Err() != nil {
+		return nil, fmt.Errorf("error occurred during row iteration: %w", rows.Err())
+	}
+	return userIDs, nil
+}
+
 // // GetUserByExtID implements services.IUserRepository.
 // func (u *UserRepo) GetUserByExtID(ctx context.Context, account, extID string) (domain.User, error) {
 // 	if extID == "" {

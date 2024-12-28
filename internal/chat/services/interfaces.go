@@ -50,4 +50,6 @@ type IMessageRepository interface {
 type IAccountRepository interface {
 	CreateAccount(context.Context, domain.Account) (domain.Account, error)
 	AddUserToAccount(ctx context.Context, userID int, accountID int, inviterID int, role string) error
+	GetAccountByUserID(ctx context.Context, userID int) (int, error)
+	GetContactsByAccount(ctx context.Context, accID int) ([]int, error)
 }

@@ -3,12 +3,86 @@ package httpserver
 import (
 	"net/http"
 
+	"github.com/KozlovNikolai/pfp/internal/chat/constants"
+	"github.com/KozlovNikolai/pfp/internal/chat/domain"
+	"github.com/KozlovNikolai/pfp/internal/pkg/utils"
 	"github.com/gin-gonic/gin"
 )
 
-const (
-	errorGetAccount = "error get account"
-)
+func (h HTTPServer) CreateAccount(c *gin.Context) {
+	var accountCreateRequest AccountRequest
+	var err error
+	if err = c.ShouldBindJSON(&accountCreateRequest); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"invalid-json": err.Error()})
+		return
+	}
+
+	if err = accountCreateRequest.Validate(); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{invaldRequest: err.Error()})
+		return
+	}
+
+	domainAccount := toDomainAccount(accountCreateRequest)
+
+	createdAccount, err := h.accountService.CreateAccount(c, domainAccount)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error service Account": err.Error()})
+		return
+	}
+	response := toResponseAccount(createdAccount)
+	c.JSON(http.StatusOK, response)
+}
+
+func (h HTTPServer) AddContactToAccount(c *gin.Context) {
+	var addConToAccReq AddContactToAccount
+	var err error
+	if err = c.ShouldBindJSON(&addConToAccReq); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"invalid-json": err.Error()})
+		return
+	}
+
+	if err = addConToAccReq.Validate(); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{invaldRequest: err.Error()})
+		return
+	}
+	userCtx, err := utils.GetDataFromContext[domain.User](c, "user")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": domain.ErrNoUserInContext.Error()})
+		return
+	}
+
+	accID, err := h.accountService.GetAccountByUserID(c, userCtx.ID())
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error GetAccountByUserID": err.Error()})
+		return
+	}
+	// кого добавляем, куда добавляем, кто добавляет, с какой ролью...
+	err = h.accountService.AddUserToAccount(c, addConToAccReq.UserID, accID, userCtx.ID(), constants.AccountRoleContact)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error AddUserToAccount": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"status": "added"})
+}
+
+func (h HTTPServer) GetContactsByAccount(c *gin.Context) {
+	userCtx, err := utils.GetDataFromContext[domain.User](c, "user")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": domain.ErrNoUserInContext.Error()})
+		return
+	}
+	accID, err := h.accountService.GetAccountByUserID(c, userCtx.ID())
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+	contactIDs, err := h.accountService.GetContactsByAccount(c, accID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, contactIDs)
+}
 
 // func (h HTTPServer) GetAccountByUser(c *gin.Context) {
 // 	var accountRequest AccountRequest
@@ -171,31 +245,6 @@ const (
 // 		return
 // 	}
 // }
-
-func (h HTTPServer) CreateAccount(c *gin.Context) {
-	var accountCreateRequest AccountRequest
-	var err error
-	if err = c.ShouldBindJSON(&accountCreateRequest); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"invalid-json": err.Error()})
-		return
-	}
-
-	if err = accountCreateRequest.Validate(); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{invaldRequest: err.Error()})
-		return
-	}
-
-	domainAccount := toDomainAccount(accountCreateRequest)
-
-	createdAccount, err := h.accountService.CreateAccount(c, domainAccount)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error service Account": err.Error()})
-		return
-	}
-	response := toResponseAccount(createdAccount)
-	c.JSON(http.StatusOK, response)
-	return
-}
 
 // // GetUsers is ...
 // // GetUsersTags 		godoc
