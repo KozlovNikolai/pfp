@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "4b8205cd-4f9e-4b92-bdc1-cac89b03efe0",
+		"_postman_id": "44b03f3c-691a-46d6-be09-026032cd3f7c",
 		"name": "pfp",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "35109601"
+		"_exporter_id": "32925668"
 	},
 	"item": [
 		{
@@ -250,769 +250,733 @@
 			]
 		},
 		{
-			"name": "signup",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"profile\":\"email\",\n  \"login\": \"cmd@cmd.ru\",\n  \"password\": \"123456\",\n  \"name\":\"Donald\",\n  \"surname\":\"Trump\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:8443/signup",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8443",
-					"path": [
-						"signup"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "signin",
-			"event": [
+			"name": "User service",
+			"item": [
 				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"var jsonData = JSON.parse(responseBody);",
-							"postman.setEnvironmentVariable(\"token\", jsonData.token);",
-							"postman.setEnvironmentVariable(\"pubsub\", jsonData.pubsub);",
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"profile\":\"email\",\n  \"login\": \"cmd@cmd.us\",\n  \"password\": \"123456\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
+					"name": "signup",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"profile\":\"email\",\n  \"login\": \"cmd@cmd.ru\",\n  \"password\": \"123456\",\n  \"name\":\"Donald\",\n  \"surname\":\"Trump\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8443/signup",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8443",
+							"path": [
+								"signup"
+							]
 						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:8443/signin",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8443",
-					"path": [
-						"signin"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "signout",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{token}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:8443/auth/signout/{{pubsub}}",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8443",
-					"path": [
-						"auth",
-						"signout",
-						"{{pubsub}}"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/sputnik/login Коля",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"var jsonData = JSON.parse(responseBody);",
-							"postman.setEnvironmentVariable(\"token\", jsonData.token);",
-							"postman.setEnvironmentVariable(\"pubsub\", jsonData.pubsub);"
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNSwiZXhwIjoxNzM2OTM5NzY5LCJqdGkiOiI0NTU4MTZiNS1lMjUxLTRhMDAtYjFjNC1hNjdiNWZlZWQ4NzUifQ.MoN05bewy4AEmPn_NDNx-0jt2c9mQYZw5MC-oCOdAt0",
-							"type": "string"
-						}
-					]
-				},
-				"method": "GET",
-				"header": [
-					{
-						"key": "Application",
-						"value": "Sputnik51",
-						"type": "text"
 					},
-					{
-						"key": "user-id",
-						"value": "1234560",
-						"type": "text"
-					}
-				],
-				"url": {
-					"raw": "http://localhost:8443/sputnik/login",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8443",
-					"path": [
-						"sputnik",
-						"login"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/sputnik/login Паша",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"var jsonData = JSON.parse(responseBody);",
-							"postman.setEnvironmentVariable(\"token\", jsonData.token);",
-							"postman.setEnvironmentVariable(\"pubsub\", jsonData.pubsub);"
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJleHAiOjE3MzY2NjcwMjEsImp0aSI6ImFjM2U2ZTQ0LWE0OGUtNDg3Ny1hMGQ1LTY1MTMyOTQwMjIzMSJ9.D1PcxCOH2i5GrgCq189cs19XZtF4NN5Q4NI8VO-Yd2A",
-							"type": "string"
-						}
-					]
+					"response": []
 				},
-				"method": "GET",
-				"header": [
-					{
-						"key": "Application",
-						"value": "Sputnik51",
-						"type": "text"
+				{
+					"name": "signin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);",
+									"postman.setEnvironmentVariable(\"token\", jsonData.token);",
+									"postman.setEnvironmentVariable(\"pubsub\", jsonData.pubsub);",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"profile\":\"email\",\n  \"login\": \"cmd@cmd.us\",\n  \"password\": \"123456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8443/signin",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8443",
+							"path": [
+								"signin"
+							]
+						}
 					},
-					{
-						"key": "user-id",
-						"value": "1234560",
-						"type": "text"
-					}
-				],
-				"url": {
-					"raw": "http://localhost:8443/sputnik/login",
-					"protocol": "http",
-					"host": [
-						"localhost"
+					"response": []
+				},
+				{
+					"name": "/sputnik/login Коля",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);",
+									"postman.setEnvironmentVariable(\"token\", jsonData.token);",
+									"postman.setEnvironmentVariable(\"pubsub\", jsonData.pubsub);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
 					],
-					"port": "8443",
-					"path": [
-						"sputnik",
-						"login"
-					]
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNSwiZXhwIjoxNzM2OTM5NzY5LCJqdGkiOiI0NTU4MTZiNS1lMjUxLTRhMDAtYjFjNC1hNjdiNWZlZWQ4NzUifQ.MoN05bewy4AEmPn_NDNx-0jt2c9mQYZw5MC-oCOdAt0",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Application",
+								"value": "Sputnik51",
+								"type": "text"
+							},
+							{
+								"key": "user-id",
+								"value": "1234560",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8443/sputnik/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8443",
+							"path": [
+								"sputnik",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/sputnik/login Паша",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);",
+									"postman.setEnvironmentVariable(\"token\", jsonData.token);",
+									"postman.setEnvironmentVariable(\"pubsub\", jsonData.pubsub);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJleHAiOjE3MzY2NjcwMjEsImp0aSI6ImFjM2U2ZTQ0LWE0OGUtNDg3Ny1hMGQ1LTY1MTMyOTQwMjIzMSJ9.D1PcxCOH2i5GrgCq189cs19XZtF4NN5Q4NI8VO-Yd2A",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Application",
+								"value": "Sputnik51",
+								"type": "text"
+							},
+							{
+								"key": "user-id",
+								"value": "1234560",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8443/sputnik/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8443",
+							"path": [
+								"sputnik",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add contact to account",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\":2,\n    \"role\":\"Contact\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8443/auth/addContactToAccount",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8443",
+							"path": [
+								"auth",
+								"addContactToAccount"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get contacts",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8443/auth/getContacts",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8443",
+							"path": [
+								"auth",
+								"getContacts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "signout",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8443/auth/signout/{{pubsub}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8443",
+							"path": [
+								"auth",
+								"signout",
+								"{{pubsub}}"
+							]
+						}
+					},
+					"response": []
 				}
-			},
-			"response": []
+			]
 		},
 		{
-			"name": "get chats",
-			"event": [
+			"name": "Chat service",
+			"item": [
 				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
+					"name": "create any chat",
+					"event": [
 						{
-							"key": "token",
-							"value": "{{token}}",
-							"type": "string"
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
 						}
-					]
-				},
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:8443/auth/getChats",
-					"protocol": "http",
-					"host": [
-						"localhost"
 					],
-					"port": "8443",
-					"path": [
-						"auth",
-						"getChats"
-					]
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\":\"My mega chat\",\n    \"chat_type\":\"regular\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8443/auth/createChat",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8443",
+							"path": [
+								"auth",
+								"createChat"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create private chat",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_two_id\":2\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8443/auth/createPrivateChat",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8443",
+							"path": [
+								"auth",
+								"createPrivateChat"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get chats",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8443/auth/getChats",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8443",
+							"path": [
+								"auth",
+								"getChats"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "enter to chat",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8443/auth/enter/{{pubsub}}?chat_id=1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8443",
+							"path": [
+								"auth",
+								"enter",
+								"{{pubsub}}"
+							],
+							"query": [
+								{
+									"key": "chat_id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add user to chat",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"chat_id\":2,\n    \"user_id\":4,\n    \"role\":\"Regular\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8443/auth/addToChat",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8443",
+							"path": [
+								"auth",
+								"addToChat"
+							]
+						}
+					},
+					"response": []
 				}
-			},
-			"response": []
+			]
 		},
 		{
-			"name": "get contacts",
-			"event": [
+			"name": "Message service",
+			"item": [
 				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
+					"name": "send msg",
+					"event": [
 						{
-							"key": "token",
-							"value": "{{token}}",
-							"type": "string"
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
 						}
-					]
-				},
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:8443/auth/getContacts",
-					"protocol": "http",
-					"host": [
-						"localhost"
 					],
-					"port": "8443",
-					"path": [
-						"auth",
-						"getContacts"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "send msg",
-			"event": [
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"chat_id\":2,\n    \"msg_type\":\"nop\",\n    \"text\":\"fourth message\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8443/auth/sendmsg",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8443",
+							"path": [
+								"auth",
+								"sendmsg"
+							]
+						}
+					},
+					"response": []
+				},
 				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
+					"name": "get msgs",
+					"event": [
 						{
-							"key": "token",
-							"value": "{{token}}",
-							"type": "string"
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
 						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"chat_id\":2,\n    \"msg_type\":\"nop\",\n    \"text\":\"fourth message\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:8443/auth/sendmsg",
-					"protocol": "http",
-					"host": [
-						"localhost"
 					],
-					"port": "8443",
-					"path": [
-						"auth",
-						"sendmsg"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "get msgs",
-			"event": [
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"chat_id\":1,\n    \"msg_type\":\"nop\",\n    \"limit\":20,\n    \"offset\":0\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8443/auth/getmsgs",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8443",
+							"path": [
+								"auth",
+								"getmsgs"
+							]
+						}
+					},
+					"response": []
+				},
 				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
+					"name": "get chat msgs",
+					"event": [
 						{
-							"key": "token",
-							"value": "{{token}}",
-							"type": "string"
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
 						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"chat_id\":1,\n    \"msg_type\":\"nop\",\n    \"limit\":20,\n    \"offset\":0\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:8443/auth/getmsgs",
-					"protocol": "http",
-					"host": [
-						"localhost"
 					],
-					"port": "8443",
-					"path": [
-						"auth",
-						"getmsgs"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "get chat msgs",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{token}}",
-							"type": "string"
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"chat_id\":1,\n    \"initial_msg_id\":14,\n    \"before\":3,\n    \"after\":3\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8443/auth/getchatmsgs",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8443",
+							"path": [
+								"auth",
+								"getchatmsgs"
+							]
 						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"chat_id\":1,\n    \"initial_msg_id\":14,\n    \"before\":3,\n    \"after\":3\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:8443/auth/getchatmsgs",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8443",
-					"path": [
-						"auth",
-						"getchatmsgs"
-					]
+					},
+					"response": []
 				}
-			},
-			"response": []
-		},
-		{
-			"name": "add user to chat",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{token}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"chat_id\":2,\n    \"user_id\":4,\n    \"role\":\"Regular\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:8443/auth/addToChat",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8443",
-					"path": [
-						"auth",
-						"addToChat"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "add contact to account",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{token}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"user_id\":2,\n    \"role\":\"Contact\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:8443/auth/addContactToAccount",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8443",
-					"path": [
-						"auth",
-						"addContactToAccount"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "enter to chat",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{token}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:8443/auth/enter/{{pubsub}}?chat_id=1",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8443",
-					"path": [
-						"auth",
-						"enter",
-						"{{pubsub}}"
-					],
-					"query": [
-						{
-							"key": "chat_id",
-							"value": "1"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "create room",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{token}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"id\":\"1\",\n    \"name\":\"chat1\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:8443/auth/createChat",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8443",
-					"path": [
-						"auth",
-						"createChat"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "create any chat",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{token}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"name\":\"My mega chat\",\n    \"chat_type\":\"regular\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:8443/auth/createChat",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8443",
-					"path": [
-						"auth",
-						"createChat"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "create private chat",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{token}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"user_two_id\":2\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:8443/auth/createPrivateChat",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8443",
-					"path": [
-						"auth",
-						"createPrivateChat"
-					]
-				}
-			},
-			"response": []
+			]
 		}
 	]
 }
