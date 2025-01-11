@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "44b03f3c-691a-46d6-be09-026032cd3f7c",
+		"_postman_id": "bbf84fd8-66f9-4cb6-9c41-727e30dca839",
 		"name": "pfp",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "32925668"
@@ -24,12 +24,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8443/signup",
+							"raw": "http://{{host_port}}/signup",
 							"protocol": "http",
 							"host": [
-								"localhost"
+								"{{host_port}}"
 							],
-							"port": "8443",
 							"path": [
 								"signup"
 							]
@@ -67,12 +66,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8443/signin",
+							"raw": "http://{{host_port}}/signin",
 							"protocol": "http",
 							"host": [
-								"localhost"
+								"{{host_port}}"
 							],
-							"port": "8443",
 							"path": [
 								"signin"
 							]
@@ -117,12 +115,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8443/auth/createChat",
+							"raw": "http://{{host_port}}/auth/createChat",
 							"protocol": "http",
 							"host": [
-								"localhost"
+								"{{host_port}}"
 							],
-							"port": "8443",
 							"path": [
 								"auth",
 								"createChat"
@@ -171,12 +168,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8443/admin/states?limit=10&offset=0",
+							"raw": "http://{{host_port}}/admin/states?limit=10&offset=0",
 							"protocol": "http",
 							"host": [
-								"localhost"
+								"{{host_port}}"
 							],
-							"port": "8443",
 							"path": [
 								"admin",
 								"states"
@@ -223,12 +219,11 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8443/admin/users?limit=10&offset=0",
+							"raw": "http://{{host_port}}/admin/users?limit=10&offset=0",
 							"protocol": "http",
 							"host": [
-								"localhost"
+								"{{host_port}}"
 							],
-							"port": "8443",
 							"path": [
 								"admin",
 								"users"
@@ -267,12 +262,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8443/signup",
+							"raw": "http://{{host_port}}/signup",
 							"protocol": "http",
 							"host": [
-								"localhost"
+								"{{host_port}}"
 							],
-							"port": "8443",
 							"path": [
 								"signup"
 							]
@@ -302,7 +296,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"profile\":\"email\",\n  \"login\": \"cmd@cmd.us\",\n  \"password\": \"123456\"\n}",
+							"raw": "{\n  \"profile\":\"email\",\n  \"login\": \"cmd@cmd.ru\",\n  \"password\": \"123456\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -310,12 +304,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8443/signin",
+							"raw": "http://{{host_port}}/signin",
 							"protocol": "http",
 							"host": [
-								"localhost"
+								"{{host_port}}"
 							],
-							"port": "8443",
 							"path": [
 								"signin"
 							]
@@ -345,7 +338,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNSwiZXhwIjoxNzM2OTM5NzY5LCJqdGkiOiI0NTU4MTZiNS1lMjUxLTRhMDAtYjFjNC1hNjdiNWZlZWQ4NzUifQ.MoN05bewy4AEmPn_NDNx-0jt2c9mQYZw5MC-oCOdAt0",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNSwiZXhwIjoxNzM5MTM3MDc3LCJqdGkiOiI2OWQxOGI0OS0zZjFkLTQ5NDUtODQyMy0zZDMzMGE5YWY1MjYifQ.7x0AJg3dG306FCGufT6dy3EnBCNGDLPOwkGSRbiFKng",
 									"type": "string"
 								}
 							]
@@ -364,12 +357,11 @@
 							}
 						],
 						"url": {
-							"raw": "http://localhost:8443/sputnik/login",
+							"raw": "http://{{host_port}}/sputnik/login",
 							"protocol": "http",
 							"host": [
-								"localhost"
+								"{{host_port}}"
 							],
-							"port": "8443",
 							"path": [
 								"sputnik",
 								"login"
@@ -419,12 +411,11 @@
 							}
 						],
 						"url": {
-							"raw": "http://localhost:8443/sputnik/login",
+							"raw": "http://{{host_port}}/sputnik/login",
 							"protocol": "http",
 							"host": [
-								"localhost"
+								"{{host_port}}"
 							],
-							"port": "8443",
 							"path": [
 								"sputnik",
 								"login"
@@ -470,12 +461,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8443/auth/addContactToAccount",
+							"raw": "http://{{host_port}}/auth/addContactToAccount",
 							"protocol": "http",
 							"host": [
-								"localhost"
+								"{{host_port}}"
 							],
-							"port": "8443",
 							"path": [
 								"auth",
 								"addContactToAccount"
@@ -512,12 +502,11 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8443/auth/getContacts",
+							"raw": "http://{{host_port}}/auth/getContacts",
 							"protocol": "http",
 							"host": [
-								"localhost"
+								"{{host_port}}"
 							],
-							"port": "8443",
 							"path": [
 								"auth",
 								"getContacts"
@@ -554,12 +543,11 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8443/auth/signout/{{pubsub}}",
+							"raw": "http://{{host_port}}/auth/signout/{{pubsub}}",
 							"protocol": "http",
 							"host": [
-								"localhost"
+								"{{host_port}}"
 							],
-							"port": "8443",
 							"path": [
 								"auth",
 								"signout",
@@ -611,12 +599,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8443/auth/createChat",
+							"raw": "http://{{host_port}}/auth/createChat",
 							"protocol": "http",
 							"host": [
-								"localhost"
+								"{{host_port}}"
 							],
-							"port": "8443",
 							"path": [
 								"auth",
 								"createChat"
@@ -662,12 +649,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8443/auth/createPrivateChat",
+							"raw": "http://{{host_port}}/auth/createPrivateChat",
 							"protocol": "http",
 							"host": [
-								"localhost"
+								"{{host_port}}"
 							],
-							"port": "8443",
 							"path": [
 								"auth",
 								"createPrivateChat"
@@ -704,12 +690,11 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8443/auth/getChats",
+							"raw": "http://{{host_port}}/auth/getChats",
 							"protocol": "http",
 							"host": [
-								"localhost"
+								"{{host_port}}"
 							],
-							"port": "8443",
 							"path": [
 								"auth",
 								"getChats"
@@ -746,12 +731,11 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8443/auth/enter/{{pubsub}}?chat_id=1",
+							"raw": "http://{{host_port}}/auth/enter/{{pubsub}}?chat_id=1",
 							"protocol": "http",
 							"host": [
-								"localhost"
+								"{{host_port}}"
 							],
-							"port": "8443",
 							"path": [
 								"auth",
 								"enter",
@@ -804,12 +788,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8443/auth/addToChat",
+							"raw": "http://{{host_port}}/auth/addToChat",
 							"protocol": "http",
 							"host": [
-								"localhost"
+								"{{host_port}}"
 							],
-							"port": "8443",
 							"path": [
 								"auth",
 								"addToChat"
@@ -860,12 +843,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8443/auth/sendmsg",
+							"raw": "http://{{host_port}}/auth/sendmsg",
 							"protocol": "http",
 							"host": [
-								"localhost"
+								"{{host_port}}"
 							],
-							"port": "8443",
 							"path": [
 								"auth",
 								"sendmsg"
@@ -911,12 +893,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8443/auth/getmsgs",
+							"raw": "http://{{host_port}}/auth/getmsgs",
 							"protocol": "http",
 							"host": [
-								"localhost"
+								"{{host_port}}"
 							],
-							"port": "8443",
 							"path": [
 								"auth",
 								"getmsgs"
@@ -962,12 +943,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8443/auth/getchatmsgs",
+							"raw": "http://{{host_port}}/auth/getchatmsgs",
 							"protocol": "http",
 							"host": [
-								"localhost"
+								"{{host_port}}"
 							],
-							"port": "8443",
 							"path": [
 								"auth",
 								"getchatmsgs"
