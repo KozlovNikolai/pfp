@@ -1,4 +1,15 @@
-storage: "postgres://pguser:pgpass@localhost:5432/mydb?sslmode=disable"
+# сопоставить данные с файлом .env
+# 
+# storage: "postgres://pguser:pgpass@localhost:5432/mydb?sslmode=disable"
+# repo_type: "postgres"
+# token_time_duration: 300m
+# order_time_duration: 1m
+# http_server:
+#   address: "0.0.0.0:8443"
+#   timeout: 4s
+#   idle_timout: 60s
+
+storage: "postgres://chatbotuser:Ghjdklamd@31SD@10.80.0.114:5001/chatbot?sslmode=disable"
 repo_type: "postgres"
 token_time_duration: 300m
 order_time_duration: 1m
