@@ -1,6 +1,8 @@
 package httpserver
 
 import (
+	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -68,6 +70,11 @@ func (h HTTPServer) CreatePrivateChat(c *gin.Context) {
 	userOne := userCtx.ID()
 	userTwo := privateChatCreateRequest.UserTwoID
 
+	if userOne == userTwo {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "users should not be equal"})
+		return
+	}
+
 	_, err = h.userService.GetUserByID(c, userTwo)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"adding user not found": err.Error()})
@@ -78,26 +85,44 @@ func (h HTTPServer) CreatePrivateChat(c *gin.Context) {
 	chatCreateRequest.ChatType = constants.PrivateChatType
 
 	if userOne < userTwo {
-		chatCreateRequest.Name = "p" + strconv.Itoa(userOne) + "_" + strconv.Itoa(userTwo)
+		chatCreateRequest.Name = strconv.Itoa(userOne) + "_" + strconv.Itoa(userTwo)
 	} else {
-		chatCreateRequest.Name = "p" + strconv.Itoa(userTwo) + "_" + strconv.Itoa(userOne)
+		chatCreateRequest.Name = strconv.Itoa(userTwo) + "_" + strconv.Itoa(userOne)
 	}
 	chatCreateRequest.OwnerID = userOne
-
+	ok := h.IsChatExistsByNameAndType(c, chatCreateRequest.Name, chatCreateRequest.ChatType)
+	if ok {
+		c.JSON(http.StatusInternalServerError, fmt.Sprintf("chat with name: %s and type: %s is exist", chatCreateRequest.Name, chatCreateRequest.ChatType))
+		return
+	}
 	domainChat := toDomainChat(chatCreateRequest)
 	// fmt.Printf("\nchatDomain: %+v\n\n", domainChat)
 	createdChat, err := h.chatService.CreateChat(c, domainChat)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error service User": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error create Private Chat": err.Error()})
 		return
 	}
-	err = h.chatService.AddUserToChat(c, userCtx.ID(), createdChat.ID(), constants.ChatRoleAdmin)
+	err = h.chatService.AddUserToChat(c, userOne, createdChat.ID(), constants.ChatRoleAdmin)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error service User": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error service UserOne": err.Error()})
+		return
+	}
+	err = h.chatService.AddUserToChat(c, userTwo, createdChat.ID(), constants.ChatRoleAdmin)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error service UserTwo": err.Error()})
 		return
 	}
 	response := toResponseChat(createdChat)
 	c.JSON(http.StatusCreated, response)
+}
+
+func (h HTTPServer) IsChatExistsByNameAndType(ctx context.Context, name string, chatType string) bool {
+	_, err := h.chatService.GetChatByNameAndType(ctx, name, chatType)
+	if err == nil {
+		return true
+	}
+	log.Printf("chat with name: %s and type: %s not exist, error: %s", name, chatType, err.Error())
+	return false
 }
 
 func (h HTTPServer) AddToChat(c *gin.Context) {
