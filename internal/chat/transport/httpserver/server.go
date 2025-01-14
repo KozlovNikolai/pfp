@@ -176,6 +176,8 @@ func (s *Router) Run() {
 		}
 		close(stopped)
 	}()
+
+	fmt.Printf("Server run on %s\n", server.Addr)
 	// if err := server.ListenAndServeTLS(config.CertFile, config.KeyFile); err != nil &&
 	// 	err != http.ErrServerClosed {
 	// 	s.logger.Fatal(fmt.Sprintf("Could not listen on %s", config.Cfg.Address), zap.Error(err))
