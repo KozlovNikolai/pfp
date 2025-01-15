@@ -111,3 +111,7 @@ func (s UserService) GetUsers(ctx context.Context, user domain.User, limit, offs
 func (u UserService) AddContact(ctx context.Context, user domain.User, userID int) error {
 	return u.repo.AddContact(ctx, user, userID)
 }
+
+func (u UserService) FindUsers(ctx context.Context, search string, start int, stop int) ([]domain.User, error) {
+	return u.repo.FindUsers(ctx, search, start, stop)
+}

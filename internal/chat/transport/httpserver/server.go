@@ -146,6 +146,7 @@ func NewRouter() *Router {
 	authorized.POST("addToChat", httpServer.AddToChat)
 	authorized.GET("enter/:pubsub", httpServer.EnterToChat)
 	authorized.GET("usersByChat", httpServer.GetUsersByChatID)
+	authorized.GET("getusers", httpServer.FindUsers)
 	return server
 }
 

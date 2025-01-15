@@ -35,6 +35,7 @@ type IUserService interface {
 	UpdateUser(context.Context, domain.User) (domain.User, error)
 	DeleteUser(context.Context, int) error
 	AddContact(ctx context.Context, user domain.User, userID int) error
+	FindUsers(ctx context.Context, search string, start int, stop int) ([]domain.User, error)
 }
 
 type IChatService interface {

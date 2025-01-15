@@ -221,3 +221,61 @@ func (h HTTPServer) AddContact(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"status": "contact added"})
 }
+
+func (h HTTPServer) FindUsers(c *gin.Context) {
+	userCtx, err := utils.GetDataFromContext[domain.User](c, "user")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": domain.ErrNoUserInContext.Error()})
+		return
+	}
+	userCtx, err = h.userService.GetUserByID(c, userCtx.ID())
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": domain.ErrNotFound.Error()})
+		return
+	}
+
+	search := c.Query("search")
+	startQuery := c.Query("start")
+	stopQuery := c.Query("stop")
+
+	start, err := strconv.Atoi(startQuery)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"invalid-start": err.Error()})
+		return
+	}
+
+	stop, err := strconv.Atoi(stopQuery)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"invalid-stop": err.Error()})
+		return
+	}
+	if start < 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"start-must-be-greater-or-equal-then-zero": ""})
+		return
+	}
+	if stop < 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"stop-must-be-greater-or-equal-then-zero": ""})
+		return
+	}
+	if stop < start {
+		c.JSON(http.StatusBadRequest, gin.H{"stop-must-be-greater-or-equal-then-start": ""})
+		return
+	}
+	users, err := h.userService.FindUsers(c, search, start, stop)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error get users": err.Error()})
+		return
+	}
+
+	response := make([]UserResponse, 0, len(users))
+	for _, user := range users {
+		_, ok := h.stateService.GetState(c, user.ID())
+		status := "offline"
+		if ok {
+			status = "online"
+		}
+		response = append(response, toResponseUser(user, status))
+	}
+
+	c.JSON(http.StatusOK, response)
+}

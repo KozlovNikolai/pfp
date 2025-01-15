@@ -382,3 +382,52 @@ func (u *UserRepo) AddContact(ctx context.Context, user domain.User, userID int)
 
 	return nil
 }
+
+func (u *UserRepo) FindUsers(ctx context.Context, search string, start int, stop int) ([]domain.User, error) {
+	query := `
+SELECT *
+FROM users
+WHERE CONCAT(name, ' ', surname)  ILIKE '%' || $1 || '%'
+ORDER BY name
+LIMIT $3 - $2 + 1 OFFSET $2
+	`
+	// Запрос
+	rows, err := u.db.RO.Query(ctx, query, search, start, stop)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute query: %w", err)
+	}
+	defer rows.Close()
+	// Заполняем массив пользователей
+	var users []models.User
+	for rows.Next() {
+		var user models.User
+		err := rows.Scan(
+			&user.ID,
+			&user.UserExtID,
+			&user.Login,
+			&user.Password,
+			&user.Profile,
+			&user.Name,
+			&user.Surname,
+			&user.Email,
+			&user.UserType,
+			&user.CreatedAt,
+			&user.UpdatedAt)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan row: %w", err)
+		}
+		users = append(users, user)
+	}
+
+	// Проверка на ошибки, возникшие при итерации по строкам
+	if rows.Err() != nil {
+		return nil, fmt.Errorf("error occurred during row iteration: %w", rows.Err())
+	}
+	// мапим модель в домен
+	domainUsers := make([]domain.User, len(users))
+	for i, user := range users {
+		domainUser := userToDomain(user)
+		domainUsers[i] = domainUser
+	}
+	return domainUsers, nil
+}
