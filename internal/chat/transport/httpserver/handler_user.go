@@ -85,13 +85,13 @@ func (h HTTPServer) GetUser(c *gin.Context) {
 		}
 
 		// auth user id
-		if userCtx.ID() != userID && userCtx.UserType() != config.AdminRole {
-			c.JSON(
-				http.StatusUnauthorized,
-				gin.H{"invalid user id or role": domain.ErrAccessDenied.Error()},
-			)
-			return
-		}
+		// if userCtx.ID() != userID && userCtx.UserType() != config.AdminRole {
+		// 	c.JSON(
+		// 		http.StatusUnauthorized,
+		// 		gin.H{"invalid user id or role": domain.ErrAccessDenied.Error()},
+		// 	)
+		// 	return
+		// }
 		user, err := h.userService.GetUserByID(c, userID)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{errorGetUsers: err.Error()})
