@@ -1,7 +1,8 @@
 package utils
 
 import (
-	"github.com/KozlovNikolai/pfp/internal/chat/domain"
+	"alfachat/internal/chat/domain"
+
 	"github.com/gin-gonic/gin"
 )
 

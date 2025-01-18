@@ -3,7 +3,7 @@ package services
 import (
 	"context"
 
-	"github.com/KozlovNikolai/pfp/internal/chat/domain"
+	"alfachat/internal/chat/domain"
 )
 
 // UserService is a User service

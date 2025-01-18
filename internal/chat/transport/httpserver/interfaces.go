@@ -3,7 +3,8 @@ package httpserver
 import (
 	"context"
 
-	"github.com/KozlovNikolai/pfp/internal/chat/domain"
+	"alfachat/internal/chat/domain"
+
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )

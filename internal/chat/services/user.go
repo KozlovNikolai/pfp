@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/KozlovNikolai/pfp/internal/chat/constants"
-	"github.com/KozlovNikolai/pfp/internal/chat/domain"
-	"github.com/KozlovNikolai/pfp/internal/pkg/utils"
+	"alfachat/internal/chat/constants"
+	"alfachat/internal/chat/domain"
+	"alfachat/internal/pkg/utils"
 )
 
 // UserService is a User service

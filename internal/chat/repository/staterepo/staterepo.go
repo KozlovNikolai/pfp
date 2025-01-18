@@ -1,6 +1,6 @@
 package staterepo
 
-import "github.com/KozlovNikolai/pfp/internal/chat/repository/models"
+import "alfachat/internal/chat/repository/models"
 
 type stateStore struct {
 	states map[int]models.State

@@ -1,9 +1,9 @@
 package httpserver
 
 import (
-	"github.com/KozlovNikolai/pfp/internal/chat/constants"
-	"github.com/KozlovNikolai/pfp/internal/chat/domain"
-	"github.com/KozlovNikolai/pfp/internal/chat/transport/httpserver/middlewares"
+	"alfachat/internal/chat/constants"
+	"alfachat/internal/chat/domain"
+	"alfachat/internal/chat/transport/httpserver/middlewares"
 )
 
 func toDomainUser(user UserRequest) domain.User {

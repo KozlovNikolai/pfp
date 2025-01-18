@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 
-	"github.com/KozlovNikolai/pfp/internal/pkg/utils"
+	"alfachat/internal/pkg/utils"
 )
 
 // AuthorizationHeader ...

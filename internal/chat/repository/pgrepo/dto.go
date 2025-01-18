@@ -1,8 +1,8 @@
 package pgrepo
 
 import (
-	"github.com/KozlovNikolai/pfp/internal/chat/domain"
-	"github.com/KozlovNikolai/pfp/internal/chat/repository/models"
+	"alfachat/internal/chat/domain"
+	"alfachat/internal/chat/repository/models"
 )
 
 func domainToUser(user domain.User) models.User {
